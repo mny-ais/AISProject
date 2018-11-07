@@ -287,7 +287,6 @@ class AISGame(object):
         # TODO teach car how to drift
         # TODO implement recording
 
-
     def _get_keyboard_control(self, keys):
         """
         Return a VehicleControl message based on the pressed keys. Return None
