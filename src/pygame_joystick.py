@@ -40,7 +40,7 @@ while key != ord('q'):
     stdscr.clrtobot()
 
     if num_joysticks > 0:
-        num_lines = 2
+        num_lines = 3
         for joy_num in range(num_joysticks):
             # For each joystick, do the following:
             # State its name
