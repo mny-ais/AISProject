@@ -34,6 +34,7 @@ stdscr = curses.initscr()
 curses.noecho()
 curses.cbreak()
 stdscr.keypad(1)
+stdscr.scrollok(1) # enable scrolling
 stdscr.nodelay(True)
 
 key = ''
@@ -70,35 +71,66 @@ while key != ord('q'):
 
             if num_axis > 0:
                 for num in range(num_axis):
-                    stdscr.addstr(num_lines, 0, "Axis {0}: {1}".
-                                  format(num, joysticks[joy_num].
-                                         get_axis(num)))
+                    axis_even = num % 2 == 0
+                    if axis_even:
+                        stdscr.addstr(num_lines, 0, "Axis {0}: {1}".
+                                      format(num, joysticks[joy_num].
+                                             get_axis(num)))
+                    else:
+                        stdscr.addstr(num_lines, 40, "Axis {0}: {1}".
+                                      format(num, joysticks[joy_num].
+                                             get_axis(num)))
+                        num_lines += 1
+
+                # if finished with all axes on an even axis value:
+                if num_axis % 2 == 0:
                     num_lines += 1
 
             # Get the number of buttons and state their state
             num_buttons = joysticks[joy_num].get_numbuttons()
+            num_lines += 1
             stdscr.addstr(num_lines, 0, "Joystick has {0} buttons".
                           format(num_buttons))
             num_lines += 1
 
             if num_buttons > 0:
                 for num in range(num_buttons):
-                    stdscr.addstr(num_lines, 0, "Button {0}: {1}".
-                                  format(num, joysticks[joy_num].
-                                         get_button(num)))
+                    button_mod_3 = num % 3
+                    if button_mod_3 == 0:
+                        stdscr.addstr(num_lines, 0, "Button {0}: {1}".
+                                      format(num, joysticks[joy_num].
+                                             get_button(num)))
+                    elif button_mod_3 == 1:
+                        stdscr.addstr(num_lines, 20, "Button {0}: {1}".
+                                      format(num, joysticks[joy_num].
+                                             get_button(num)))
+                    else:
+                        stdscr.addstr(num_lines, 40, "Button {0}: {1}".
+                                      format(num, joysticks[joy_num].
+                                             get_button(num)))
+                        num_lines += 1
+
+                # If finished with buttons but not at mod 3 == 2, add an
+                # empty line
+                if num_buttons % 3 != 2:
                     num_lines += 1
+
 
             # Get the number of hats and state their state
             num_hats = joysticks[joy_num].get_numhats()
+            num_lines += 1
             stdscr.addstr(num_lines, 0, "Joystick has {0} hats".
                           format(num_hats))
             num_lines += 1
 
             if num_hats > 0:
                 for num in range(num_hats):
-                    stdscr.addstr(num_hats, 0, "Hat {0}: {1}".
+                    stdscr.addstr(num_lines, 0, "Hat {0}: {1}".
                                   format(num, joysticks[joy_num].
                                          get_hat(num)))
+                    num_lines += 1
+
+            num_lines += 1
 
     stdscr.move(0, 0)
     stdscr.refresh()
