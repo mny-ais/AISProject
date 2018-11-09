@@ -56,6 +56,7 @@ class VehicleControl(object):
         self.throttle = 0
         self.brake = 0
         self.hand_brake = 0
+        self.reverse = False
 
 class Timer(object):
     def __init__(self):
@@ -244,8 +245,10 @@ class AISGame(object):
             self._timer.lap()
 
         # Get Control from keyboard
-        control = self._get_keyboard_control(pygame.key.get_pressed())
-        # control =  self.get_joystick_control(self.joysticks[0])
+        # control = self._get_keyboard_control(pygame.key.get_pressed())
+
+        # Get control from joystick
+        control =  self._get_joystick_control(self.joysticks[0])
         # Apply control
         if control is None:
             self._on_new_episode()
@@ -257,35 +260,137 @@ class AISGame(object):
 
         pygame.display.update()
 
-    def _get_joystick_control(self, joystick):
+    def _get_joystick_control(self, joystick, mode="left"):
         """ Returns a VehicleControl message based on joystick input. Return
             None if a new episode was requested.
 
             This assumes a Playstation DualShock3 controller is being used.
+
+        Args:
+            joystick (pygame.joystick.Joystick): The pygame joystick object
+                                                 used as input
+            mode (string): Available options are:
+                           - "left": Only the left analog stick is used for
+                                     control
+                           - "right": Only the right analog stick is used for
+                                      control
+                           - "rc": Mimics an rc car, where the left stick is
+                                   used to control throttle and the right stick
+                                   controls steering
+                           - "game": Mimics default video game bindings, with
+                                     throttle and brake controls bound to the
+                                     triggers. Only available when using a PS4
+                                     controller
+
         """
-        if joystick.get_numaxes() != 4:
-            raise EnvironmentError('Wrong controller or broken controller '
-                                   'plugged in')
+        ps3 = "PLAYSTATION(R)3" in joystick.get_name()
+        ps4 = "Wireless" in joystick.get_name()
+        if mode == "game" and ps3:
+            raise Exception("Pygame unfortunately does not support "
+                            "analog trigger values with a PS3 "
+                            "controller.")
+
+        if not (ps3 or ps4):
+            raise Exception("Not designed for non-playstation"
+                            "controllers")
 
         control = VehicleControl()
 
-        right_stick_horizontal = 0 # TODO figure out which axis is right stick
-                                   # horizontal
-        control.steer = joystick.get_axis(right_stick_horizontal)
+        # Button assignments
+        # x defines the horizontal axis
+        # y defines the vertical axis
+        # l is defined as left
+        # r is defined as right
+        l_x = self._input_deadzone(joystick.get_axis(0))
+        l_y = self._input_deadzone(joystick.get_axis(1))
+        r_x = self._input_deadzone(joystick.get_axis(2))
+        r_y = self._input_deadzone(joystick.get_axis(3))
+        l2 = None  # brakes for game mode
+        r2 = None  # throttle for game mode
+        start_button = None  # start/stop recording
+        x_button = None  # handbrakes
+        r1 = None  # reverse enable
 
-        left_stick_vertical = 2 # TODO figure out which axis is left stick
-                                # vertical
-        left_vertical_value = joystick.get_axis(left_stick_vertical)
-        if left_stick_vertical > 0:
-            # throttle is on
-            control.throttle = left_stick_vertical
-        else:
-            # brake
-            control.brake = left_stick_vertical
+        if ps3:
+            start_button = joystick.get_button(3)
+            x_button = joystick.get_button(14)
+            r1 = joystick.get_button(11)
 
-        # TODO implement reverse and hand brakes
+        if ps4:
+            start_button = joystick.get_button(9)
+            x_button = joystick.get_button(1)
+            r1 = joystick.get_button(5)
+            l2 = self._input_deadzone(joystick.get_axis(4))
+            r2 = self._input_deadzone(joystick.get_axis(5))
+
+        control.hand_brake = x_button == 1
+        control.reverse = r1 == 1
+
+        if mode == "left":
+            control.steer = l_x
+            # modify the vehicle control object for throttle and brake controls
+            self._throttle_brake_combined(l_y, control)
+
+        if mode == "right":
+            control.steer = r_x
+            # modify the vehicle control object for throttle and brake controls
+            self._throttle_brake_combined(r_y, control)
+
+        if mode == "rc":
+            control.steer = r_x
+            # modify the vehicle control object for throttle and brake controls
+            self._throttle_brake_combined(l_y, control)
+
+        if mode == "game":
+            control.steer = l_x
+            control.throttle = (r2 + 1) / 2
+            control.brake = (l2 + 1) / 2
+
         # TODO teach car how to drift
         # TODO implement recording
+        # TODO implement button state to allow for recording with single button
+        # tap
+
+    def _input_deadzone(self, value, deadzone=0.02):
+        """ Defines a deadzone for joystick input.
+
+            Analog controls are often times noisy. This method sets a deadzone
+            for Playstation controllers, no user input returns no controller
+            input (as opposed to 0.019 input or thereabouts).
+
+        Args:
+            value (float): The raw controller value.
+            deadzone (float): Deadzone value, defaults to 0.02.
+
+        Returns:
+            Input value with deadzone.
+        """
+        if value < deadzone:
+            return 0
+        else:
+            return value
+
+    def _throttle_brake_combined(self, value, vehicle_control):
+        """ Modifies the value of throttle or brake in vehicle_control.
+
+        Args:
+            value (float): A floating point value between -1 and 1.
+            vehicle_control (VehicleControl): The VehicleControl object whose
+                                              throttle and brake value are to be
+                                              changed.
+        """
+        if value < 0 and not vehicle_control.reverse:
+            vehicle_control.throttle = abs(value)
+
+        if value > 0 and not vehicle_control.reverse:
+            vehicle_control.brake = value
+
+        if value > 0 and vehicle_control.reverse:
+            vehicle_control.throttle = value
+
+        if value == 0:
+            vehicle_control.throttle = 0
+            vehicle_control.brake = 0
 
     def _get_keyboard_control(self, keys):
         """
