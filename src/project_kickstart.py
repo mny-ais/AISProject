@@ -259,13 +259,14 @@ class AISGame(object):
             self.counter = 0
             self._timer.lap()
 
-        # Get Control from keyboard
-        # control = self._get_keyboard_control(pygame.key.get_pressed())
-
-        # Get control from joystick
-        control =  self._get_joystick_control(self.joysticks[0],
-                                              pygame.key.get_pressed(),
-                                              self.control_mode)
+        if self.control_mode == "keyboard":
+            # Get Control from keyboard
+            control = self._get_keyboard_control(pygame.key.get_pressed())
+        else:
+            # Get control from joystick
+            control =  self._get_joystick_control(self.joysticks[0],
+                                                  pygame.key.get_pressed(),
+                                                  self.control_mode)
         # Apply control
         if control is None:
             self._on_new_episode()
