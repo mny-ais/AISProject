@@ -360,8 +360,8 @@ class AISGame(object):
 
         if mode == "game":
             control.steer = l_x / 2
-            control.throttle = (r2 + 1) / 2
-            control.brake = (l2 + 1) / 2
+            control.throttle = (r2 + 1) / 4
+            control.brake = (l2 + 1) / 4
 
         control.print_state()
         return control
