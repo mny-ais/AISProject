@@ -324,27 +324,25 @@ class AISGame(object):
         # r is defined as right
         l_x = self._input_deadzone(joystick.get_axis(0))
         l_y = self._input_deadzone(joystick.get_axis(1))
-        r_x = self._input_deadzone(joystick.get_axis(2))
-        r_y = self._input_deadzone(joystick.get_axis(3))
-        l2 = None  # brakes for game mode
-        r2 = None  # throttle for game mode
+        r_x = self._input_deadzone(joystick.get_axis(3))
+        r_y = self._input_deadzone(joystick.get_axis(4))
+        l2 = self._input_deadzone(joystick.get_axis(2))
+        r2 = self._input_deadzone(joystick.get_axis(5))
         start_button = None  # start/stop recording
-        x_button = None  # handbrakes
+        l1 = None  # handbrakes
         r1 = None  # reverse enable
 
         if ps3:
             start_button = joystick.get_button(9)
-            x_button = joystick.get_button(0)
+            l1 = joystick.get_button(4)
             r1 = joystick.get_button(5)
 
         if ps4:
             start_button = joystick.get_button(9)
-            x_button = joystick.get_button(1)
+            l1 = joystick.get_button(4)
             r1 = joystick.get_button(5)
-            l2 = self._input_deadzone(joystick.get_axis(4))
-            r2 = self._input_deadzone(joystick.get_axis(5))
 
-        control.hand_brake = x_button == 1
+        control.hand_brake = l1 == 1
         control.reverse = r1 == 1
 
         if mode == "left":
@@ -406,13 +404,13 @@ class AISGame(object):
                                               changed.
         """
         if value < 0 and not vehicle_control.reverse:
-            vehicle_control.throttle = abs(value / 3)
+            vehicle_control.throttle = abs(value / 2)
 
         if value > 0 and not vehicle_control.reverse:
-            vehicle_control.brake = value / 3
+            vehicle_control.brake = value / 2
 
         if value > 0 and vehicle_control.reverse:
-            vehicle_control.throttle = value / 3
+            vehicle_control.throttle = value / 2
 
         if value == 0:
             vehicle_control.throttle = 0
