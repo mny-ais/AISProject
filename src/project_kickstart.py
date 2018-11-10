@@ -405,13 +405,13 @@ class AISGame(object):
                                               changed.
         """
         if value < 0 and not vehicle_control.reverse:
-            vehicle_control.throttle = abs(value)
+            vehicle_control.throttle = abs(value / 3)
 
         if value > 0 and not vehicle_control.reverse:
-            vehicle_control.brake = value
+            vehicle_control.brake = value / 3
 
         if value > 0 and vehicle_control.reverse:
-            vehicle_control.throttle = value
+            vehicle_control.throttle = value / 3
 
         if value == 0:
             vehicle_control.throttle = 0
