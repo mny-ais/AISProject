@@ -4,10 +4,16 @@
 from __future__ import print_function
 
 import airsim
+
 import logging
+
 import time
+
 import cv2
+
 import os
+
+import sys
 
 try:
     import pygame
@@ -79,12 +85,16 @@ class Timer(object):
 
 
 class AISGame(object):
-    def __init__(self ):
-
+    def __init__(self, control_mode):
+        """ Initializes the AISGame object.
+        Args:
+            control_mode (string): The control mode to used with the joystick.
+        """
         self.client = airsim.CarClient()
         self.client.confirmConnection()
         self.client.enableApiControl(True)
         self.car_controls = airsim.CarControls()
+        self.control_mode = control_mode
 
         self._timer = None
         self.save_timer = None
@@ -248,7 +258,8 @@ class AISGame(object):
         # control = self._get_keyboard_control(pygame.key.get_pressed())
 
         # Get control from joystick
-        control =  self._get_joystick_control(self.joysticks[0])
+        control =  self._get_joystick_control(self.joysticks[0],
+                                              self.control_mode)
         # Apply control
         if control is None:
             self._on_new_episode()
@@ -441,14 +452,17 @@ class AISGame(object):
         pygame.display.flip()
 
 
-def main():
-    game = AISGame()
+def main(control_mode="left"):
+    game = AISGame(control_mode)
     game.execute()
 
 
 if __name__ == '__main__':
 
     try:
-        main()
+        if len(sys.argv) > 1:
+            main(sys.argv[1])
+        else:
+            main()
     except KeyboardInterrupt:
         print('\nCancelled by user. Bye!')
