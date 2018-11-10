@@ -361,6 +361,8 @@ class AISGame(object):
             control.throttle = (r2 + 1) / 2
             control.brake = (l2 + 1) / 2
 
+        return control
+
         # TODO teach car how to drift
         # TODO implement recording
         # TODO implement button state to allow for recording with single button
