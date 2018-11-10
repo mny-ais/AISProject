@@ -349,23 +349,23 @@ class AISGame(object):
 
         if mode == "left":
             print("l_x: {0}".format(l_x))
-            control.steer = l_x
+            control.steer = l_x / 2
             # modify the vehicle control object for throttle and brake controls
             self._throttle_brake_combined(l_y, control)
 
 
         if mode == "right":
-            control.steer = r_x
+            control.steer = r_x / 2
             # modify the vehicle control object for throttle and brake controls
             self._throttle_brake_combined(r_y, control)
 
         if mode == "rc":
-            control.steer = r_x
+            control.steer = r_x / 2
             # modify the vehicle control object for throttle and brake controls
             self._throttle_brake_combined(l_y, control)
 
         if mode == "game":
-            control.steer = l_x
+            control.steer = l_x / 2
             control.throttle = (r2 + 1) / 2
             control.brake = (l2 + 1) / 2
 
