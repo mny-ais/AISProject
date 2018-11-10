@@ -306,10 +306,6 @@ class AISGame(object):
         ps3 = "PLAYSTATION(R)3" in joystick.get_name()\
               or "PS3" in joystick.get_name()
         ps4 = "Wireless" in joystick.get_name()
-        if mode == "game" and ps3:
-            raise Exception("Pygame unfortunately does not support "
-                            "analog trigger values with a PS3 "
-                            "controller.")
 
         if not (ps3 or ps4):
             raise Exception("Not designed for non-playstation"
@@ -342,7 +338,7 @@ class AISGame(object):
             l1 = joystick.get_button(4)
             r1 = joystick.get_button(5)
 
-        control.hand_brake = l1 == 1
+        control.hand_brake = l1
         control.reverse = r1 == 1
 
         if mode == "left":
