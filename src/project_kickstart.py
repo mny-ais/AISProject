@@ -1,5 +1,6 @@
 # Manual control of AIScar simulator
 # Johan Vertens 2018
+# Yvan Satyawan 2018
 
 from __future__ import print_function
 
@@ -32,12 +33,14 @@ try:
     from pygame.locals import K_q
     from pygame.locals import K_z
 except ImportError:
-    raise RuntimeError('cannot import pygame, make sure pygame package is installed')
+    raise RuntimeError('cannot import pygame, make sure pygame package is'
+                       'installed')
 
 try:
     import numpy as np
 except ImportError:
-    raise RuntimeError('cannot import numpy, make sure numpy package is installed')
+    raise RuntimeError('cannot import numpy, make sure numpy package is'
+                       'installed')
 
 from time import gmtime, strftime
 
@@ -56,6 +59,7 @@ grab_image_distance = 0.1  # meters
 
 max_lanes = 6
 
+
 class VehicleControl(object):
     def __init__(self):
         self.steer = 0
@@ -68,6 +72,7 @@ class VehicleControl(object):
         print("Steering: {0}".format(self.steer))
         print("Throttle: {0}".format(self.throttle))
         print("Brake: {0}".format(self.brake))
+
 
 class Timer(object):
     def __init__(self):
@@ -83,7 +88,8 @@ class Timer(object):
         self._lap_time = time.time()
 
     def ticks_per_second(self):
-        return float(self.step - self._lap_step) / self.elapsed_seconds_since_lap()
+        return float(self.step - self._lap_step)\
+               / self.elapsed_seconds_since_lap()
 
     def elapsed_seconds_since_lap(self):
         return time.time() - self._lap_time
@@ -111,16 +117,17 @@ class AISGame(object):
         self.counter = 0
         self.color_map = {}
         self.val_map = {}
-        self.setSegmentationIds()
+        self.set_segmentation_ids()
 
         self.recording = False
         self.record_path = None
         self.save_counter = 0
 
-        self.last_pos = np.zeros((3))
+        self.last_pos = np.zeros(3)
 
         pygame.joystick.init()
-        self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        self.joysticks = [pygame.joystick.Joystick(x)
+                          for x in range(pygame.joystick.get_count())]
         for j in self.joysticks:
             j.init()
         print("Found %d joysticks" % (len(self.joysticks)))
@@ -139,31 +146,52 @@ class AISGame(object):
         finally:
             pygame.quit()
 
-    def setSegmentationIds(self):
+    def set_segmentation_ids(self):
 
         # rgb_file = open("seg_rgbs.txt", "r")
         # lines = rgb_file.readlines()
         # for l in lines:
         #     s = l.split('[')
         #     self.color_map[int(s[0].rstrip())] = eval('[' + s[1].rstrip())
-        #     self.val_map[tuple(eval('[' + s[1].rstrip()))] = int(s[0].rstrip())
+        #     self.val_map[tuple(eval('[' + s[1].rstrip()))] = int(s[0].
+        #                                                      rstrip())
 
-        found = self.client.simSetSegmentationObjectID("[\w]*", 0, True);
-        print("Reset all segmentations to zero: %r" % (found))
+        found = self.client.simSetSegmentationObjectID("[\w]*", 0, True)
+        print("Reset all segmentations to zero: %r" % found)
 
-        self.client.simSetSegmentationObjectID("ParkingAnnotRoad[\w]*", 22, True)
-        self.client.simSetSegmentationObjectID("CrosswalksRoad[\w]*", 23, True)
-        self.client.simSetSegmentationObjectID("Car[\w]*", 24, True)
+        self.client.simSetSegmentationObjectID("ParkingAnnotRoad[\w]*",
+                                               22,
+                                               True)
+        self.client.simSetSegmentationObjectID("CrosswalksRoad[\w]*",
+                                               23,
+                                               True)
+        self.client.simSetSegmentationObjectID("Car[\w]*",
+                                               24,
+                                               True)
 
-        self.client.simSetSegmentationObjectID("GroundRoad[\w]*", 25, True)
-        self.client.simSetSegmentationObjectID("SolidMarkingRoad[\w]*", 26, True)
-        self.client.simSetSegmentationObjectID("DashedMarkingRoad[\w]*", 27, True)
-        self.client.simSetSegmentationObjectID("StopLinesRoad[\w]*", 28, True)
-        self.client.simSetSegmentationObjectID("ParkingLinesRoad[\w]*", 29, True)
-        self.client.simSetSegmentationObjectID("JunctionsAnnotRoad[\w]*", 30, True)
+        self.client.simSetSegmentationObjectID("GroundRoad[\w]*",
+                                               25,
+                                               True)
+        self.client.simSetSegmentationObjectID("SolidMarkingRoad[\w]*",
+                                               26,
+                                               True)
+        self.client.simSetSegmentationObjectID("DashedMarkingRoad[\w]*",
+                                               27,
+                                               True)
+        self.client.simSetSegmentationObjectID("StopLinesRoad[\w]*",
+                                               28,
+                                               True)
+        self.client.simSetSegmentationObjectID("ParkingLinesRoad[\w]*",
+                                               29,
+                                               True)
+        self.client.simSetSegmentationObjectID("JunctionsAnnotRoad[\w]*",
+                                               30,
+                                               True)
 
         for i in range(max_lanes):
-            self.client.simSetSegmentationObjectID("LaneRoadAnnot" + str(i) +"[\w]*", i+31, True)
+            self.client.simSetSegmentationObjectID("LaneRoadAnnot"
+                                                   + str(i) + "[\w]*", i + 31,
+                                                   True)
 
     def _initialize_game(self):
         self._on_new_episode()
@@ -182,7 +210,9 @@ class AISGame(object):
 
     def response_to_cv(self, r, channels):
         if r.compress:
-            image = cv2.imdecode(np.fromstring(r.image_data_uint8, dtype=np.uint8), 1)
+            image = cv2.imdecode(np.fromstring(r.image_data_uint8,
+                                               dtype=np.uint8),
+                                 1)
             image = image.reshape(r.height, r.width, channels)
             image = cv2.cvtColor(image[:, :, 0:channels], cv2.COLOR_RGB2BGR)
 
@@ -194,22 +224,22 @@ class AISGame(object):
 
     def seg_rgb_to_values(self, seg_rgb):
         val_map = np.zeros((seg_rgb.shape[0], seg_rgb.shape[1]), dtype=np.uint8)
-        for v , color in self.color_map.items():
-            v_map = np.all(seg_rgb == tuple(color), axis=-1).astype(np.uint8) * v
+        for v, color in self.color_map.items():
+            v_map = np.all(seg_rgb == tuple(color), axis=-1).astype(np.uint8)\
+                    * v
             val_map += v_map
         return val_map
 
-    def genLabels(self, map):
+    def gen_labels(self, map):
 
         val_map = np.zeros((map.shape[0], map.shape[1]))
         for x in range(map.shape[0]):
             for y in range(map.shape[1]):
-                val_map[x,y] = self.val_map[tuple(map[x,y,:])]
+                val_map[x, y] = self.val_map[tuple(map[x, y, :])]
 
         val_map = val_map.astype(np.uint8)
 
         return val_map
-
 
     def _on_loop(self):
         self._timer.tick()
@@ -220,34 +250,46 @@ class AISGame(object):
         pos = np.array([pos.x_val, pos.y_val, pos.y_val])
 
         if show_segmentation:
-          responses = self.client.simGetImages([
-              airsim.ImageRequest("0", airsim.ImageType.Scene, False,
-                                  False), airsim.ImageRequest("0", airsim.ImageType.Segmentation, False,
-                              False)])
+            responses = self.client.simGetImages(
+                [airsim.ImageRequest("0",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     False),
+                 airsim.ImageRequest("0",
+                                     airsim.ImageType.Segmentation,
+                                     False,
+                                     False)])
+
         else:
-          responses = self.client.simGetImages([
-              airsim.ImageRequest("0", airsim.ImageType.Scene, False,
-                                  False)])
+            responses = self.client.simGetImages(
+                [airsim.ImageRequest("0",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     False)])
 
         if len(responses) > 0:
             rgb = self.response_to_cv(responses[0], 3)
 
             # crop_img = rgb[ADDITIONAL_CROP_TOP:, :]
             # rgb = cv2.resize(crop_img, (640, 85))
-            self._main_image = (rgb)
+            self._main_image = rgb
 
         # Did we get a segmentation image?
         if len(responses) > 1:
             seg = self.response_to_cv(responses[1], 3)
             self._seg_image = seg
 
-        if self.recording and len(responses)>1:
+        if self.recording and len(responses) > 1:
             # if self.save_timer.elapsed_seconds_since_lap() > 0.2:
             # Record image every $grap_image_distance meters
             if np.linalg.norm(self.last_pos - pos) > grab_image_distance:
                     if self.record_path is not None:
-                        cv2.imwrite(self.record_path + 'image_' + str(self.save_counter) + '.png', cv2.cvtColor(rgb,cv2.COLOR_BGR2RGB))
-                        cv2.imwrite(self.record_path + 'seg_' + str(self.save_counter) + '.png', cv2.cvtColor(seg,cv2.COLOR_BGR2RGB))
+                        cv2.imwrite(self.record_path + 'image_'
+                                    + str(self.save_counter) + '.png',
+                                    cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
+                        cv2.imwrite(self.record_path + 'seg_'
+                                    + str(self.save_counter) + '.png',
+                                    cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
                         self.save_counter += 1
                     self.last_pos = pos
 
@@ -264,9 +306,9 @@ class AISGame(object):
             control = self._get_keyboard_control(pygame.key.get_pressed())
         else:
             # Get control from joystick
-            control =  self._get_joystick_control(self.joysticks[0],
-                                                  pygame.key.get_pressed(),
-                                                  self.control_mode)
+            control = self._get_joystick_control(self.joysticks[0],
+                                                 pygame.key.get_pressed(),
+                                                 self.control_mode)
         # Apply control
         if control is None:
             self._on_new_episode()
@@ -338,7 +380,7 @@ class AISGame(object):
             l1 = joystick.get_button(4)
             r1 = joystick.get_button(5)
 
-        control.hand_brake = l1
+        control.hand_brake = float(l1)
         control.reverse = r1 == 1
 
         if mode == "left":
@@ -346,7 +388,6 @@ class AISGame(object):
             control.steer = l_x / 2
             # modify the vehicle control object for throttle and brake controls
             self._throttle_brake_combined(l_y, control)
-
 
         if mode == "right":
             control.steer = r_x / 2
@@ -399,6 +440,7 @@ class AISGame(object):
                                               throttle and brake value are to be
                                               changed.
         """
+        # TODO Make this method return instead of modify
         if value < 0 and not vehicle_control.reverse:
             vehicle_control.throttle = abs(value / 2)
 
@@ -435,7 +477,8 @@ class AISGame(object):
             control.hand_brake = True
         if keys[K_q]:
             if not self.recording:
-                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S", gmtime()) + '/'
+                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
+                                                       gmtime()) + '/'
                 if not os.path.exists(self.record_path):
                     os.makedirs(self.record_path)
                 self.recording = True
@@ -451,11 +494,13 @@ class AISGame(object):
     # This function gets called everytime the screen needs to be rendered
     def _on_render(self):
         if self._main_image is not None:
-            surface_main = pygame.surfarray.make_surface(self._main_image.swapaxes(0, 1))
+            surface_main = pygame.surfarray.make_surface(
+                self._main_image.swapaxes(0, 1))
             self._display.blit(surface_main, (0, 0))
 
             if show_segmentation:
-                surface_seg = pygame.surfarray.make_surface(self._seg_image.swapaxes(0, 1))
+                surface_seg = pygame.surfarray.make_surface(
+                    self._seg_image.swapaxes(0, 1))
                 self._display.blit(surface_seg, (0, 85*1))
 
         pygame.display.flip()
