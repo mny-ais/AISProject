@@ -64,6 +64,11 @@ class VehicleControl(object):
         self.hand_brake = 0
         self.reverse = False
 
+    def print_state(self):
+        print("Steering: {0}".format(self.steer))
+        print("Throttle: {0}".format(self.throttle))
+        print("Brake: {0}".format(self.brake))
+
 class Timer(object):
     def __init__(self):
         self.step = 0
@@ -342,9 +347,11 @@ class AISGame(object):
         control.reverse = r1 == 1
 
         if mode == "left":
+            print("l_x: {0}".format(l_x))
             control.steer = l_x
             # modify the vehicle control object for throttle and brake controls
             self._throttle_brake_combined(l_y, control)
+
 
         if mode == "right":
             control.steer = r_x
@@ -361,6 +368,7 @@ class AISGame(object):
             control.throttle = (r2 + 1) / 2
             control.brake = (l2 + 1) / 2
 
+        control.print_state()
         return control
 
         # TODO teach car how to drift
