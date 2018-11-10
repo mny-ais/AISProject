@@ -390,7 +390,7 @@ class AISGame(object):
         Returns:
             Input value with deadzone.
         """
-        if value < deadzone:
+        if (-1 * deadzone) < value < deadzone:
             return 0
         else:
             return value
