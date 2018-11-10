@@ -136,12 +136,12 @@ class AISGame(object):
 
     def setSegmentationIds(self):
 
-        rgb_file = open("seg_rgbs.txt", "r")
-        lines = rgb_file.readlines()
-        for l in lines:
-            s = l.split('[')
-            self.color_map[int(s[0].rstrip())] = eval('[' + s[1].rstrip())
-            self.val_map[tuple(eval('[' + s[1].rstrip()))] = int(s[0].rstrip())
+        # rgb_file = open("seg_rgbs.txt", "r")
+        # lines = rgb_file.readlines()
+        # for l in lines:
+        #     s = l.split('[')
+        #     self.color_map[int(s[0].rstrip())] = eval('[' + s[1].rstrip())
+        #     self.val_map[tuple(eval('[' + s[1].rstrip()))] = int(s[0].rstrip())
 
         found = self.client.simSetSegmentationObjectID("[\w]*", 0, True);
         print("Reset all segmentations to zero: %r" % (found))
@@ -294,7 +294,7 @@ class AISGame(object):
                                      controller
 
         """
-        ps3 = "PLAYSTATION(R)3" in joystick.get_name()
+        ps3 = "PLAYSTATION(R)3" in joystick.get_name() or "PS3" in joystick.get_name()
         ps4 = "Wireless" in joystick.get_name()
         if mode == "game" and ps3:
             raise Exception("Pygame unfortunately does not support "
@@ -323,9 +323,9 @@ class AISGame(object):
         r1 = None  # reverse enable
 
         if ps3:
-            start_button = joystick.get_button(3)
-            x_button = joystick.get_button(14)
-            r1 = joystick.get_button(11)
+            start_button = joystick.get_button(9)
+            x_button = joystick.get_button(0)
+            r1 = joystick.get_button(5)
 
         if ps4:
             start_button = joystick.get_button(9)
