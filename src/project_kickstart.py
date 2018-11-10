@@ -259,6 +259,7 @@ class AISGame(object):
 
         # Get control from joystick
         control =  self._get_joystick_control(self.joysticks[0],
+                                              pygame.key.get_pressed(),
                                               self.control_mode)
         # Apply control
         if control is None:
@@ -271,7 +272,7 @@ class AISGame(object):
 
         pygame.display.update()
 
-    def _get_joystick_control(self, joystick, mode="left"):
+    def _get_joystick_control(self, joystick, keys, mode="left"):
         """ Returns a VehicleControl message based on joystick input. Return
             None if a new episode was requested.
 
@@ -292,9 +293,12 @@ class AISGame(object):
                                      throttle and brake controls bound to the
                                      triggers. Only available when using a PS4
                                      controller
-
+            keys (Pygame key): Keys for use with I have no clue tbh.
         """
-        ps3 = "PLAYSTATION(R)3" in joystick.get_name() or "PS3" in joystick.get_name()
+        if keys[K_r]:
+            return None
+        ps3 = "PLAYSTATION(R)3" in joystick.get_name()\
+              or "PS3" in joystick.get_name()
         ps4 = "Wireless" in joystick.get_name()
         if mode == "game" and ps3:
             raise Exception("Pygame unfortunately does not support "
