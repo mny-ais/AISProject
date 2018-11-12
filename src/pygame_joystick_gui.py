@@ -1,3 +1,4 @@
+import math
 import time
 
 import tkinter as tk
@@ -23,35 +24,44 @@ def init_pygame_joysticks():
 
     return joysticks
 
-def update_joystick_values(joysticks, j_attributes):
+def update_joystick_values(j_attributes, root):
     """ Updates multiple joystick values in only one function call."""
-    current_stick_number = 0
-    for j in joysticks:
-        update_axis_values(j, j_attributes[current_stick_number]
-                           ["Axis_state"])
-        update_button_values(j, j_attributes[current_stick_number]
-                             ["Button_state"])
-        update_hat_values(j, j_attributes[current_stick_number]
-                          ["Hat_state"])
+
+    for event in pygame.event.get():
+        if event.type == pygame.JOYAXISMOTION:
+            # Handles axis motion
+            value = truncate(deadzone(event.value), 4)
+            j_attributes[event.joy]["Axis_state"][event.axis].\
+                set("Axis {0}: {1}".format(event.axis, value))
+        elif event.type == pygame.JOYBALLMOTION:
+            # Handles ball motion
+            j_attributes[event.joy]["Ball_state"][event.ball].\
+                set("Ball {0}: {1}".format(event.ball, event.value))
+        elif event.type == pygame.JOYBUTTONDOWN:
+            # Handles button down
+            j_attributes[event.joy]["Button_state"][event.button].\
+                set("Button {0}: 1".format(event.button))
+        elif event.type == pygame.JOYBUTTONUP:
+            # Handles button up
+            j_attributes[event.joy]["Button_state"][event.button].\
+                set("Button{0}: 0".format(event.button))
+        elif event.type == pygame.JOYHATMOTION:
+            # Handles hat motion
+            j_attributes[event.joy]["Hat_state"][event.hat]. \
+                set("Hat {0}: {1}".format(event.hat, event.value))
 
 
-def update_axis_values(joystick, axis_states):
-    """ Updates a list of all axis values of a joystick in order."""
-    for i in range(len(axis_states)):
-        axis_states[i].set(joystick.get_axis(i))
+    root.after(10, update_joystick_values, j_attributes, root)
 
+def deadzone(value):
+    if -0.002 < value < 0.002:
+        return 0
+    else:
+        return value
 
-def update_button_values(joystick, button_states):
-    """ Updates a list of all button values of a joystick in order."""
-    for i in range(len(button_states)):
-        button_states[i].set(joystick.get_button(i))
-
-
-def update_hat_values(joystick, hat_states):
-    """ Updates a list of all hat values of a joystick in order."""
-    for i in range(len(hat_states)):
-        hat_states[i].set(str(joystick.get_hat(i)))
-
+def truncate(number, digits):
+    stepper = pow(10.0, digits)
+    return math.trunc(stepper * number) / stepper
 
 def controller_monitor(joystick_list):
     """ Main function that represents the app and extends tk.Tk
@@ -68,10 +78,14 @@ def controller_monitor(joystick_list):
     root = tk.Tk()
     root.title("Pygame Joystick Monitor")
 
+    # Configure the grid
+    for i in range(4):
+        root.grid_columnconfigure(i, minsize=100)
+
     # Set text
     tk.Label(root, text="{0} Joystick(s) found".
              format(len(joystick_list))).\
-        grid(rowspan=4)
+        grid(row=0, columnspan=4)
 
     # Create a list of dictionaries for each joystick
     j_attributes = []
@@ -79,41 +93,55 @@ def controller_monitor(joystick_list):
     # initialize the joystick_attributes list
     for j in joystick_list:
         num_axis = j.get_numaxes()
-        axis_values = [tk.DoubleVar(root) for i in range(num_axis)]
+        axis_values = [tk.StringVar(master=root, value="Axis {0}: 0.0".
+                                    format(i))
+                       for i in range(num_axis)]
+        num_balls = j.get_numballs()
+        ball_values = [tk.StringVar(master=root, value="Ball {0}: (0, 0)".
+                                    format(i))
+                         for i in range(num_balls)]
         num_buttons = j.get_numbuttons()
-        button_values = [tk.DoubleVar(root) for i in range(num_buttons)]
-        num_hats = j.get_hats()
-        hat_values = [tk.StringVar for i in range(num_hats)]
+        button_values = [tk.StringVar(master=root, value="Button {0}: 0".
+                                      format(i))
+                         for i in range(num_buttons)]
+        num_hats = j.get_numhats()
+        hat_values = [tk.StringVar(master=root, value="Hat {0}: (0, 0)".
+                                   format(i))
+                      for i in range(num_hats)]
 
         joystick_state = {
             "Name": j.get_name(),
             "Axes": num_axis,
             "Axis_state": axis_values,
+            "Balls": num_balls,
+            "Ball_state": ball_values,
             "Buttons": num_buttons,
             "Button_state": button_values,
-            "Hats:": num_hats,
+            "Hats": num_hats,
             "Hat_state": hat_values
         }
         j_attributes.append(joystick_state)
 
     # Fill the window with the joystick states
-    current_row = 2
+    current_row = 3
+
     for j in range(len(joystick_list)):
         # Name label
         tk.Label(root,
                  text="Name: {0}".format(j_attributes[j]["Name"])).\
-            grid(row=current_row, rowspan=4)
+            grid(row=current_row, columnspan=4)
         current_row += 1
 
         # Axis labels
         tk.Label(root,
-                 text="Joystick has {0} axes".format(j_attributes[j]["Axes"])).\
-            grid(row=current_row)
+                 text="Joystick has {0} axes".
+                 format(j_attributes[j]["Axes"])).\
+            grid(row=current_row, columnspan=4)
+        current_row += 1
         for i in range(j_attributes[j]["Axes"]):
             axis_mod_2 = i % 2
             tk.Label(root,
-                     "Axis {0}: {1}".
-                     format(i, j_attributes[j]["Axis_state"][i].get())).\
+                     textvariable=j_attributes[j]["Axis_state"][i]).\
                 grid(row=current_row, column=axis_mod_2)
             if axis_mod_2 == 1:
                 current_row += 1
@@ -125,16 +153,36 @@ def controller_monitor(joystick_list):
         else:
             current_row += 1
 
+        # Ball labels
+        tk.Label(root,
+                 text="Joystick has {0} balls".
+                 format(j_attributes[j]["Balls"])). \
+            grid(row=current_row, columnspan=4)
+        current_row += 1
+        for i in range(j_attributes[j]["Balls"]):
+            axis_mod_2 = i % 2
+            tk.Label(root,
+                     textvariable=j_attributes[j]["Ball_state"][i]). \
+                grid(row=current_row, column=axis_mod_2)
+            if axis_mod_2 == 1:
+                current_row += 1
+        # If finished on an even value, i.e. odd number of axes, add an extra
+        # blank line to compensate
+        if j_attributes[j]["Balls"] % 2 == 0:
+            current_row += 2
+        else:
+            current_row += 1
+
         # Button labels
         tk.Label(root,
                  text="Joystick has {0} buttons".
                  format(j_attributes[j]["Buttons"])).\
-            grid(row=current_row, rowspan=4)
+            grid(row=current_row, columnspan=4)
+        current_row += 1
         for i in range(j_attributes[j]["Buttons"]):
             button_mod_4 = i % 4
             tk.Label(root,
-                     "Button {0}: {1}".
-                     format(i, j_attributes[j]["Button_state"][i].get())).\
+                     textvariable=j_attributes[j]["Button_state"][i]).\
                 grid(row=current_row, column=button_mod_4)
             if button_mod_4 == 3:
                 current_row += 1
@@ -150,12 +198,12 @@ def controller_monitor(joystick_list):
         tk.Label(root,
                  text="Joystick has {0} hats".
                  format(j_attributes[j]["Hats"])).\
-            grid(row=current_row, rowspan=4)
+            grid(row=current_row, columnspan=4)
+        current_row += 1
         for i in range(j_attributes[j]["Hats"]):
             hat_mod_2 = i % 2
             tk.Label(root,
-                     "Hat {0}: {1}".
-                     format(i, j_attributes[j]["Hat_state"][i].get())).\
+                     textvariable=j_attributes[j]["Hat_state"][i]).\
                 grid(row=current_row, column=hat_mod_2)
             if hat_mod_2 == 1:
                 current_row += 1
@@ -163,105 +211,17 @@ def controller_monitor(joystick_list):
         # If finished on an even value, i.e. odd number of axes, add an extra
         # blank line to compensate
         if j_attributes[j]["Hats"] % 2 == 0:
-            current_row += 2
+            current_row += 3
         else:
-            current_row += 1
+            current_row += 2
 
-    root.after(10, func=update_joystick_values(joystick_list, j_attributes))
+        current_row += 1
+
+    root.after(10, update_joystick_values, j_attributes, root)
     root.mainloop()
+
 
 
 if __name__ == '__main__':
     joysticks = init_pygame_joysticks()
     controller_monitor(joysticks)
-
-"""
-    initial += 1
-    stdscr.clear()
-
-    # List the number of joysticks and show that the screen is refreshing
-    num_joysticks = len(joysticks)
-    stdscr.addstr(0, 0, "Found {0} joysticks".format(num_joysticks))
-    stdscr.addstr(2, 0, "Refresh count: {0}".format(initial))
-    stdscr.clrtobot()
-
-    if num_joysticks > 0:
-        num_lines = 3
-        for joy_num in range(num_joysticks):
-            # For each joystick, do the following:
-            # State its name
-            stdscr.addstr(num_lines, 0, "Name: {0}".format(joysticks[joy_num].
-                                                           get_name()))
-            num_lines += 1
-            stdscr.addstr(num_lines, 0, "=============================")
-            num_lines += 1
-
-            # Get the number of axes and state their state
-            num_axis = joysticks[joy_num].get_numaxes()
-            stdscr.addstr(num_lines, 0, "Joystick has {0} axes".
-                          format(num_axis))
-            num_lines += 1
-
-            if num_axis > 0:
-                for num in range(num_axis):
-                    axis_even = num % 2 == 0
-                    if axis_even:
-                        stdscr.addstr(num_lines, 0, "Axis {0}: {1}".
-                                      format(num, joysticks[joy_num].
-                                             get_axis(num)))
-                    else:
-                        stdscr.addstr(num_lines, 40, "Axis {0}: {1}".
-                                      format(num, joysticks[joy_num].
-                                             get_axis(num)))
-                        num_lines += 1
-
-                # if finished with all axes on an even axis value:
-                if num_axis % 2 == 0:
-                    num_lines += 1
-
-            # Get the number of buttons and state their state
-            num_buttons = joysticks[joy_num].get_numbuttons()
-            num_lines += 1
-            stdscr.addstr(num_lines, 0, "Joystick has {0} buttons".
-                          format(num_buttons))
-            num_lines += 1
-
-            if num_buttons > 0:
-                for num in range(num_buttons):
-                    button_mod_3 = num % 3
-                    if button_mod_3 == 0:
-                        stdscr.addstr(num_lines, 0, "Button {0}: {1}".
-                                      format(num, joysticks[joy_num].
-                                             get_button(num)))
-                    elif button_mod_3 == 1:
-                        stdscr.addstr(num_lines, 20, "Button {0}: {1}".
-                                      format(num, joysticks[joy_num].
-                                             get_button(num)))
-                    else:
-                        stdscr.addstr(num_lines, 40, "Button {0}: {1}".
-                                      format(num, joysticks[joy_num].
-                                             get_button(num)))
-                        num_lines += 1
-
-                # If finished with buttons but not at mod 3 == 2, add an
-                # empty line
-                if num_buttons % 3 != 2:
-                    num_lines += 1
-
-
-            # Get the number of hats and state their state
-            num_hats = joysticks[joy_num].get_numhats()
-            num_lines += 1
-            stdscr.addstr(num_lines, 0, "Joystick has {0} hats".
-                          format(num_hats))
-            num_lines += 1
-
-            if num_hats > 0:
-                for num in range(num_hats):
-                    stdscr.addstr(num_lines, 0, "Hat {0}: {1}".
-                                  format(num, joysticks[joy_num].
-                                         get_hat(num)))
-                    num_lines += 1
-
-            num_lines += 1
-"""
