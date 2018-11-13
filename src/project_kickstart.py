@@ -22,6 +22,8 @@ import csv
 
 try:
     import pygame
+    from pygame.locals import K_q
+    from pygame.locals import K_z
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
@@ -537,7 +539,7 @@ class AISGame(object):
 
     def _keyboard_controls(self, keys):
         """ Parses keyboard input into actions."""
-        if keys[pygame.key.K_q]:
+        if keys[K_q]:
             if not self.recording:
                 self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
                                                        gmtime()) + '/'
@@ -546,7 +548,7 @@ class AISGame(object):
                 self.request_start_recording = True
                 self.save_counter = 0
                 print('Recording on, saving to: %s' % self.record_path)
-        if keys[pygame.key.K_z]:
+        if keys[K_z]:
             if self.recording:
                 self.request_stop_recording = True
                 print('Recording off, saved to: %s' % self.record_path)
