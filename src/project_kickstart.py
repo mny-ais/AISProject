@@ -18,22 +18,10 @@ import os
 
 import platform
 
+import csv
+
 try:
     import pygame
-    from pygame.locals import K_DOWN
-    from pygame.locals import K_LEFT
-    from pygame.locals import K_RIGHT
-    from pygame.locals import K_SPACE
-    from pygame.locals import K_UP
-    from pygame.locals import K_a
-    from pygame.locals import K_d
-    from pygame.locals import K_p
-    from pygame.locals import K_q
-    from pygame.locals import K_r
-    from pygame.locals import K_s
-    from pygame.locals import K_w
-    from pygame.locals import K_q
-    from pygame.locals import K_z
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
@@ -55,7 +43,7 @@ SAVE_DIR = 'save_dir/'
 show_segmentation = True
 
 WINDOW_WIDTH = AIRSIM_RES_WIDTH
-WINDOW_HEIGHT = AIRSIM_RES_HEIGHT*2 if show_segmentation else AIRSIM_RES_HEIGHT
+WINDOW_HEIGHT = AIRSIM_RES_HEIGHT * 2 if show_segmentation else AIRSIM_RES_HEIGHT
 
 grab_image_distance = 0.1  # meters
 
@@ -285,7 +273,7 @@ class Timer(object):
         self._lap_time = time.time()
 
     def ticks_per_second(self):
-        return float(self.step - self._lap_step)\
+        return float(self.step - self._lap_step) \
                / self.elapsed_seconds_since_lap()
 
     def elapsed_seconds_since_lap(self):
@@ -319,8 +307,12 @@ class AISGame(object):
         self.set_segmentation_ids()
 
         self.recording = False
+        self.request_start_recording = False
+        self.request_stop_recording = False
         self.record_path = None
         self.save_counter = 0
+        self.csv_file = None
+        self.writer = None
 
         self.last_pos = np.zeros(3)
 
@@ -396,8 +388,8 @@ class AISGame(object):
         self._on_new_episode()
 
         self._display = pygame.display.set_mode(
-                (WINDOW_WIDTH, WINDOW_HEIGHT),
-                pygame.HWSURFACE | pygame.DOUBLEBUF)
+            (WINDOW_WIDTH, WINDOW_HEIGHT),
+            pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         logging.debug('pygame started')
 
@@ -418,14 +410,14 @@ class AISGame(object):
 
         else:
             image = np.fromstring(r.image_data_uint8, dtype=np.uint8)
-            image = image.reshape(r.height, r.width, channels+1)
+            image = image.reshape(r.height, r.width, channels + 1)
             image = image[:, :, 0:channels]
         return image
 
     def seg_rgb_to_values(self, seg_rgb):
         val_map = np.zeros((seg_rgb.shape[0], seg_rgb.shape[1]), dtype=np.uint8)
         for v, color in self.color_map.items():
-            v_map = np.all(seg_rgb == tuple(color), axis=-1).astype(np.uint8)\
+            v_map = np.all(seg_rgb == tuple(color), axis=-1).astype(np.uint8) \
                     * v
             val_map += v_map
         return val_map
@@ -479,19 +471,48 @@ class AISGame(object):
             seg = self.response_to_cv(responses[1], 3)
             self._seg_image = seg
 
+        # Was a recording session requested?
+        if self.request_start_recording:
+            if self.record_path is not None:
+                with open(self.record_path + 'controls' + '.csv') \
+                        as self.csv_file:
+                    self.writer = csv.writer(self.csv_file, 'excel')
+
+            self.recording = True
+            self.request_start_recording = False
+
         if self.recording and len(responses) > 1:
             # if self.save_timer.elapsed_seconds_since_lap() > 0.2:
             # Record image every $grap_image_distance meters
+            # Also record the vehicle controls at each instance
             if np.linalg.norm(self.last_pos - pos) > grab_image_distance:
-                    if self.record_path is not None:
-                        cv2.imwrite(self.record_path + 'image_'
-                                    + str(self.save_counter) + '.png',
-                                    cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
-                        cv2.imwrite(self.record_path + 'seg_'
-                                    + str(self.save_counter) + '.png',
-                                    cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
-                        self.save_counter += 1
-                    self.last_pos = pos
+                if self.record_path is not None:
+                    cv2.imwrite(self.record_path + 'image_'
+                                + str(self.save_counter) + '.png',
+                                cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
+                    cv2.imwrite(self.record_path + 'seg_'
+                                + str(self.save_counter) + '.png',
+                                cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
+
+                    # Prepare csv data
+                    csv_data = [self.save_counter,
+                                self.vehicle_controls.car_control.steering,
+                                self.vehicle_controls.car_control.throttle,
+                                self.vehicle_controls.car_control.brake,
+                                self.vehicle_controls.car_control.handbrake,
+                                self.vehicle_controls.car_control.
+                                    manual_gear]
+                    self.writer.writerow(csv_data)
+                    self.save_counter += 1
+                self.last_pos = pos
+
+        if self.request_stop_recording:
+            # Stops recording, closes the csv file, and resets the counter
+            self.recording = False
+            self.csv_file.close()
+            self.writer = None
+            self.save_counter = 0
+            self.request_stop_recording = False
 
         self.counter += 1
 
@@ -516,18 +537,18 @@ class AISGame(object):
 
     def _keyboard_controls(self, keys):
         """ Parses keyboard input into actions."""
-        if keys[K_q]:
+        if keys[pygame.key.K_q]:
             if not self.recording:
                 self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
                                                        gmtime()) + '/'
                 if not os.path.exists(self.record_path):
                     os.makedirs(self.record_path)
-                self.recording = True
+                self.request_start_recording = True
                 self.save_counter = 0
                 print('Recording on, saving to: %s' % self.record_path)
-        if keys[K_z]:
+        if keys[pygame.key.K_z]:
             if self.recording:
-                self.recording = False
+                self.request_stop_recording = True
                 print('Recording off, saved to: %s' % self.record_path)
 
     def _on_render(self):
@@ -539,7 +560,7 @@ class AISGame(object):
             if show_segmentation:
                 surface_seg = pygame.surfarray.make_surface(
                     self._seg_image.swapaxes(0, 1))
-                self._display.blit(surface_seg, (0, 85*1))
+                self._display.blit(surface_seg, (0, 85 * 1))
 
         pygame.display.flip()
 
