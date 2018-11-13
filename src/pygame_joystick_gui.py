@@ -1,5 +1,4 @@
 import math
-import time
 
 import tkinter as tk
 
@@ -7,7 +6,7 @@ try:
     import pygame
 
 except ImportError:
-    raise RuntimeError('cannot import pygame, make sure pygame package is'
+    raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
 
 

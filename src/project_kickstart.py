@@ -16,6 +16,8 @@ import os
 
 import sys
 
+import platform
+
 try:
     import pygame
     from pygame.locals import K_DOWN
@@ -61,17 +63,181 @@ max_lanes = 6
 
 
 class VehicleControl(object):
-    def __init__(self):
-        self.steer = 0
-        self.throttle = 0
-        self.brake = 0
-        self.hand_brake = 0
-        self.reverse = False
+    def __init__(self, control_mode):
+        """ Holds a CarControl object and some extra functionality."""
+        self.request_new_episode = False
+
+        self.car_control = airsim.CarControls()
+        self.car_control.is_manual_gear = True
+        self.car_control.manual_gear = 1
+
+        # First assign bindings based on OS.
+        self.current_os = platform.system()
+        if self.current_os == "Linux":
+            self.l_x = 0
+            self.l_y = 1
+            self.r_x = 3
+            self.r_y = 4
+            self.l2 = 2
+            self.r2 = 5
+            self.start_button = 9
+            self.l1 = 4  # Handbrakes
+            self.r1 = 5  # Reverse enable
+            self.deadzone = 0.02
+
+        elif self.current_os == "Windows":
+            self.l_x = 0
+            self.l_y = 1
+            self.r_x = 4
+            self.r_y = 3
+            # XInput only supports a single axis for both triggers. Positive
+            # for l2, negative for r2
+            self.triggers = 2
+            self.start_button = 7
+            self.l1 = 4
+            self.r1 = 5
+            self.deadzone = 0.04
+
+        # Then assign the control scheme
+
+        # use a switcher
+        switcher = {
+            "left": self._update_left,
+            "right": self._update_right,
+            "rc": self._update_rc,
+            "game": self._update_game_scheme
+        }
+        self.func = switcher[control_mode]
 
     def print_state(self):
-        print("Steering: {0}".format(self.steer))
-        print("Throttle: {0}".format(self.throttle))
-        print("Brake: {0}".format(self.brake))
+        print("Steering: {0}".format(self.car_control.steering))
+        print("Throttle: {0}".format(self.car_control.throttle))
+        print("Brake: {0}".format(self.car_control.throttle))
+        print("Gear: {0}".format(self.car_control.manual_gear))
+
+    def _update_car_controls(self):
+        """ Gets the pygame event queue and uses it to control the car.
+
+            Gets the pygame event queue and uses that information to update the
+            object values. If no events exist, then simply don't update. If a
+            new episode is requested either by pressing r or start, then
+            changes the boolean flag to True, and waits for it to be reset by
+            the _on_new_episode function of the AISGame class.
+
+            Assumes that Linux will run with a Playstation controller and
+            Windows with XInput (e.g. Steam Controller).
+
+            No longer supports keyboard controls because it's just a waste of
+            time to program something we'll never use.
+        """
+        events = pygame.event.get()
+
+        for event in events:
+            if event.type == pygame.JOYAXISMOTION:
+                self.func(event)
+            elif event.type == pygame.JOYBUTTONDOWN:
+                self._update_button_downs(event)
+            elif event.type == pygame.JOYBUTTONUP:
+                self._update_button_ups(event)
+
+    def _update_left(self, event):
+        """ Updates based on left control scheme."""
+        # Steering event
+        if event.axis == self.l_x:
+            self.car_control.steering = event.value / 2
+
+        # Throttle/brake event
+        elif event.axis == self.l_y:
+            self._throttle_brake_combined(self._deadzone(event.value))
+
+    def _update_right(self, event):
+        """ Updates based on right control scheme."""
+        # Steering event
+        if event.axis == self.r_x:
+            self.car_control.steering = event.value / 2
+
+        # Throttle/brake event
+        elif event.axis == self.r_y:
+            self._throttle_brake_combined(self._deadzone(event.value))
+
+    def _update_rc(self, event):
+        """ Updates with a control scheme similar to an RC car."""
+        # Steering event
+        if event.axis == self.r_x:
+            self.car_control.steering = event.value / 2
+
+        # Throttle/brake event
+        elif event.axis == self.l_y:
+            self._throttle_brake_combined(self._deadzone(event.value))
+
+    def _update_game_scheme(self, event):
+        """ Updates based on game control scheme."""
+        # Steering event
+        if event.axis == self.l_x:
+            self.car_control.steering = event.value / 2
+
+        # Throttle/brake event
+        elif self.current_os == "Linux":
+            if event.axis == self.l2 or event.axis == self.r2:
+                self.car_control.throttle = (event.value + 1 / 4)
+                self.car_control.brake = (event.value + 1) / 4
+
+        elif self.current_os == "Windows":
+            if event.axis == self.triggers:
+                self._throttle_brake_combined(self._deadzone(event.value))
+
+    def _update_button_downs(self, event):
+        """ Handles buttons since all control schemes use the same buttons.
+
+            Handles all button up events.
+        """
+        if event.button == self.r1:
+            # Reverse
+            self.car_control.manual_gear = -1
+        elif event.button == self.l1:
+            # Handbrakes
+            self.car_control.handbrake = True
+
+        elif event.button == self.start_button:
+            self.request_new_episode = True
+
+    def _update_button_ups(self, event):
+        """ Handles buttons since all control schemes use the same buttons.
+
+            Handles all button up events.
+        """
+        if event.button == self.r1:
+            # Reverse
+            self.car_control.manual_gear = 1
+        elif event.button == self.l1:
+            # Handbrakes
+            self.car_control.handbrake = False
+
+    def _deadzone(self, value):
+        """ Handles deadzone based on controller."""
+        if -self.deadzone < value < self.deadzone:
+            return 0
+
+        return value
+
+    def _throttle_brake_combined(self, value):
+        """ Modifies the value of the throttle or brake.
+
+        Args:
+            value (float): A floating point value between -1 and 1.
+        """
+        if value < 0 and self.car_control.manual_gear > 0:
+            self.car_control.throttle = abs(value / 2)
+
+        if value > 0 and self.car_control.manual_gear > 0:
+            self.car_control.brake = value / 2
+
+        if value > 0 and self.car_control.manual_gear < 0:
+            self.car_control.throttle = value / 2
+
+        if value == 0:
+            self.car_control.throttle = 0
+            self.car_control.brake = 0
 
 
 class Timer(object):
@@ -104,8 +270,9 @@ class AISGame(object):
         self.client = airsim.CarClient()
         self.client.confirmConnection()
         self.client.enableApiControl(True)
-        self.car_controls = airsim.CarControls()
-        self.control_mode = control_mode
+
+        # Internally represents the vehicle control state
+        self.vehicle_controls = VehicleControl(control_mode)
 
         self._timer = None
         self.save_timer = None
@@ -207,6 +374,7 @@ class AISGame(object):
         self.client.reset()
         self._timer = Timer()
         self.save_timer = Timer()
+        self.vehicle_controls.request_new_episode = False
 
     def response_to_cv(self, r, channels):
         if r.compress:
@@ -301,196 +469,53 @@ class AISGame(object):
             self.counter = 0
             self._timer.lap()
 
-        if self.control_mode == "keyboard":
-            # Get Control from keyboard
-            control = self._get_keyboard_control(pygame.key.get_pressed())
-        else:
-            # Get control from joystick
-            control = self._get_joystick_control(self.joysticks[0],
-                                                 pygame.key.get_pressed(),
-                                                 self.control_mode)
-        # Apply control
-        if control is None:
+        # If a new episode is requested, create a new episode.
+        if self.vehicle_controls.request_new_episode:
             self._on_new_episode()
-        else:
-            self.car_controls.throttle = control.throttle
-            self.car_controls.steering = control.steer
-            self.car_controls.brake = control.brake
-            self.client.setCarControls(self.car_controls)
+
+        # TODO Get keyboard keys to allow recording
+
+        self.client.setCarControls(self.vehicle_controls.car_control)
 
         pygame.display.update()
 
-    def _get_joystick_control(self, joystick, keys, mode="left"):
-        """ Returns a VehicleControl message based on joystick input. Return
-            None if a new episode was requested.
-
-            This assumes a Playstation DualShock3 controller is being used.
-
-        Args:
-            joystick (pygame.joystick.Joystick): The pygame joystick object
-                                                 used as input
-            mode (string): Available options are:
-                           - "left": Only the left analog stick is used for
-                                     control
-                           - "right": Only the right analog stick is used for
-                                      control
-                           - "rc": Mimics an rc car, where the left stick is
-                                   used to control throttle and the right stick
-                                   controls steering
-                           - "game": Mimics default video game bindings, with
-                                     throttle and brake controls bound to the
-                                     triggers. Only available when using a PS4
-                                     controller
-            keys (Pygame key): Keys for use with I have no clue tbh.
-        """
-        if keys[K_r]:
-            return None
-        ps3 = "PLAYSTATION(R)3" in joystick.get_name()\
-              or "PS3" in joystick.get_name()
-        ps4 = "Wireless" in joystick.get_name()
-
-        if not (ps3 or ps4):
-            raise Exception("Not designed for non-playstation"
-                            "controllers")
-
-        control = VehicleControl()
-
-        # Button assignments
-        # x defines the horizontal axis
-        # y defines the vertical axis
-        # l is defined as left
-        # r is defined as right
-        l_x = self._input_deadzone(joystick.get_axis(0))
-        l_y = self._input_deadzone(joystick.get_axis(1))
-        r_x = self._input_deadzone(joystick.get_axis(3))
-        r_y = self._input_deadzone(joystick.get_axis(4))
-        l2 = self._input_deadzone(joystick.get_axis(2))
-        r2 = self._input_deadzone(joystick.get_axis(5))
-        start_button = None  # start/stop recording
-        l1 = None  # handbrakes
-        r1 = None  # reverse enable
-
-        if ps3:
-            start_button = joystick.get_button(9)
-            l1 = joystick.get_button(4)
-            r1 = joystick.get_button(5)
-
-        if ps4:
-            start_button = joystick.get_button(9)
-            l1 = joystick.get_button(4)
-            r1 = joystick.get_button(5)
-
-        control.hand_brake = float(l1)
-        control.reverse = r1 == 1
-
-        if mode == "left":
-            print("l_x: {0}".format(l_x))
-            control.steer = l_x / 2
-            # modify the vehicle control object for throttle and brake controls
-            self._throttle_brake_combined(l_y, control)
-
-        if mode == "right":
-            control.steer = r_x / 2
-            # modify the vehicle control object for throttle and brake controls
-            self._throttle_brake_combined(r_y, control)
-
-        if mode == "rc":
-            control.steer = r_x / 2
-            # modify the vehicle control object for throttle and brake controls
-            self._throttle_brake_combined(l_y, control)
-
-        if mode == "game":
-            control.steer = l_x / 2
-            control.throttle = (r2 + 1) / 4
-            control.brake = (l2 + 1) / 4
-
-        control.print_state()
-        return control
-
-        # TODO teach car how to drift
-        # TODO implement recording
-        # TODO implement button state to allow for recording with single button
-        # tap
-
-    def _input_deadzone(self, value, deadzone=0.02):
-        """ Defines a deadzone for joystick input.
-
-            Analog controls are often times noisy. This method sets a deadzone
-            for Playstation controllers, no user input returns no controller
-            input (as opposed to 0.019 input or thereabouts).
-
-        Args:
-            value (float): The raw controller value.
-            deadzone (float): Deadzone value, defaults to 0.02.
-
-        Returns:
-            Input value with deadzone.
-        """
-        if (-1 * deadzone) < value < deadzone:
-            return 0
-        else:
-            return value
-
-    def _throttle_brake_combined(self, value, vehicle_control):
-        """ Modifies the value of throttle or brake in vehicle_control.
-
-        Args:
-            value (float): A floating point value between -1 and 1.
-            vehicle_control (VehicleControl): The VehicleControl object whose
-                                              throttle and brake value are to be
-                                              changed.
-        """
-        # TODO Make this method return instead of modify
-        if value < 0 and not vehicle_control.reverse:
-            vehicle_control.throttle = abs(value / 2)
-
-        if value > 0 and not vehicle_control.reverse:
-            vehicle_control.brake = value / 2
-
-        if value > 0 and vehicle_control.reverse:
-            vehicle_control.throttle = value / 2
-
-        if value == 0:
-            vehicle_control.throttle = 0
-            vehicle_control.brake = 0
-
-    def _get_keyboard_control(self, keys):
-        """
-        Return a VehicleControl message based on the pressed keys. Return None
-        if a new episode was requested.
-        """
-        # Left/Right 0
-        # Throttle 5
-
-        if keys[K_r]:
-            return None
-        control = VehicleControl()
-        if keys[K_LEFT] or keys[K_a]:
-            control.steer = -0.7
-        if keys[K_RIGHT] or keys[K_d]:
-            control.steer = 0.7
-        if keys[K_UP] or keys[K_w]:
-            control.throttle = 0.3
-        if keys[K_DOWN] or keys[K_s]:
-            control.brake = 1.0
-        if keys[K_SPACE]:
-            control.hand_brake = True
-        if keys[K_q]:
-            if not self.recording:
-                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
-                                                       gmtime()) + '/'
-                if not os.path.exists(self.record_path):
-                    os.makedirs(self.record_path)
-                self.recording = True
-                self.save_counter = 0
-                print('Recording on, saving to: %s' % self.record_path)
-        if keys[K_z]:
-            if self.recording:
-                self.recording = False
-                print('Recording off, saved to: %s' % self.record_path)
-
-        return control
-
+    # def _get_keyboard_control(self, keys):
+    #     """
+    #     Return a VehicleControl message based on the pressed keys. Return None
+    #     if a new episode was requested.
+    #     """
+    #     # Left/Right 0
+    #     # Throttle 5
+    #
+    #     if keys[K_r]:
+    #         return None
+    #     control = VehicleControl()
+    #     if keys[K_LEFT] or keys[K_a]:
+    #         control.steer = -0.7
+    #     if keys[K_RIGHT] or keys[K_d]:
+    #         control.steer = 0.7
+    #     if keys[K_UP] or keys[K_w]:
+    #         control.throttle = 0.3
+    #     if keys[K_DOWN] or keys[K_s]:
+    #         control.brake = 1.0
+    #     if keys[K_SPACE]:
+    #         control.hand_brake = True
+    #     if keys[K_q]:
+    #         if not self.recording:
+    #             self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
+    #                                                    gmtime()) + '/'
+    #             if not os.path.exists(self.record_path):
+    #                 os.makedirs(self.record_path)
+    #             self.recording = True
+    #             self.save_counter = 0
+    #             print('Recording on, saving to: %s' % self.record_path)
+    #     if keys[K_z]:
+    #         if self.recording:
+    #             self.recording = False
+    #             print('Recording off, saved to: %s' % self.record_path)
+    #
+    #     return control
+    #
     # This function gets called everytime the screen needs to be rendered
     def _on_render(self):
         if self._main_image is not None:
