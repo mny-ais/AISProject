@@ -309,12 +309,10 @@ class AISGame(object):
         self.set_segmentation_ids()
 
         self.recording = False
-        self.request_start_recording = False
         self.request_stop_recording = False
         self.record_path = None
         self.save_counter = 0
-        self.csv_file = None
-        self.writer = None
+        self.csv_data = []
 
         self.last_pos = np.zeros(3)
 
@@ -473,16 +471,6 @@ class AISGame(object):
             seg = self.response_to_cv(responses[1], 3)
             self._seg_image = seg
 
-        # Was a recording session requested?
-        if self.request_start_recording:
-            if self.record_path is not None:
-                with open(self.record_path + 'controls' + '.csv') \
-                        as self.csv_file:
-                    self.writer = csv.writer(self.csv_file, 'excel')
-
-            self.recording = True
-            self.request_start_recording = False
-
         if self.recording and len(responses) > 1:
             # if self.save_timer.elapsed_seconds_since_lap() > 0.2:
             # Record image every $grap_image_distance meters
@@ -497,22 +485,25 @@ class AISGame(object):
                                 cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
-                    csv_data = [self.save_counter,
-                                self.vehicle_controls.car_control.steering,
-                                self.vehicle_controls.car_control.throttle,
-                                self.vehicle_controls.car_control.brake,
-                                self.vehicle_controls.car_control.handbrake,
-                                self.vehicle_controls.car_control.
-                                    manual_gear]
-                    self.writer.writerow(csv_data)
+                    self.csv_data.append(
+                        [self.save_counter,
+                         self.vehicle_controls.car_control.steering,
+                         self.vehicle_controls.car_control.throttle,
+                         self.vehicle_controls.car_control.brake,
+                         self.vehicle_controls.car_control.handbrake,
+                         self.vehicle_controls.car_control.manual_gear])
                     self.save_counter += 1
                 self.last_pos = pos
 
         if self.request_stop_recording:
             # Stops recording, closes the csv file, and resets the counter
             self.recording = False
-            self.csv_file.close()
-            self.writer = None
+            with open(self.record_path + "control_input.csv", mode='x') \
+                as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerows(self.csv_data)
+            csv_file.close()
+            self.csv_data = []
             self.save_counter = 0
             self.request_stop_recording = False
 
@@ -545,7 +536,7 @@ class AISGame(object):
                                                        gmtime()) + '/'
                 if not os.path.exists(self.record_path):
                     os.makedirs(self.record_path)
-                self.request_start_recording = True
+                self.recording = True
                 self.save_counter = 0
                 print('Recording on, saving to: %s' % self.record_path)
         if keys[K_z]:
