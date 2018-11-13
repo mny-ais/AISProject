@@ -90,9 +90,9 @@ class VehicleControl(object):
         self.car_control.manual_gear = 1
 
         # Max values
-        self.max_steering = max_steering
-        self.max_throttle = max_throttle
-        self.max_brakes = max_brakes
+        self.max_steering = float(max_steering)
+        self.max_throttle = float(max_throttle)
+        self.max_brakes = float(max_brakes)
 
         # First assign bindings based on OS.
         self.current_os = platform.system()
