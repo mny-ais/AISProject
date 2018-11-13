@@ -167,7 +167,7 @@ class VehicleControl(object):
         """ Updates based on left control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = event.value * self.max_steering
+            self.car_control.steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -177,7 +177,7 @@ class VehicleControl(object):
         """ Updates based on right control scheme."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = event.value * self.max_steering
+            self.car_control.steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.r_y:
@@ -187,7 +187,7 @@ class VehicleControl(object):
         """ Updates with a control scheme similar to an RC car."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = event.value * self.max_steering
+            self.car_control.steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -197,7 +197,7 @@ class VehicleControl(object):
         """ Updates based on game control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = event.value * self.max_steering
+            self.car_control.steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif self.current_os == "Linux":
@@ -564,8 +564,8 @@ if __name__ == '__main__':
         elif len(sys.argv) > 5:
             raise Exception("Too many arguments. \n"
                             "Usage: \n"
-                            "project_kickstart.py [control_mode] [max_steering]"
-                            "[max_throttle] [max_brakes]")
+                            "project_kickstart.py [control_mode] "
+                            "[max_steering] [max_throttle] [max_brakes]")
         else:
             main()
     except KeyboardInterrupt:
