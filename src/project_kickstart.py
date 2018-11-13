@@ -63,13 +63,36 @@ max_lanes = 6
 
 
 class VehicleControl(object):
-    def __init__(self, control_mode):
-        """ Holds a CarControl object and some extra functionality."""
+    def __init__(self, mode, max_steering, max_throttle, max_brakes):
+        """ Holds a CarControl object and some extra functionality.
+
+        Args:
+            mode (string): Available options are:
+                           - "left": Only the left analog stick is used for
+                                     control.
+                           - "right": Only the right analog stick is used for
+                                      control.
+                           - "rc": Mimics an rc car, where the left stick is
+                                   used to control throttle and the right stick
+                                   controls steering.
+                           - "game": Mimics default video game bindings, with
+                                     throttle and brake controls bound to the
+                                     triggers. Only available when using a PS4
+                                     controller.
+            max_steering (float): Maximum value for steering.
+            max_throttle (float): Maximum value for throttle.
+            max_brakes (float): Maximum value for breaks.
+        """
         self.request_new_episode = False
 
         self.car_control = airsim.CarControls()
         self.car_control.is_manual_gear = True
         self.car_control.manual_gear = 1
+
+        # Max values
+        self.max_steering = max_steering
+        self.max_throttle = max_throttle
+        self.max_brakes = max_brakes
 
         # First assign bindings based on OS.
         self.current_os = platform.system()
@@ -107,7 +130,7 @@ class VehicleControl(object):
             "rc": self._update_rc,
             "game": self._update_game_scheme
         }
-        self.func = switcher[control_mode]
+        self.func = switcher[mode]
 
     def print_state(self):
         print("Steering: {0}".format(self.car_control.steering))
@@ -144,7 +167,7 @@ class VehicleControl(object):
         """ Updates based on left control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = event.value / 2
+            self.car_control.steering = event.value * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -154,7 +177,7 @@ class VehicleControl(object):
         """ Updates based on right control scheme."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = event.value / 2
+            self.car_control.steering = event.value * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.r_y:
@@ -164,7 +187,7 @@ class VehicleControl(object):
         """ Updates with a control scheme similar to an RC car."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = event.value / 2
+            self.car_control.steering = event.value * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -174,18 +197,21 @@ class VehicleControl(object):
         """ Updates based on game control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = event.value / 2
+            self.car_control.steering = event.value * self.max_steering
 
         # Throttle/brake event
         elif self.current_os == "Linux":
             # Throttle event
             if event.axis == self.r2:
-                self.car_control.throttle = self._deadzone(event.value + 1) / 4
+                self.car_control.throttle = self._deadzone(event.value + 1) \
+                                            * 0.5 * self.max_throttle
             # Brake or reverse event
             elif event.axis == self.l2 and self.car_control.manual_gear > 0:
-                self.car_control.brake = self._deadzone(event.value + 1) / 4
+                self.car_control.brake = self._deadzone(event.value + 1) \
+                                         * 0.5 * self.max_brakes
             elif event.axis == self.l2 and self.car_control.manual_gear < 0:
-                self.car_control.throttle = self._deadzone(event.value + 1) / 4
+                self.car_control.throttle = self._deadzone(event.value + 1) \
+                                            * 0.5 * self.max_throttle
 
         elif self.current_os == "Windows":
             if event.axis == self.triggers:
@@ -232,13 +258,13 @@ class VehicleControl(object):
             value (float): A floating point value between -1 and 1.
         """
         if value < 0 and self.car_control.manual_gear > 0:
-            self.car_control.throttle = abs(value / 2)
+            self.car_control.throttle = abs(value) * self.max_throttle
 
         if value > 0 and self.car_control.manual_gear > 0:
-            self.car_control.brake = value / 2
+            self.car_control.brake = value * self.max_brakes
 
         if value > 0 and self.car_control.manual_gear < 0:
-            self.car_control.throttle = value / 2
+            self.car_control.throttle = value * self.max_throttle
 
         if value == 0:
             self.car_control.throttle = 0
@@ -267,7 +293,7 @@ class Timer(object):
 
 
 class AISGame(object):
-    def __init__(self, control_mode):
+    def __init__(self, control_mode, max_steering, max_throttle, max_brakes):
         """ Initializes the AISGame object.
         Args:
             control_mode (string): The control mode to used with the joystick.
@@ -277,7 +303,8 @@ class AISGame(object):
         self.client.enableApiControl(True)
 
         # Internally represents the vehicle control state
-        self.vehicle_controls = VehicleControl(control_mode)
+        self.vehicle_controls = VehicleControl(control_mode, max_steering,
+                                               max_throttle, max_brakes)
 
         self._timer = None
         self.save_timer = None
@@ -517,16 +544,28 @@ class AISGame(object):
         pygame.display.flip()
 
 
-def main(control_mode="left"):
-    game = AISGame(control_mode)
+def main(control_mode="left", max_steering=0.4, max_throttle=0.5,
+         max_brakes=0.5):
+    game = AISGame(control_mode, max_steering, max_throttle, max_brakes)
     game.execute()
 
 
 if __name__ == '__main__':
 
     try:
-        if len(sys.argv) > 1:
+        if len(sys.argv) == 2:
             main(sys.argv[1])
+        elif len(sys.argv) == 3:
+            main(sys.argv[1], sys.argv[2])
+        elif len(sys.argv) == 4:
+            main(sys.argv[1], sys.argv[2], sys.argv[3])
+        elif len(sys.argv) == 5:
+            main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        elif len(sys.argv) > 5:
+            raise Exception("Too many arguments. \n"
+                            "Usage: \n"
+                            "project_kickstart.py [control_mode] [max_steering]"
+                            "[max_throttle] [max_brakes]")
         else:
             main()
     except KeyboardInterrupt:
