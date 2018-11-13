@@ -113,7 +113,7 @@ class VehicleControl(object):
         print("Brake: {0}".format(self.car_control.throttle))
         print("Gear: {0}".format(self.car_control.manual_gear))
 
-    def _update_car_controls(self):
+    def update_car_controls(self):
         """ Gets the pygame event queue and uses it to control the car.
 
             Gets the pygame event queue and uses that information to update the
@@ -176,9 +176,14 @@ class VehicleControl(object):
 
         # Throttle/brake event
         elif self.current_os == "Linux":
-            if event.axis == self.l2 or event.axis == self.r2:
-                self.car_control.throttle = (event.value + 1 / 4)
-                self.car_control.brake = (event.value + 1) / 4
+            # Throttle event
+            if event.axis == self.r2:
+                self.car_control.throttle = self._deadzone(event.value + 1) / 4
+            # Brake or reverse event
+            elif event.axis == self.l2 and self.car_control.manual_gear > 0:
+                self.car_control.brake = self._deadzone(event.value + 1) / 4
+            elif event.axis == self.l2 and self.car_control.manual_gear < 0:
+                self.car_control.throttle = self._deadzone(event.value + 1) / 4
 
         elif self.current_os == "Windows":
             if event.axis == self.triggers:
@@ -473,7 +478,7 @@ class AISGame(object):
 
         # TODO Get keyboard keys to allow recording
 
-        self.vehicle_controls.print_state()
+        self.vehicle_controls.update_car_controls()
         self.client.setCarControls(self.vehicle_controls.car_control)
 
         pygame.display.update()
