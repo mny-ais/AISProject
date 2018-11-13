@@ -14,6 +14,8 @@ import cv2
 
 import sys
 
+import os
+
 import platform
 
 try:
@@ -476,51 +478,31 @@ class AISGame(object):
         if self.vehicle_controls.request_new_episode:
             self._on_new_episode()
 
-        # TODO Get keyboard keys to allow recording
+        # Get key presses and parse them
+        pygame.event.pump()
+        self._keyboard_controls(pygame.key.get_pressed())
 
         self.vehicle_controls.update_car_controls()
         self.client.setCarControls(self.vehicle_controls.car_control)
 
         pygame.display.update()
 
-    # def _get_keyboard_control(self, keys):
-    #     """
-    #     Return a VehicleControl message based on the pressed keys. Return None
-    #     if a new episode was requested.
-    #     """
-    #     # Left/Right 0
-    #     # Throttle 5
-    #
-    #     if keys[K_r]:
-    #         return None
-    #     control = VehicleControl()
-    #     if keys[K_LEFT] or keys[K_a]:
-    #         control.steer = -0.7
-    #     if keys[K_RIGHT] or keys[K_d]:
-    #         control.steer = 0.7
-    #     if keys[K_UP] or keys[K_w]:
-    #         control.throttle = 0.3
-    #     if keys[K_DOWN] or keys[K_s]:
-    #         control.brake = 1.0
-    #     if keys[K_SPACE]:
-    #         control.hand_brake = True
-    #     if keys[K_q]:
-    #         if not self.recording:
-    #             self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
-    #                                                    gmtime()) + '/'
-    #             if not os.path.exists(self.record_path):
-    #                 os.makedirs(self.record_path)
-    #             self.recording = True
-    #             self.save_counter = 0
-    #             print('Recording on, saving to: %s' % self.record_path)
-    #     if keys[K_z]:
-    #         if self.recording:
-    #             self.recording = False
-    #             print('Recording off, saved to: %s' % self.record_path)
-    #
-    #     return control
-    #
-    # This function gets called everytime the screen needs to be rendered
+    def _keyboard_controls(self, keys):
+        """ Parses keyboard input into actions."""
+        if keys[K_q]:
+            if not self.recording:
+                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
+                                                       gmtime()) + '/'
+                if not os.path.exists(self.record_path):
+                    os.makedirs(self.record_path)
+                self.recording = True
+                self.save_counter = 0
+                print('Recording on, saving to: %s' % self.record_path)
+        if keys[K_z]:
+            if self.recording:
+                self.recording = False
+                print('Recording off, saved to: %s' % self.record_path)
+
     def _on_render(self):
         if self._main_image is not None:
             surface_main = pygame.surfarray.make_surface(
