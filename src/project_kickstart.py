@@ -12,8 +12,6 @@ import time
 
 import cv2
 
-import os
-
 import sys
 
 import platform
@@ -35,13 +33,13 @@ try:
     from pygame.locals import K_q
     from pygame.locals import K_z
 except ImportError:
-    raise RuntimeError('cannot import pygame, make sure pygame package is'
+    raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
 
 try:
     import numpy as np
 except ImportError:
-    raise RuntimeError('cannot import numpy, make sure numpy package is'
+    raise RuntimeError('cannot import numpy, make sure numpy package is '
                        'installed')
 
 from time import gmtime, strftime
@@ -475,6 +473,7 @@ class AISGame(object):
 
         # TODO Get keyboard keys to allow recording
 
+        self.vehicle_controls.print_state()
         self.client.setCarControls(self.vehicle_controls.car_control)
 
         pygame.display.update()
