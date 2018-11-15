@@ -24,6 +24,7 @@ try:
     import pygame
     from pygame.locals import K_q
     from pygame.locals import K_z
+    from pygame.locals import K_n
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
@@ -45,7 +46,8 @@ SAVE_DIR = 'save_dir/'
 show_segmentation = True
 
 WINDOW_WIDTH = AIRSIM_RES_WIDTH
-WINDOW_HEIGHT = AIRSIM_RES_HEIGHT * 2 if show_segmentation else AIRSIM_RES_HEIGHT
+WINDOW_HEIGHT = AIRSIM_RES_HEIGHT * 2 if show_segmentation \
+    else AIRSIM_RES_HEIGHT
 
 grab_image_distance = 0.1  # meters
 
@@ -55,6 +57,14 @@ max_lanes = 6
 class VehicleControl(object):
     def __init__(self, mode, max_steering, max_throttle, max_brakes):
         """ Holds a CarControl object and some extra functionality.
+
+            Allows the addition of noise into the system by holding the airsim
+            CarControls object, user input, and noise input separately. Only at
+            the end of the update call is the airsim CarControls object
+            updated. Before that, only the user input and noise input are
+            updated.
+
+            Only the steering and brakes can have noise added to them.
 
         Args:
             mode (string): Available options are:
@@ -78,6 +88,13 @@ class VehicleControl(object):
         self.car_control = airsim.CarControls()
         self.car_control.is_manual_gear = True
         self.car_control.manual_gear = 1
+
+        # User and noise input (Required to allow for inserting noise)
+        self.user_steering = 0.0
+        self.user_brakes = 0.0
+        self.noise_steering = 0.0
+        self.noise_brakes = 0.0
+        self.noisy = False
 
         # Max values
         self.max_steering = float(max_steering)
@@ -153,11 +170,17 @@ class VehicleControl(object):
             elif event.type == pygame.JOYBUTTONUP:
                 self._update_button_ups(event)
 
+        if self.noisy:
+            self._make_some_noise()
+
+        self.car_control.steering = self.user_steering + self.noise_steering
+        self.car_control.brake = self.user_brakes + self.noise_brakes
+
     def _update_left(self, event):
         """ Updates based on left control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = float(event.value) * self.max_steering
+            self.user_steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -167,7 +190,7 @@ class VehicleControl(object):
         """ Updates based on right control scheme."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = float(event.value) * self.max_steering
+            self.user_steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.r_y:
@@ -177,7 +200,7 @@ class VehicleControl(object):
         """ Updates with a control scheme similar to an RC car."""
         # Steering event
         if event.axis == self.r_x:
-            self.car_control.steering = float(event.value) * self.max_steering
+            self.user_steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -187,7 +210,7 @@ class VehicleControl(object):
         """ Updates based on game control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.car_control.steering = float(event.value) * self.max_steering
+            self.user_steering = float(event.value) * self.max_steering
 
         # Throttle/brake event
         elif self.current_os == "Linux":
@@ -197,7 +220,7 @@ class VehicleControl(object):
                                             * 0.5 * self.max_throttle
             # Brake or reverse event
             elif event.axis == self.l2 and self.car_control.manual_gear > 0:
-                self.car_control.brake = self._deadzone(event.value + 1) \
+                self.user_brakes = self._deadzone(event.value + 1) \
                                          * 0.5 * self.max_brakes
             elif event.axis == self.l2 and self.car_control.manual_gear < 0:
                 self.car_control.throttle = self._deadzone(event.value + 1) \
@@ -251,14 +274,18 @@ class VehicleControl(object):
             self.car_control.throttle = abs(value) * self.max_throttle
 
         if value > 0 and self.car_control.manual_gear > 0:
-            self.car_control.brake = value * self.max_brakes
+            self.user_brakes = value * self.max_brakes
 
         if value > 0 and self.car_control.manual_gear < 0:
             self.car_control.throttle = value * self.max_throttle
 
         if value == 0:
             self.car_control.throttle = 0
-            self.car_control.brake = 0
+            self.user_brakes = 0
+
+    def _make_some_noise(self):
+        """ Changes the noise value to add noise to the system."""
+        # TODO Make a way to input noise
 
 
 class Timer(object):
@@ -400,7 +427,8 @@ class AISGame(object):
         self.save_timer = Timer()
         self.vehicle_controls.request_new_episode = False
 
-    def response_to_cv(self, r, channels):
+    @staticmethod
+    def response_to_cv(r, channels):
         if r.compress:
             image = cv2.imdecode(np.fromstring(r.image_data_uint8,
                                                dtype=np.uint8),
@@ -422,12 +450,12 @@ class AISGame(object):
             val_map += v_map
         return val_map
 
-    def gen_labels(self, map):
+    def gen_labels(self, label_map):
 
-        val_map = np.zeros((map.shape[0], map.shape[1]))
-        for x in range(map.shape[0]):
-            for y in range(map.shape[1]):
-                val_map[x, y] = self.val_map[tuple(map[x, y, :])]
+        val_map = np.zeros((label_map.shape[0], label_map.shape[1]))
+        for x in range(label_map.shape[0]):
+            for y in range(label_map.shape[1]):
+                val_map[x, y] = self.val_map[tuple(label_map[x, y, :])]
 
         val_map = val_map.astype(np.uint8)
 
@@ -459,6 +487,8 @@ class AISGame(object):
                                      False,
                                      False)])
 
+        rgb = None
+        seg = None
         if len(responses) > 0:
             rgb = self.response_to_cv(responses[0], 3)
 
@@ -487,9 +517,9 @@ class AISGame(object):
                     # Prepare csv data
                     self.csv_data.append(
                         [self.save_counter,
-                         self.vehicle_controls.car_control.steering,
+                         self.vehicle_controls.user_steering,
                          self.vehicle_controls.car_control.throttle,
-                         self.vehicle_controls.car_control.brake,
+                         self.vehicle_controls.user_brakes,
                          self.vehicle_controls.car_control.handbrake,
                          self.vehicle_controls.car_control.manual_gear])
                     self.save_counter += 1
@@ -499,7 +529,7 @@ class AISGame(object):
             # Stops recording, closes the csv file, and resets the counter
             self.recording = False
             with open(self.record_path + "control_input.csv", mode='x') \
-                as csv_file:
+                    as csv_file:
                 writer = csv.writer(csv_file)
                 writer.writerows(self.csv_data)
             csv_file.close()
@@ -543,6 +573,13 @@ class AISGame(object):
             if self.recording:
                 self.request_stop_recording = True
                 print('Recording off, saved to: %s' % self.record_path)
+
+        if keys[K_n]:
+            if self.vehicle_controls.noisy:
+                print('Removing noise to steering and throttle.')
+            else:
+                print('Adding noise to steering and throttle.')
+            self.vehicle_controls.noisy = not self.vehicle_controls.noisy
 
     def _on_render(self):
         if self._main_image is not None:
