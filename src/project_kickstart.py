@@ -25,9 +25,9 @@ try:
     from pygame.locals import K_q
     from pygame.locals import K_z
     from pygame.locals import K_n
-    from pygame.locals import K_UP
-    from pygame.locals import K_LEFT
-    from pygame.locals import K_RIGHT
+    from pygame.locals import K_KP4
+    from pygame.locals import K_KP6
+    from pygame.locals import K_KP8
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
@@ -266,11 +266,11 @@ class VehicleControl(object):
             self.car_control.handbrake = False
 
     def _update_key_downs(self, event):
-        if event.key == K_UP:
+        if event.key == K_KP8:
             self.requested_direction = "Forwards"
-        elif event.key == K_LEFT:
+        elif event.key == K_KP4:
             self.requested_direction = "Left"
-        elif event.key == K_RIGHT:
+        elif event.key == K_KP6:
             self.requested_direction = "Right"
 
     def _deadzone(self, value):
