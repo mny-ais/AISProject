@@ -303,10 +303,16 @@ class VehicleControl(object):
 
     def _make_some_noise(self):
         """ Changes the noise value to add noise to the system."""
-        steering_noise = float(random.randint(-200,200)) / 1000
-        # brakes_noise = float(random.randint(0,200)) / 1000
-        self.noise_steering = steering_noise
-        # self.noise_brakes = brakes_noise
+        is_it_time = random.randint(1,10)
+
+        if is_it_time == 10:
+            steering_noise = float(random.randint(-200,200)) / 1000
+            # brakes_noise = float(random.randint(0,200)) / 1000
+            self.noise_steering = steering_noise
+            # self.noise_brakes = brakes_noise
+        else:
+            self.noise_steering = 0
+            self.noise_brakes = 0
 
 
 class Timer(object):
