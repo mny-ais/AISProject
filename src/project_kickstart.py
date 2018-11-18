@@ -274,6 +274,12 @@ class VehicleControl(object):
             self.requested_direction = "Left"
         elif event.key == K_KP6:
             self.requested_direction = "Right"
+        elif event.key == K_n:
+            if self.vehicle_controls.noisy:
+                print('Removing noise to steering and throttle.')
+            else:
+                print('Adding noise to steering and throttle.')
+            self.vehicle_controls.noisy = not self.vehicle_controls.noisy
 
     def _deadzone(self, value):
         """ Handles deadzone based on controller."""
@@ -603,13 +609,6 @@ class AISGame(object):
             if self.recording:
                 self.request_stop_recording = True
                 print('Recording off, saved to: %s' % self.record_path)
-
-        if keys[K_n]:
-            if self.vehicle_controls.noisy:
-                print('Removing noise to steering and throttle.')
-            else:
-                print('Adding noise to steering and throttle.')
-            self.vehicle_controls.noisy = not self.vehicle_controls.noisy
 
     def _on_render(self):
         if self._main_image is not None:
