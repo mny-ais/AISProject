@@ -20,6 +20,8 @@ import platform
 
 import csv
 
+import random
+
 try:
     import pygame
     from pygame.locals import K_q
