@@ -103,6 +103,10 @@ class VehicleControl(object):
         self.noise_steering = 0.0
         self.noise_brakes = 0.0
         self.noisy = False
+        self.noise_max_amp = float(0.3)
+        self.noise_how_long = 0
+        self.noise_already = 0
+        self.noise_left_or_right = 0
 
         # Max values
         self.max_steering = float(max_steering)
@@ -147,7 +151,7 @@ class VehicleControl(object):
         }
         self.func = switcher[mode]
 
-    def print_state(self):
+    def print_state(self):# {{{
         print("Steering: {0}".format(self.car_control.steering))
         print("Throttle: {0}".format(self.car_control.throttle))
         print("Brake: {0}".format(self.car_control.throttle))
@@ -305,20 +309,22 @@ class VehicleControl(object):
 
         if value == 0:
             self.car_control.throttle = 0
-            self.user_brakes = 0
+            self.user_brakes = 0# }}}
 
     def _make_some_noise(self):
         """ Changes the noise value to add noise to the system."""
-        is_it_time = random.randint(1,10)
-
-        if is_it_time == 10:
-            steering_noise = float(random.randint(-200,200)) / 1000
-            # brakes_noise = float(random.randint(0,200)) / 1000
-            self.noise_steering = steering_noise
-            # self.noise_brakes = brakes_noise
-        else:
+        if self.noise_how_long == self.noise_already:
             self.noise_steering = 0
-            self.noise_brakes = 0
+            self.noise_already = 0
+            self.noise_how_long = random.randint(5,20)
+            self.noise_left_or_right = random.randint(0,1)
+        else:
+            self.noise_already += 1
+            steering_noise = float(self.noise_max_amp) / 20
+            if self.noise_already < (self.noise_how_long / 2):
+                self.noise_steering += steering_noise
+            else:
+                self.noise_steering -= steering_noise
 
 
 class Timer(object):
