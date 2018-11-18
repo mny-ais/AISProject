@@ -604,7 +604,7 @@ class AISGame(object):
         """ Parses keyboard input into actions."""
         if keys[K_q]:
             if not self.recording:
-                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H:%M:%S",
+                self.record_path = SAVE_DIR + strftime("%Y_%m_%d_%H-%M-%S",
                                                        gmtime()) + '/'
                 if not os.path.exists(self.record_path):
                     os.makedirs(self.record_path)
