@@ -280,6 +280,7 @@ class VehicleControl(object):
             self.requested_direction = "Right"
         elif event.key == K_n:
             if self.vehicle_controls.noisy:
+                self.noise_steering = 0
                 print('Removing noise to steering and throttle.')
             else:
                 print('Adding noise to steering and throttle.')
