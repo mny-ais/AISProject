@@ -25,6 +25,9 @@ try:
     from pygame.locals import K_q
     from pygame.locals import K_z
     from pygame.locals import K_n
+    from pygame.locals import K_UP
+    from pygame.locals import K_LEFT
+    from pygame.locals import K_RIGHT
 except ImportError:
     raise RuntimeError('cannot import pygame, make sure pygame package is '
                        'installed')
@@ -88,6 +91,9 @@ class VehicleControl(object):
         self.car_control = airsim.CarControls()
         self.car_control.is_manual_gear = True
         self.car_control.manual_gear = 1
+
+        # Requested Direction
+        self.requested_direction = "Forwards"
 
         # User and noise input (Required to allow for inserting noise)
         self.user_steering = 0.0
@@ -169,6 +175,8 @@ class VehicleControl(object):
                 self._update_button_downs(event)
             elif event.type == pygame.JOYBUTTONUP:
                 self._update_button_ups(event)
+            elif event.type == pygame.KEYDOWN:
+                self._update_key_downs(event)
 
         if self.noisy:
             self._make_some_noise()
@@ -256,6 +264,14 @@ class VehicleControl(object):
         elif event.button == self.l1:
             # Handbrakes
             self.car_control.handbrake = False
+
+    def _update_key_downs(self, event):
+        if event.key == K_UP:
+            self.requested_direction = "Forwards"
+        elif event.key == K_LEFT:
+            self.requested_direction = "Left"
+        elif event.key == K_RIGHT:
+            self.requested_direction = "Right"
 
     def _deadzone(self, value):
         """ Handles deadzone based on controller."""
@@ -521,7 +537,8 @@ class AISGame(object):
                          self.vehicle_controls.car_control.throttle,
                          self.vehicle_controls.user_brakes,
                          self.vehicle_controls.car_control.handbrake,
-                         self.vehicle_controls.car_control.manual_gear])
+                         self.vehicle_controls.car_control.manual_gear,
+                         self.vehicle_controls.requested_direction])
                     self.save_counter += 1
                 self.last_pos = pos
 
@@ -541,7 +558,9 @@ class AISGame(object):
 
         # Print FPS
         if self._timer.elapsed_seconds_since_lap() > 1.0:
-            print("FPS: %d" % self.counter)
+            print("FPS: {0}, Drive direction: {1}".
+                  format(self.counter,
+                         self.vehicle_controls.requested_direction))
             self.counter = 0
             self._timer.lap()
 
