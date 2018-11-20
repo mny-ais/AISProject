@@ -202,8 +202,7 @@ class VehicleControl(object):
         """ Updates based on left control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.user_steering = self._exponentialize(
-                self._deadzone(float(event.value)))
+            self.user_steering = self._deadzone(float(event.value))
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -213,8 +212,7 @@ class VehicleControl(object):
         """ Updates based on right control scheme."""
         # Steering event
         if event.axis == self.r_x:
-            self.user_steering = self._exponentialize(
-                self._deadzone(float(event.value)))
+            self.user_steering = self._deadzone(float(event.value))
 
         # Throttle/brake event
         elif event.axis == self.r_y:
@@ -224,8 +222,7 @@ class VehicleControl(object):
         """ Updates with a control scheme similar to an RC car."""
         # Steering event
         if event.axis == self.r_x:
-            self.user_steering = self._exponentialize(
-                self._deadzone(float(event.value)))
+            self.user_steering = self._deadzone(float(event.value))
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -235,8 +232,7 @@ class VehicleControl(object):
         """ Updates based on game control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.user_steering = self._exponentialize(
-                self._deadzone(float(event.value)))
+            self.user_steering = self._deadzone(float(event.value))
 
         # Throttle/brake event
         elif self.current_os == "Linux":
@@ -344,14 +340,6 @@ class VehicleControl(object):
                     self.noise_steering -= steering_noise
                 else:
                     self.noise_steering += steering_noise
-
-    @staticmethod
-    def _exponentialize(value):
-        p = pow(value, 1.5)
-        if value < 0:
-            return p * -1
-        else:
-            return p
 
 
 class Timer(object):
