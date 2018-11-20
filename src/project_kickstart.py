@@ -279,11 +279,11 @@ class VehicleControl(object):
         elif event.key == K_KP6:
             self.requested_direction = "Right"
         elif event.key == K_n:
-            if self.vehicle_controls.noisy:
+            if self.noisy:
                 print('Removing noise to steering and throttle.')
             else:
                 print('Adding noise to steering and throttle.')
-            self.vehicle_controls.noisy = not self.vehicle_controls.noisy
+            self.noisy = not self.noisy
 
     def _deadzone(self, value):
         """ Handles deadzone based on controller."""
@@ -322,9 +322,15 @@ class VehicleControl(object):
             self.noise_already += 1
             steering_noise = float(self.noise_max_amp) / 20
             if self.noise_already < (self.noise_how_long / 2):
-                self.noise_steering += steering_noise
+                if self.noise_left_or_right == 0:
+               	    self.noise_steering += steering_noise
+                else:
+               	    self.noise_steering -= steering_noise
             else:
-                self.noise_steering -= steering_noise
+                if self.noise_left_or_right == 0:
+               	    self.noise_steering -= steering_noise
+                else:
+               	    self.noise_steering += steering_noise
 
 
 class Timer(object):
