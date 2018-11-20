@@ -347,10 +347,11 @@ class VehicleControl(object):
 
     @staticmethod
     def _exponentialize(value):
+        p = pow(value, 1.5)
         if value < 0:
-            return value * value * -1
+            return p * -1
         else:
-            return value * value
+            return p
 
 
 class Timer(object):
