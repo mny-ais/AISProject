@@ -1,8 +1,9 @@
 # Manual control of AIScar simulator
 # Johan Vertens 2018
 # Yvan Satyawan 2018
+# Maximilian Roth
 
-from __future__ import print_function
+# from __future__ import print_function
 
 import airsim
 
@@ -21,6 +22,8 @@ import platform
 import csv
 
 import random
+
+import cProfile
 
 try:
     import pygame
@@ -89,6 +92,7 @@ class VehicleControl(object):
             max_brakes (float): Maximum value for breaks.
         """
         self.request_new_episode = False
+        self.request_quit = False
 
         self.car_control = airsim.CarControls()
         self.car_control.is_manual_gear = True
@@ -183,6 +187,8 @@ class VehicleControl(object):
                 self._update_button_ups(event)
             elif event.type == pygame.KEYDOWN:
                 self._update_key_downs(event)
+            elif event.type == pygame.QUIT:
+                self.request_quit = True
 
         if self.noisy:
             self._make_some_noise()
@@ -280,6 +286,7 @@ class VehicleControl(object):
             self.requested_direction = "Right"
         elif event.key == K_n:
             if self.noisy:
+                self.noise_steering = 0
                 print('Removing noise to steering and throttle.')
             else:
                 print('Adding noise to steering and throttle.')
@@ -399,15 +406,9 @@ class AISGame(object):
         """Launch the PyGame."""
         pygame.init()
         self._initialize_game()
-        try:
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        return
-                self._on_loop()
-                self._on_render()
-        finally:
-            pygame.quit()
+        while True:
+            self._on_loop()
+            self._on_render()
 
     def set_segmentation_ids(self):
 
@@ -482,7 +483,7 @@ class AISGame(object):
             image = cv2.cvtColor(image[:, :, 0:channels], cv2.COLOR_RGB2BGR)
 
         else:
-            image = np.fromstring(r.image_data_uint8, dtype=np.uint8)
+            image = np.frombuffer(r.image_data_uint8, dtype=np.uint8)
             image = image.reshape(r.height, r.width, channels + 1)
             image = image[:, :, 0:channels]
         return image
@@ -604,6 +605,12 @@ class AISGame(object):
         self.vehicle_controls.update_car_controls()
         self.client.setCarControls(self.vehicle_controls.car_control)
 
+        # Check if the game should quit
+        if self.vehicle_controls.request_quit:
+            pygame.display.quit()
+            pygame.quit()
+            sys.exit()
+
         pygame.display.update()
 
     def _keyboard_controls(self, keys):
@@ -635,18 +642,38 @@ class AISGame(object):
 
         pygame.display.flip()
 
+    def execute_profile(self):
+        """Launch the PyGame but for only 5 updates."""
+        pygame.init()
+        self._initialize_game()
+        count = 0
+        while count < 20:
+            self._on_loop()
+            self._on_render()
+            count += 1
+
+
 
 def main(control_mode="left", max_steering=0.4, max_throttle=0.5,
          max_brakes=0.5):
     game = AISGame(control_mode, max_steering, max_throttle, max_brakes)
     game.execute()
 
+def profile():
+    game = AISGame('left', 1.0, 1.0, 1.0)
+    cProfile.runctx("game.execute_profile()",
+                    globals(),
+                    locals(),
+                    filename='profile.txt')
 
 if __name__ == '__main__':
 
     try:
         if len(sys.argv) == 2:
-            main(sys.argv[1])
+            if sys.argv[1] == "profile":
+                profile()
+            else:
+                main(sys.argv[1])
         elif len(sys.argv) == 3:
             main(sys.argv[1], sys.argv[2])
         elif len(sys.argv) == 4:
