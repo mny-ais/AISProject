@@ -155,7 +155,7 @@ class VehicleControl(object):
         }
         self.func = switcher[mode]
 
-    def print_state(self):# {{{
+    def print_state(self):  # {{{
         print("Steering: {0}".format(self.car_control.steering))
         print("Throttle: {0}".format(self.car_control.throttle))
         print("Brake: {0}".format(self.car_control.throttle))
@@ -193,14 +193,17 @@ class VehicleControl(object):
         if self.noisy:
             self._make_some_noise()
 
-        self.car_control.steering = (self.user_steering + self.noise_steering) * self.max_steering
-        self.car_control.brake = (self.user_brakes + self.noise_brakes) * self.max_brakes
+        self.car_control.steering = (self.user_steering
+                                     + self.noise_steering) * self.max_steering
+        self.car_control.brake = (self.user_brakes
+                                  + self.noise_brakes) * self.max_brakes
 
     def _update_left(self, event):
         """ Updates based on left control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.user_steering = float(event.value)
+            self.user_steering = self._exponentialize(
+                self._deadzone(float(event.value)))
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -210,7 +213,8 @@ class VehicleControl(object):
         """ Updates based on right control scheme."""
         # Steering event
         if event.axis == self.r_x:
-            self.user_steering = float(event.value)
+            self.user_steering = self._exponentialize(
+                self._deadzone(float(event.value)))
 
         # Throttle/brake event
         elif event.axis == self.r_y:
@@ -220,7 +224,8 @@ class VehicleControl(object):
         """ Updates with a control scheme similar to an RC car."""
         # Steering event
         if event.axis == self.r_x:
-            self.user_steering = float(event.value)
+            self.user_steering = self._exponentialize(
+                self._deadzone(float(event.value)))
 
         # Throttle/brake event
         elif event.axis == self.l_y:
@@ -230,7 +235,8 @@ class VehicleControl(object):
         """ Updates based on game control scheme."""
         # Steering event
         if event.axis == self.l_x:
-            self.user_steering = float(event.value)
+            self.user_steering = self._exponentialize(
+                self._deadzone(float(event.value)))
 
         # Throttle/brake event
         elif self.current_os == "Linux":
@@ -241,7 +247,7 @@ class VehicleControl(object):
             # Brake or reverse event
             elif event.axis == self.l2 and self.car_control.manual_gear > 0:
                 self.user_brakes = self._deadzone(event.value + 1) \
-                                         * 0.5
+                                   * 0.5
             elif event.axis == self.l2 and self.car_control.manual_gear < 0:
                 self.car_control.throttle = self._deadzone(event.value + 1) \
                                             * 0.5 * self.max_throttle
@@ -316,28 +322,32 @@ class VehicleControl(object):
 
         if value == 0:
             self.car_control.throttle = 0
-            self.user_brakes = 0# }}}
+            self.user_brakes = 0  # }}}
 
     def _make_some_noise(self):
         """ Changes the noise value to add noise to the system."""
         if self.noise_how_long == self.noise_already:
             self.noise_steering = 0
             self.noise_already = 0
-            self.noise_how_long = random.randint(5,20)
-            self.noise_left_or_right = random.randint(0,1)
+            self.noise_how_long = random.randint(5, 20)
+            self.noise_left_or_right = random.randint(0, 1)
         else:
             self.noise_already += 1
             steering_noise = float(self.noise_max_amp) / 20
             if self.noise_already < (self.noise_how_long / 2):
                 if self.noise_left_or_right == 0:
-               	    self.noise_steering += steering_noise
+                    self.noise_steering += steering_noise
                 else:
-               	    self.noise_steering -= steering_noise
+                    self.noise_steering -= steering_noise
             else:
                 if self.noise_left_or_right == 0:
-               	    self.noise_steering -= steering_noise
+                    self.noise_steering -= steering_noise
                 else:
-               	    self.noise_steering += steering_noise
+                    self.noise_steering += steering_noise
+
+    @staticmethod
+    def _exponentialize(value):
+        return value * value
 
 
 class Timer(object):
@@ -653,11 +663,11 @@ class AISGame(object):
             count += 1
 
 
-
-def main(control_mode="left", max_steering=0.4, max_throttle=0.5,
-         max_brakes=0.5):
+def main(control_mode="rc", max_steering=0.5, max_throttle=0.4,
+         max_brakes=0.7):
     game = AISGame(control_mode, max_steering, max_throttle, max_brakes)
     game.execute()
+
 
 def profile():
     game = AISGame('left', 1.0, 1.0, 1.0)
@@ -665,6 +675,7 @@ def profile():
                     globals(),
                     locals(),
                     filename='profile.txt')
+
 
 if __name__ == '__main__':
 
