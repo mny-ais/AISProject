@@ -1,8 +1,14 @@
-# Manual control of AIScar simulator
-# Johan Vertens 2018
-# Yvan Satyawan 2018
-# Maximilian Roth
+# -*- coding: utf-8 -*-
+"""Manual Control of AIScar simulator.
 
+Allows manual control and recording of AIScar simulator with joystick input.
+
+Authors:
+    Johan Vertens
+    Yvan Satyawan <ys88@saturn.uni-freiburg.de>
+    Maximilian Roth
+"""
+# Uncomment if using python 2.x
 # from __future__ import print_function
 
 import airsim
@@ -519,48 +525,84 @@ class AISGame(object):
 
         if show_segmentation:
             responses = self.client.simGetImages(
+                # Camera Scenes
                 [airsim.ImageRequest("0",
                                      airsim.ImageType.Scene,
                                      False,
-                                     False),
+                                     True),
+                 airsim.ImageRequest("1",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     True),
+                 airsim.ImageRequest("2",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     True),
+                 # Camera Segmentations
                  airsim.ImageRequest("0",
                                      airsim.ImageType.Segmentation,
                                      False,
-                                     False)])
+                                     True),
+                 airsim.ImageRequest("1",
+                                     airsim.ImageType.Segmentation,
+                                     False,
+                                     True),
+                 airsim.ImageRequest("1",
+                                     airsim.ImageType.Segmentation,
+                                     False,
+                                     True)])
+
 
         else:
             responses = self.client.simGetImages(
                 [airsim.ImageRequest("0",
                                      airsim.ImageType.Scene,
                                      False,
-                                     False)])
+                                     False),
+                 airsim.ImageRequest("1",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     True),
+                 airsim.ImageRequest("2",
+                                     airsim.ImageType.Scene,
+                                     False,
+                                     True)])
 
-        rgb = None
-        seg = None
-        if len(responses) > 0:
-            rgb = self.response_to_cv(responses[0], 3)
+        rgb = []
+        seg = []
 
-            # crop_img = rgb[ADDITIONAL_CROP_TOP:, :]
-            # rgb = cv2.resize(crop_img, (640, 85))
-            self._main_image = rgb
+        for i in range(3):
+            if responses[i]:
+                # Check each rgb image
+                rgb[i] = self.response_to_cv(responses[i], 3)
 
-        # Did we get a segmentation image?
-        if len(responses) > 1:
-            seg = self.response_to_cv(responses[1], 3)
-            self._seg_image = seg
+                # Add to main image for rendering if it's the center camera
+                if i == 0:
+                    self._main_image = rgb[0]
 
-        if self.recording and len(responses) > 1:
-            # if self.save_timer.elapsed_seconds_since_lap() > 0.2:
-            # Record image every $grap_image_distance meters
-            # Also record the vehicle controls at each instance
-            if np.linalg.norm(self.last_pos - pos) > grab_image_distance:
+        for i in range(3):
+            # Check each segmentation image
+            if responses[i + 3]:
+                seg[i] = self.response_to_cv(responses[i + 3], 3)
+
+            # Add to main image for rending if it's the center camera
+            if i == 0:
+                self._seg_image = seg[0]
+
+        if self.recording:
+            if len(responses) == 6 \
+                    and np.linalg.norm(self.last_pos - pos)\
+                        > grab_image_distance:
+                # Record the rgb images
                 if self.record_path is not None:
-                    cv2.imwrite(self.record_path + 'image_'
-                                + str(self.save_counter) + '.png',
-                                cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
-                    cv2.imwrite(self.record_path + 'seg_'
-                                + str(self.save_counter) + '.png',
-                                cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
+                    for i in range(3):
+                        cv2.imwrite(self.record_path + "cam_" + str(i)
+                                    + 'image_' + str(self.save_counter)
+                                    + '.png',
+                                    cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
+                        cv2.imwrite(self.record_path + "cam_" +str(i)
+                                    + 'seg_' + str(self.save_counter) + '.png',
+                                    cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
                     self.csv_data.append(

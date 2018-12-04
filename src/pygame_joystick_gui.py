@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Joystick GUI Tester.
+
+Renders a GUI to show the current joystick input values.
+
+Authors:
+    Yvan Satyawan <ys88@saturn.uni-freiburg.de>
+"""
+
 import math
 
 import tkinter as tk
