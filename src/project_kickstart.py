@@ -105,7 +105,7 @@ class VehicleControl(object):
         self.car_control.manual_gear = 1
 
         # Requested Direction
-        self.requested_direction = "Forwards"
+        self.requested_direction = 0
 
         # User and noise input (Required to allow for inserting noise)
         self.user_steering = 0.0
@@ -267,8 +267,8 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = -1
         elif event.button == self.l1:
-            # Handbrakes
-            self.car_control.handbrake = True
+            # Handbrakes (True = 1)
+            self.car_control.handbrake = 1
 
         elif event.button == self.start_button:
             self.request_new_episode = True
@@ -282,16 +282,21 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = 1
         elif event.button == self.l1:
-            # Handbrakes
-            self.car_control.handbrake = False
+            # Handbrakes False = 0
+            self.car_control.handbrake = 0
 
     def _update_key_downs(self, event):
+        """
+            0 is Forward
+            -1 is Left
+            1 is Right
+        """
         if event.key == K_KP8:
-            self.requested_direction = "Forwards"
+            self.requested_direction = 0
         elif event.key == K_KP4:
-            self.requested_direction = "Left"
+            self.requested_direction = -1
         elif event.key == K_KP6:
-            self.requested_direction = "Right"
+            self.requested_direction = 1
         elif event.key == K_n:
             if self.noisy:
                 self.noise_steering = 0
@@ -632,9 +637,16 @@ class AISGame(object):
 
         # Print FPS
         if self._timer.elapsed_seconds_since_lap() > 1.0:
+            direction = "Forward"
+            if self.vehicle_controls.requested_direction == 0:
+                direction = "Go Forward Yviiiiii"
+            elif self.vehicle_controls.requested_direction == -1:
+                direction = "Left"
+            else:
+                direction = "Right"
             print("FPS: {0}, Drive direction: {1}".
                   format(self.counter,
-                         self.vehicle_controls.requested_direction))
+                         direction))
             self.counter = 0
             self._timer.lap()
 

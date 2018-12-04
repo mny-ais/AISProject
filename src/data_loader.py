@@ -5,13 +5,13 @@
 from __future__ import print_function, division
 import os
 import os.path as op
-# import torch
+import torch
 import pandas as pd
 from skimage import io, transform
 import numpy as np
 import matplotlib.pyplot as plt
-# from torch.utils.data import Dataset, DataLoader
-# from torchvision import transforms, utils
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, utils
 
 
 # Ignore warnings
@@ -20,44 +20,81 @@ warnings.filterwarnings("ignore")
 
 print('CSV:\n')
 
-path_csv = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test.csv")
-# path_csv = '~/Documents/5.Semester/RC-Learn/pytorch-tut/test.csv'
-
-csv_file = pd.read_csv(path_csv, sep=',', header=None)
 
 class DrivingSimDataset(Dataset):
     """
         Driving Simulation Dataset
     """
-    
+
     def __init__(self, csv_file, root_dir, transform=None):
         """
-	    TODO
+            Args:
+                The CSV Data Filename
+                The Directory of images and csv file
+                The transforms used (blur, brightness, contrast, saturation, hue)
 	"""
 
-	self.drive_data = pd.read_csv(path_csv, sep=',', header=None)
-	self.root_dir = root_dir
-	self.transform = transform
+        self.drive_data = pd.read_csv(os.path.join(root_dir, csv_file), sep=',', header=None)
+        self.root_dir = root_dir
+        self.transform = transform
 
     def __len__(self):
+        """
+            Returns length of the data
+        """
         return len(self.drive_data)
 
     def __getitem__(self, idx):
-    	file_name = 'image_' + str(idx) + '.png'
-	img_name = os.path.join(self.root_dir, file_name)
-	image = io.imread(img_name)
-
-	cur_row = self.drive_data.iloc[idx, :].as_matrix()
-
-	sample = {'image': image, 'drive_data': cur_row}
-
-	if self.transform:
-	    sample = self.transform(sample)
-
-	return sample
+        """
+            Returns next transformed datapoint in correct format for the model
+        """
 
 
+        file_name = 'image_' + str(idx) + '.png'
+        img_name = os.path.join(self.root_dir, file_name)
+        image = io.imread(img_name)
 
+        #TODO use only float(able) types we need that for conversion
+        cur_row = self.drive_data.iloc[idx, 0:3].as_matrix()
+        cur_row = cur_row.astype('float')
+
+        sample = {'image': image, 'drive_data': cur_row}
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
+
+
+class ToTensor(object):
+    """Convert ndarrays in sample to Tensors."""
+
+    def __call__(self, sample):
+        image, drive_data = sample['image'], sample['drive_data']
+
+        # swap color axis because
+        # numpy image: H x W x C
+        # torch image: C X H X W
+        image = image.transpose((2, 0, 1))
+        return {'image': torch.from_numpy(image),
+                'drive_data': torch.from_numpy(drive_data)}
+
+
+transformed_dataset = DrivingSimDataset(csv_file='test.csv',
+                                           root_dir='/home/mr492/Documents/5.Semester/RC-Learn/test',
+                                           transform=transforms.Compose([
+                                               ToTensor()
+                                           ]))
+
+for i in range(len(transformed_dataset)):
+    sample = transformed_dataset[i]
+
+    print(i, sample['image'].size(), sample['drive_data'].size())
+
+    if i == 3:
+        break
+
+"""
 image_num = csv_file.iloc[0, 0]
 steering = csv_file.iloc[0, 1]
 throttle = csv_file.iloc[0, 2]
@@ -74,4 +111,6 @@ print(noise)
 print(gear)
 print(hl_comm)
 
-# print(csv_file)
+print(csv_file)
+"""
+
