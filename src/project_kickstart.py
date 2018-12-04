@@ -1,8 +1,14 @@
-# Manual control of AIScar simulator
-# Johan Vertens 2018
-# Yvan Satyawan 2018
-# Maximilian Roth
+# -*- coding: utf-8 -*-
+"""Manual Control of AIScar simulator.
 
+Allows manual control and recording of AIScar simulator with joystick input.
+
+Authors:
+    Johan Vertens
+    Yvan Satyawan <ys88@saturn.uni-freiburg.de>
+    Maximilian Roth
+"""
+# Uncomment if using python 2.x
 # from __future__ import print_function
 
 import airsim

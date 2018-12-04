@@ -1,3 +1,11 @@
+"""Joystick Command Line Tester.
+
+Shows current PyGame joystick input through the command line.
+
+Authors:
+    Yvan Satyawan <ys88@saturn.uni-freiburg.de>
+"""
+
 import curses
 
 import time
