@@ -1,50 +1,57 @@
 {
-        "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
-        "SettingsVersion": 1.2,
-        "SimMode": "Car",
-        "PawnPaths": {
-    "DefaultCar": {"PawnBP": "Class'/Game/audicup_car/Audi_Pawn_Airsim.Audi_Pawn_Airsim_C'"}
-  },
-        "CameraDefaults": {
-          "CaptureSettings": [
-                      {
-                        "ImageType": 0,
-                        "Width": 640,
-                        "Height": 128,
-                        "FOV_Degrees": 129,
-                        "AutoExposureSpeed": 200,
-                        "AutoExposureBias": 0.0,
-                        "AutoExposureMaxBrightness": 0.64,
-                        "AutoExposureMinBrightness": 0.03,
-                        "MotionBlurAmount": 0,
-                        "TargetGamma": 0.3,
-                        "ProjectionMode": "",
-                        "OrthoWidth": 5.12
-                      },
-                      {
-                        "ImageType": 5,
-                        "Width": 640,
-                        "Height": 140,
-                        "FOV_Degrees": 129,
-                        "AutoExposureSpeed": 100,
-                        "AutoExposureBias": 0,
-                        "AutoExposureMaxBrightness": 0.64,
-                        "AutoExposureMinBrightness": 0.03,
-                        "MotionBlurAmount": 0,
-                        "TargetGamma": 1.0,
-                        "ProjectionMode": "",
-                        "OrthoWidth": 5.12
-                      }
-                      ]
-        },
-        "Recording": {
-            "RecordOnMove": false,
-            "RecordInterval": 0.05,
-            "Cameras": [
+	"SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+    "SettingsVersion": 1.2,
+    "SimMode": "Car",
+    "PawnPaths":
+	{
+		"DefaultCar": {"PawnBP": "Class'/Game/audicup_car/Audi_Pawn_Airsim.Audi_Pawn_Airsim_C'"}
+	},
+
+    "CameraDefaults":
+	{
+	    "CaptureSettings":
+		[
+	        {
+				"ImageType": 0,
+				"Width": 640,
+				"Height": 128,
+				"FOV_Degrees": 129,
+				"AutoExposureSpeed": 200,
+				"AutoExposureBias": 0.0,
+				"AutoExposureMaxBrightness": 0.64,
+				"AutoExposureMinBrightness": 0.03,
+				"MotionBlurAmount": 0,
+				"TargetGamma": 0.3,
+				"ProjectionMode": "",
+				"OrthoWidth": 5.12
+            },
+            {
+                "ImageType": 5,
+                "Width": 640,
+                "Height": 140,
+                "FOV_Degrees": 129,
+                "AutoExposureSpeed": 100,
+                "AutoExposureBias": 0,
+                "AutoExposureMaxBrightness": 0.64,
+                "AutoExposureMinBrightness": 0.03,
+                "MotionBlurAmount": 0,
+                "TargetGamma": 1.0,
+                "ProjectionMode": "",
+                "OrthoWidth": 5.12
+            }
+        ]
+    },
+
+	"Recording": 
+    {
+        "RecordOnMove": false,
+        "RecordInterval": 0.05,
+        "Cameras": 
+		[
                 { "CameraName": "3", "ImageType": 0, "PixelsAsFloat": false, "Compress": true },
                 { "CameraName": "3", "ImageType": 5, "PixelsAsFloat": false, "Compress": true }
-            ]
-  }
+        ]
+    }
 
 }
 
