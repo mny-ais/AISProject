@@ -13,18 +13,15 @@ import matplotlib.pyplot as plt
 # from torch.utils.data import Dataset, DataLoader
 # from torchvision import transforms, utils
 
+
 # Ignore warnings
 import warnings
 warnings.filterwarnings("ignore")
 
 print('CSV:\n')
 
-"""
-root = op.abspath(os.sep)
-
-op.join((op.expanduser('~'), 'Documents', '5.Semester', 'RC_Learn', 'py' 'file.csv'))
-"""
-path_csv = '~/Documents/5.Semester/RC-Learn/pytorch-tut/test.csv'
+path_csv = os.path.join(os.path.abspath(os.path.dirname(__file__)), "test.csv")
+# path_csv = '~/Documents/5.Semester/RC-Learn/pytorch-tut/test.csv'
 
 csv_file = pd.read_csv(path_csv, sep=',', header=None)
 
