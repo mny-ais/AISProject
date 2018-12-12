@@ -534,28 +534,28 @@ class AISGame(object):
                 [airsim.ImageRequest("0",
                                      airsim.ImageType.Scene,
                                      False,
-                                     True),
+                                     False),
                  airsim.ImageRequest("1",
                                      airsim.ImageType.Scene,
                                      False,
-                                     True),
+                                     False),
                  airsim.ImageRequest("2",
                                      airsim.ImageType.Scene,
                                      False,
-                                     True),
+                                     False),
                  # Camera Segmentations
                  airsim.ImageRequest("0",
                                      airsim.ImageType.Segmentation,
                                      False,
-                                     True),
+                                     False),
                  airsim.ImageRequest("1",
                                      airsim.ImageType.Segmentation,
                                      False,
-                                     True),
+                                     False),
                  airsim.ImageRequest("1",
                                      airsim.ImageType.Segmentation,
                                      False,
-                                     True)])
+                                     False)])
 
 
         else:
@@ -567,11 +567,11 @@ class AISGame(object):
                  airsim.ImageRequest("1",
                                      airsim.ImageType.Scene,
                                      False,
-                                     True),
+                                     False),
                  airsim.ImageRequest("2",
                                      airsim.ImageType.Scene,
                                      False,
-                                     True)])
+                                     False)])
 
         rgb = [None, None, None]
         seg = [None, None, None]
