@@ -267,8 +267,8 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = -1
         elif event.button == self.l1:
-            # Handbrakes (True = 1)
-            self.car_control.handbrake = 1
+            # Handbrakes
+            self.car_control.handbrake = True
 
         elif event.button == self.start_button:
             self.request_new_episode = True
@@ -282,8 +282,8 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = 1
         elif event.button == self.l1:
-            # Handbrakes False = 0
-            self.car_control.handbrake = 0
+            # Handbrakes
+            self.car_control.handbrake = False
 
     def _update_key_downs(self, event):
         """
@@ -383,6 +383,16 @@ class AISGame(object):
         self.client = airsim.CarClient()
         self.client.confirmConnection()
         self.client.enableApiControl(True)
+
+        # Change camera direction (in radians)
+        self.client.simSetCameraOrientation(1,
+                                            airsim.to_quaternion(0.261799,
+                                                                 0,
+                                                                 0))
+        self.client.simSetCameraOrientation(2,
+                                            airsim.to_quaternion(-0.261799,
+                                                                 0,
+                                                                 0))
 
         # Internally represents the vehicle control state
         self.vehicle_controls = VehicleControl(control_mode, max_steering,
@@ -601,23 +611,38 @@ class AISGame(object):
                 # Record the rgb images
                 if self.record_path is not None:
                     for i in range(3):
-                        cv2.imwrite(self.record_path + "cam_" + str(i)
-                                    + 'image_' + str(self.save_counter)
+                        cv2.imwrite(self.record_path + 'image_'
+                                    + str(self.save_counter)
+                                    + "-cam_" + str(i)
                                     + '.png',
-                                    cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
-                        cv2.imwrite(self.record_path + "cam_" +str(i)
-                                    + 'seg_' + str(self.save_counter) + '.png',
-                                    cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
+                                    cv2.cvtColor(rgb[i], cv2.COLOR_BGR2RGB))
+                        cv2.imwrite(self.record_path + 'seg_'
+                                    + str(self.save_counter)
+                                    + "-cam_" + str(i)
+                                    + '.png',
+                                    cv2.cvtColor(seg[i], cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
-                    self.csv_data.append(
-                        [self.save_counter,
-                         self.vehicle_controls.user_steering,
-                         self.vehicle_controls.car_control.throttle,
-                         self.vehicle_controls.user_brakes,
-                         self.vehicle_controls.car_control.handbrake,
-                         self.vehicle_controls.car_control.manual_gear,
-                         self.vehicle_controls.requested_direction])
+                    if self.save_counter == 0:
+                        self.csv_data.append(
+                            ["No.",
+                             "Steering",
+                             "Throttle",
+                             "Brakes",
+                             "Handbrake",
+                             "Gear",
+                             "Requested_Direction"]
+                        )
+                    else:
+                        self.csv_data.append(
+                            [self.save_counter,
+                             self.vehicle_controls.user_steering,
+                             self.vehicle_controls.car_control.throttle,
+                             self.vehicle_controls.user_brakes,
+                             self.vehicle_controls.car_control.handbrake,
+                             self.vehicle_controls.car_control.manual_gear,
+                             self.vehicle_controls.requested_direction]
+                        )
                     self.save_counter += 1
                 self.last_pos = pos
 
@@ -655,7 +680,7 @@ class AISGame(object):
             self._on_new_episode()
 
         # Get key presses and parse them
-        pygame.event.pump()
+        # pygame.event.pump()
         self._keyboard_controls(pygame.key.get_pressed())
 
         self.vehicle_controls.update_car_controls()
