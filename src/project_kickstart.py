@@ -387,12 +387,12 @@ class AISGame(object):
         # Change camera direction (in radians)
         self.client.simSetCameraOrientation(1,
                                             airsim.to_quaternion(0,
-                                                                 0.261799,
-                                                                 0))
+                                                                 0,
+                                                                 0.261799))
         self.client.simSetCameraOrientation(2,
                                             airsim.to_quaternion(0,
-                                                                 -0.261799,
-                                                                 0))
+                                                                 0,
+                                                                 -0.261799))
 
         # Internally represents the vehicle control state
         self.vehicle_controls = VehicleControl(control_mode, max_steering,
