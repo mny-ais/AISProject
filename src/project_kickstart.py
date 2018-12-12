@@ -604,10 +604,10 @@ class AISGame(object):
                         cv2.imwrite(self.record_path + "cam_" + str(i)
                                     + 'image_' + str(self.save_counter)
                                     + '.png',
-                                    cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB))
+                                    cv2.cvtColor(rgb[i], cv2.COLOR_BGR2RGB))
                         cv2.imwrite(self.record_path + "cam_" +str(i)
                                     + 'seg_' + str(self.save_counter) + '.png',
-                                    cv2.cvtColor(seg, cv2.COLOR_BGR2RGB))
+                                    cv2.cvtColor(seg[i], cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
                     self.csv_data.append(
