@@ -680,7 +680,7 @@ class AISGame(object):
             self._on_new_episode()
 
         # Get key presses and parse them
-        pygame.event.pump()
+        # pygame.event.pump()
         self._keyboard_controls(pygame.key.get_pressed())
 
         self.vehicle_controls.update_car_controls()
