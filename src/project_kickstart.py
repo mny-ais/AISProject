@@ -601,12 +601,15 @@ class AISGame(object):
                 # Record the rgb images
                 if self.record_path is not None:
                     for i in range(3):
-                        cv2.imwrite(self.record_path + "cam_" + str(i)
-                                    + 'image_' + str(self.save_counter)
+                        cv2.imwrite(self.record_path + 'image_'
+                                    + str(self.save_counter)
+                                    + "-cam_" + str(i)
                                     + '.png',
                                     cv2.cvtColor(rgb[i], cv2.COLOR_BGR2RGB))
-                        cv2.imwrite(self.record_path + "cam_" +str(i)
-                                    + 'seg_' + str(self.save_counter) + '.png',
+                        cv2.imwrite(self.record_path + 'seg_'
+                                    + str(self.save_counter)
+                                    + "-cam_" + str(i)
+                                    + '.png',
                                     cv2.cvtColor(seg[i], cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
