@@ -573,8 +573,8 @@ class AISGame(object):
                                      False,
                                      True)])
 
-        rgb = []
-        seg = []
+        rgb = [None, None, None]
+        seg = [None, None, None]
 
         for i in range(3):
             if responses[i]:
