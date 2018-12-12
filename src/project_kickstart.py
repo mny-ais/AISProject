@@ -133,7 +133,6 @@ class VehicleControl(object):
             self.l2 = 2
             self.r2 = 5
             self.start_button = 9
-            self.l1 = 4  # Handbrakes
             self.r1 = 5  # Reverse enable
             self.deadzone = 0.02
 
@@ -266,9 +265,6 @@ class VehicleControl(object):
         if event.button == self.r1:
             # Reverse
             self.car_control.manual_gear = -1
-        elif event.button == self.l1:
-            # Handbrakes
-            self.car_control.handbrake = True
 
         elif event.button == self.start_button:
             self.request_new_episode = True
@@ -281,9 +277,6 @@ class VehicleControl(object):
         if event.button == self.r1:
             # Reverse
             self.car_control.manual_gear = 1
-        elif event.button == self.l1:
-            # Handbrakes
-            self.car_control.handbrake = False
 
     def _update_key_downs(self, event):
         """
@@ -629,7 +622,6 @@ class AISGame(object):
                              "Steering",
                              "Throttle",
                              "Brakes",
-                             "Handbrake",
                              "Gear",
                              "Requested_Direction"]
                         )
@@ -639,7 +631,6 @@ class AISGame(object):
                              self.vehicle_controls.user_steering,
                              self.vehicle_controls.car_control.throttle,
                              self.vehicle_controls.user_brakes,
-                             self.vehicle_controls.car_control.handbrake,
                              self.vehicle_controls.car_control.manual_gear,
                              self.vehicle_controls.requested_direction]
                         )
