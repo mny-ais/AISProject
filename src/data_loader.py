@@ -54,8 +54,17 @@ class DrivingSimDataset(Dataset):
         img_name = os.path.join(self.root_dir, file_name)
         image = io.imread(img_name)
 
-        #TODO use only float(able) types we need that for conversion
-        cur_row = self.drive_data.iloc[idx, 0:3].as_matrix()
+        
+        cur_row = self.drive_data.iloc[idx, 0:6].as_matrix()
+
+        # Convert data to floatable types
+
+        # Handbrake value conversion : FALSE=0 TRUE=1
+        if cur_row[idx, 4] = "FALSE":
+            cur_row[idx, 4] = 0
+        else:
+            cur_row[idx, 4] = 1
+            
         cur_row = cur_row.astype('float')
 
         sample = {'image': image, 'drive_data': cur_row}
