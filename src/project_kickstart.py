@@ -384,6 +384,16 @@ class AISGame(object):
         self.client.confirmConnection()
         self.client.enableApiControl(True)
 
+        # Change camera direction (in radians)
+        self.client.simSetCameraOrientation(1,
+                                            airsim.to_quaternion(0.261799,
+                                                                 0,
+                                                                 0))
+        self.client.simSetCameraOrientation(2,
+                                            airsim.to_quaternion(-0.261799,
+                                                                 0,
+                                                                 0))
+
         # Internally represents the vehicle control state
         self.vehicle_controls = VehicleControl(control_mode, max_steering,
                                                max_throttle, max_brakes)
