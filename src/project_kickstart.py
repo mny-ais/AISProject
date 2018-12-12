@@ -267,8 +267,8 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = -1
         elif event.button == self.l1:
-            # Handbrakes (True = 1)
-            self.car_control.handbrake = 1
+            # Handbrakes
+            self.car_control.handbrake = True
 
         elif event.button == self.start_button:
             self.request_new_episode = True
@@ -282,8 +282,8 @@ class VehicleControl(object):
             # Reverse
             self.car_control.manual_gear = 1
         elif event.button == self.l1:
-            # Handbrakes False = 0
-            self.car_control.handbrake = 0
+            # Handbrakes
+            self.car_control.handbrake = False
 
     def _update_key_downs(self, event):
         """
@@ -610,14 +610,26 @@ class AISGame(object):
                                     cv2.cvtColor(seg[i], cv2.COLOR_BGR2RGB))
 
                     # Prepare csv data
-                    self.csv_data.append(
-                        [self.save_counter,
-                         self.vehicle_controls.user_steering,
-                         self.vehicle_controls.car_control.throttle,
-                         self.vehicle_controls.user_brakes,
-                         self.vehicle_controls.car_control.handbrake,
-                         self.vehicle_controls.car_control.manual_gear,
-                         self.vehicle_controls.requested_direction])
+                    if self.save_counter == 0:
+                        self.csv_data.append(
+                            ["No.",
+                             "Steering",
+                             "Throttle",
+                             "Brakes",
+                             "Handbrake",
+                             "Gear",
+                             "Requested_Direction"]
+                        )
+                    else:
+                        self.csv_data.append(
+                            [self.save_counter,
+                             self.vehicle_controls.user_steering,
+                             self.vehicle_controls.car_control.throttle,
+                             self.vehicle_controls.user_brakes,
+                             self.vehicle_controls.car_control.handbrake,
+                             self.vehicle_controls.car_control.manual_gear,
+                             self.vehicle_controls.requested_direction]
+                        )
                     self.save_counter += 1
                 self.last_pos = pos
 
