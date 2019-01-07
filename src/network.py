@@ -16,20 +16,49 @@ References:
 """
 
 import torchvision
+
 import torch
+
 import torch.nn as nn
+
 import torch.nn.functional as F
 
-def make_conv(input, output, kernel, striding):
+
+def make_conv(input, output, kernel, stride=1):
+    """Makes a set of modules which represent is convolutional layer.
+
+    Makes a convolution, batchnorm, dropout, and ReLU module set that is
+    required by each convolutional layer in the network.
+
+    Args:
+        input (int): The number of input channels of the convolution.
+        output (int): The number of output channels of the convolution.
+        kernel (int): The size of the kernel.
+        stride (int): The stride of the convolution, defaults to 1.
+
+    Returns (nn.Sequential):
+        A sequential layer object that represents the required modules for each
+        convolution layer.
+    """
     layer = nn.Sequential(
-            nn.Conv2D(input, output, kernel_size=kernel, stride=striding),
+            nn.Conv2D(input, output, kernel_size=kernel, stride=stride),
             nn.BatchNorm2d(output),
             nn.Dropout(0.2),
             nn.ReLU()
             )
     return layer
 
+
 def make_fc(size):
+    """Makes a set modules which represent a fully connected layer.
+
+    Args:
+        size (int): The number of units in the fully connected layer.
+
+    Returns (nn.Sequential):
+        A sequential layer object that represents the required modules for each
+        fully connected layer.
+    """
     layer = nn.Sequential(
             nn.Linear(size, 512),
             nn.Dropout(0.5),
@@ -39,11 +68,18 @@ def make_fc(size):
 
 
 class Net(nn.Module):
-
     def __init__(self):
-        super(Net, self).__init__()
-        # input image channel, output channels, square convolution
+        """This neural network drives an car based on input images and commands.
 
+        This neural network is made up of 8 convolutions and 2 fully connected
+        layers which take an input image from the cameras on the vehicle, and
+        then branches it based on which high-level command is given to one of
+        three more fully connected layers which output the commands to be given
+        to the vehicle.
+        """
+        super(Net, self).__init__()  # First initialize the superclass
+
+        # Input images are pushed through 8 convolutions to extract features
         self.conv1 = make_conv(3, 32, 5, 2)
         self.conv2 = make_conv(32, 32, 3, 1)
         self.conv3 = make_conv(32, 64, 3, 2)
@@ -53,10 +89,11 @@ class Net(nn.Module):
         self.conv7 = make_conv(128, 256, 3, 1)
         self.conv8 = make_conv(256, 256, 3, 1)
 
-        # Error
-        self.fc1 = make_fc(1) # 96512?!?
+        # 2 fully connected layers to extract the features in the images
+        self.fc1 = make_fc(1)  # We expect an error to find the actual value
         self.fc2 = make_fc(512)
 
+        # 2 fully connected layers for each high-level command branch
         self.fc_left_1 = make_fc(512)
         self.fc_left_2 = make_fc(512)
         self.fc_forward_1 = make_fc(512)
@@ -64,11 +101,22 @@ class Net(nn.Module):
         self.fc_right_1 = make_fc(512)
         self.fc_right_2 = make_fc(512)
 
+        # Output layer which turns the previous values into steering, throttle,
+        # and brakes
         self.fc_out = make_fc(3)
 
     def forward(self, img, cmd):
+        """Describes the connections within the neural network.
 
-        # Forward through Convs
+        Args:
+            img (torch.Tensor): The input image as a tensor.
+            cmd (int): The high level command being given to the model.
+
+        Returns (torch.Tensor):
+            The commands to be given to the vehicle to drive.
+        """
+
+        # Forward through Convolutions
         x = self.conv1(img)
         x = self.conv2(x)
         x = self.conv3(x)
@@ -78,20 +126,20 @@ class Net(nn.Module):
         x = self.conv7(x)
         x = self.conv8(x)
 
-        #Flatten
+        # Flatten to prepare for fully connected layers
         x = x.view(-1, self.num_flat_features(x))
 
-        # Forward through Fully Connected
+        # Forward through fully connected layers
         x = self.fc1(x)
         x = self.fc2(x)
 
-        # Use Measurements
+        # Branch according to the higher level commands
         # -1 left, 0 forward, 1 right
         if cmd == 0:
             x = self.fc_forward_1(x)
             x = self.fc_forward_2(x)
 
-        else if  cmd == -1:
+        elif cmd == -1:
             x = self.fc_left_1(x)
             x = self.fc_left_2(x)
 
@@ -99,26 +147,18 @@ class Net(nn.Module):
             x = self.fc_right_1(x)
             x = self.fc_right_2(x)
 
-        out = self.fc_out(x)
+        softmax = nn.Softmax()  # Softmax to get usable command values
+        out = softmax(x)
         return out
 
-        """
-        # Max pooling over a (2, 2) window
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        # If the size is a square you can only specify a single number
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = x.view(-1, self.num_flat_features(x))
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-        """
+    @staticmethod
+    def num_flat_features(x):
+        """Multiplies the number of features for flattening a convolution.
 
-    def num_flat_features(self, x):
+        References:
+            https://pytorch.org/tutorials/beginner/blitz/neural_networks_
+            tutorial.html
         """
-        Courtesy of https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html#sphx-glr-beginner-blitz-neural-networks-tutorial-py
-        """
-
         size = x.size()[1:]  # all dimensions except the batch dimension
         num_features = 1
         for s in size:
