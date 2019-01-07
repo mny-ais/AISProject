@@ -58,6 +58,11 @@ class Net(nn.Module):
         self.fc2 = make_fc(512)
 
     def forward(self, input):
+        """Forwards function that describes the connections of the network.
+
+        Args:
+            ??
+        """
 
         # Forward through Convs
         x = self.conv1(input)
@@ -76,7 +81,7 @@ class Net(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
 
-        # Use Measurements
+        # We now need the three main branches
 
         """
         # Max pooling over a (2, 2) window
