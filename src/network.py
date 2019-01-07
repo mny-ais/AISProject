@@ -41,7 +41,7 @@ def make_conv(input, output, kernel, stride=1):
         convolution layer.
     """
     layer = nn.Sequential(
-            nn.Conv2D(input, output, kernel_size=kernel, stride=stride),
+            nn.Conv2d(input, output, kernel_size=kernel, stride=stride),
             nn.BatchNorm2d(output),
             nn.Dropout(0.2),
             nn.ReLU()
@@ -164,3 +164,9 @@ class Net(nn.Module):
         for s in size:
             num_features *= s
         return num_features
+
+
+if __name__ == "__main__":
+    net = Net()
+    print(net)
+
