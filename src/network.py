@@ -170,3 +170,8 @@ if __name__ == "__main__":
     net = Net()
     print(net)
 
+    input = torch.randn(200, 3, 88, 1)
+    print(input)
+    out = net(input, 0)
+    print(out)
+
