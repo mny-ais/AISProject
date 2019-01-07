@@ -49,7 +49,7 @@ def make_conv(input, output, kernel, stride=1):
     return layer
 
 
-def make_fc(size):
+def make_fc(size, output=512):
     """Makes a set modules which represent a fully connected layer.
 
     Args:
@@ -60,7 +60,7 @@ def make_fc(size):
         fully connected layer.
     """
     layer = nn.Sequential(
-            nn.Linear(size, 512),
+            nn.Linear(size, output),
             nn.Dropout(0.5),
             nn.ReLU()
             )
@@ -90,7 +90,7 @@ class Net(nn.Module):
         self.conv8 = make_conv(256, 256, 3, 1)
 
         # 2 fully connected layers to extract the features in the images
-        self.fc1 = make_fc(1)  # We expect an error to find the actual value
+        self.fc1 = make_fc(8192)
         self.fc2 = make_fc(512)
 
         # 2 fully connected layers for each high-level command branch
@@ -103,7 +103,7 @@ class Net(nn.Module):
 
         # Output layer which turns the previous values into steering, throttle,
         # and brakes
-        self.fc_out = make_fc(3)
+        self.fc_out = make_fc(512, 3)
 
     def forward(self, img, cmd):
         """Describes the connections within the neural network.
@@ -147,8 +147,7 @@ class Net(nn.Module):
             x = self.fc_right_1(x)
             x = self.fc_right_2(x)
 
-        softmax = nn.Softmax()  # Softmax to get usable command values
-        out = softmax(x)
+        out = self.fc_out(x)
         return out
 
     @staticmethod
@@ -170,8 +169,7 @@ if __name__ == "__main__":
     net = Net()
     print(net)
 
-    input = torch.randn(200, 3, 88, 1)
-    print(input)
+    input = torch.randn(1, 3, 200, 88)
     out = net(input, 0)
     print(out)
 
