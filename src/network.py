@@ -30,11 +30,12 @@ def make_conv(input, output, kernel, striding):
     return layer
 
 def make_fc(size):
-    laver = nn.Sequential(
+    layer = nn.Sequential(
             nn.Linear(size, 512),
             nn.Dropout(0.5),
             nn.ReLU()
             )
+    return layer
 
 
 class Net(nn.Module):
@@ -59,7 +60,7 @@ class Net(nn.Module):
     def forward(self, input):
 
         # Forward through Convs
-        x = self.conv1(x)
+        x = self.conv1(input)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
@@ -69,7 +70,7 @@ class Net(nn.Module):
         x = self.conv8(x)
 
         #Flatten
-        x = x.view(-1, num_flat_features(x))
+        x = x.view(-1, self.num_flat_features(x))
 
         # Forward through Fully Connected
         x = self.fc1(x)
@@ -90,6 +91,10 @@ class Net(nn.Module):
         """
 
     def num_flat_features(self, x):
+        """
+        Courtesy of https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html#sphx-glr-beginner-blitz-neural-networks-tutorial-py
+        """
+
         size = x.size()[1:]  # all dimensions except the batch dimension
         num_features = 1
         for s in size:
