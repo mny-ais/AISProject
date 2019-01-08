@@ -42,6 +42,8 @@ seq = iaa.Sequential([
         #rl(iaa.Grayscale((0.0, 1))), # put grayscale
 ], random_order=True)
 
+
+
 class DrivingSimDataset(Dataset):
     """
         Driving Simulation Dataset
@@ -54,6 +56,8 @@ class DrivingSimDataset(Dataset):
                 The Directory of images and csv file
                 The transforms used (blur, brightness, contrast, saturation, hue)
 	"""
+        super(self).__init__()
+        
         # TODO : Check if default for header works
         self.drive_data = pd.read_csv(os.path.join(root_dir, csv_file), sep=',')
         self.root_dir = root_dir
@@ -78,7 +82,9 @@ class DrivingSimDataset(Dataset):
         cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
         cur_row = cur_row.astype('float')
 
-        sample = {'image': image, 'drive_data': cur_row}
+        sample = (image, cur_row)
+
+        
 
         if self.transform:
             sample = self.transform(sample)
@@ -86,12 +92,8 @@ class DrivingSimDataset(Dataset):
         return sample
 
 
-class ToTensor(object):
-    """Convert ndarrays in sample to Tensors."""
-
-    def __call__(self, sample):
-        image, drive_data = sample['image'], sample['drive_data']
-
+    def toTensor(self, sample):
+        image, drive_data = sample(0), sample(1)
 
         # apply image augmentation sequential
         image = seq.augment_images(image)
@@ -102,8 +104,27 @@ class ToTensor(object):
 
         image = image.transpose((2, 0, 1))
 
-        return {'image': torch.from_numpy(image),
-                'drive_data': torch.from_numpy(drive_data)}
+        return (torch.from_numpy(image), torch.from_numpy(drive_data))
+
+
+
+    def toProcessedPackage(self):
+        
+        
+        for i in range(0, self.__len__()):
+            self.__toTensor(self.__getitem__(i))
+            
+            
+        
+        
+        
+
+    
+
+
+
+
+
 
 
 
