@@ -43,17 +43,14 @@ seq = iaa.Sequential([
 ], random_order=True)
 
 class DrivingSimDataset(Dataset):
-    """
-        Driving Simulation Dataset
-    """
-
     def __init__(self, csv_file, root_dir, transform=None):
+        """Dataset object that turns the images and csv file into a dataset.
+        Args:
+            csv_file (string): The CSV data file address
+            root_dir (string): The directory of both the images and csv file
+            transform (string): The transforms used (blur, brightness,
+                                contrast, saturation, hue)
         """
-            Args:
-                The CSV Data Filename
-                The Directory of images and csv file
-                The transforms used (blur, brightness, contrast, saturation, hue)
-	"""
         # TODO : Check if default for header works
         self.drive_data = pd.read_csv(os.path.join(root_dir, csv_file), sep=',')
         self.root_dir = root_dir
