@@ -67,7 +67,7 @@ def make_fc(size, output=512):
     return layer
 
 
-class Net(nn.Module):
+class DriveNet(nn.Module):
     def __init__(self):
         """This neural network drives an car based on input images and commands.
 
@@ -77,7 +77,14 @@ class Net(nn.Module):
         three more fully connected layers which output the commands to be given
         to the vehicle.
         """
-        super(Net, self).__init__()  # First initialize the superclass
+        super(DriveNet, self).__init__()  # First initialize the superclass
+
+        # Save the last output, so we can calculate the loss using it
+        self.out = None
+
+        # Save the loss, so we can use it to backpropagate
+        self.loss = None
+        self.criterion = nn.MSELoss()  # This only needs to be initialized once
 
         # Input images are pushed through 8 convolutions to extract features
         self.conv1 = make_conv(3, 32, 5, 2)
@@ -147,8 +154,9 @@ class Net(nn.Module):
             x = self.fc_right_1(x)
             x = self.fc_right_2(x)
 
-        out = self.fc_out(x)
-        return out
+        self.out = self.fc_out(x)
+
+        return self.out
 
     @staticmethod
     def num_flat_features(x):
@@ -165,11 +173,30 @@ class Net(nn.Module):
         return num_features
 
 
+    def loss_function(self, target):
+        """Calculates the loss based on a target tensor.
+
+        Args:
+            target (torch.Tensor): The (1 x 3) ground truth tensor,
+
+        Returns:
+            The loss criterion. Also saves this internally.
+        """
+        if self.out == None:
+            raise ValueError("forward() has not been run.")
+
+        self.loss = self.criterion(self.out, target)
+
+        return self.loss  # Return the loss, in case it is necessary
+
+
 if __name__ == "__main__":
-    net = Net()
-    print(net)
+    net = DriveNet()
+    #print(net)
 
     input = torch.randn(1, 3, 200, 88)
     out = net(input, 0)
     print(out)
 
+    net.zero_grad()
+    out.backward(torch.randn(1, 3))
