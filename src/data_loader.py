@@ -45,17 +45,14 @@ seq = iaa.Sequential([
 
 
 class DrivingSimDataset(Dataset):
-    """
-        Driving Simulation Dataset
-    """
-
     def __init__(self, csv_file, root_dir, transform=None):
-        """
+        """Dataset object that turns the images and csv file into a dataset.
             Args:
-                The CSV Data Filename
-                The Directory of images and csv file
-                The transforms used (blur, brightness, contrast, saturation, hue)
-	"""
+                csv_file (string): The CSV data file address
+                root_dir (string): The directory of both the images and csv file
+                transform (string): The transforms used (blur, brightness,
+                                    contrast, saturation, hue)
+        """
         super(self).__init__()
         
         # TODO : Check if default for header works
@@ -64,17 +61,12 @@ class DrivingSimDataset(Dataset):
         self.transform = transform
 
     def __len__(self):
-        """
-            Returns length of the data
-        """
+        """Returns length of the data."""
         return len(self.drive_data)
 
     def __getitem__(self, idx):
+        """Returns next transformed datapoint in correct format for the model.
         """
-            Returns next transformed datapoint in correct format for the model
-        """
-
-
         file_name = 'image_' + str(idx) + '.png'
         img_name = os.path.join(self.root_dir, file_name)
         image = io.imread(img_name)
@@ -91,7 +83,6 @@ class DrivingSimDataset(Dataset):
 
         return sample
 
-
     def toTensor(self, sample):
         image, drive_data = sample(0), sample(1)
 
@@ -106,26 +97,11 @@ class DrivingSimDataset(Dataset):
 
         return (torch.from_numpy(image), torch.from_numpy(drive_data))
 
-
-
     def toProcessedPackage(self):
         
         
         for i in range(0, self.__len__()):
             self.__toTensor(self.__getitem__(i))
-            
-            
-        
-        
-        
-
-    
-
-
-
-
-
-
 
 
 transformed_dataset = DrivingSimDataset(csv_file='test.csv',
