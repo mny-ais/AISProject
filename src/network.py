@@ -56,7 +56,9 @@ class DriveNet(nn.Module):
 
         # Output layer which turns the previous values into steering, throttle,
         # and brakes
-        self.fc_out = NetworkUtils.make_fc(512, 2)
+        self.fc_out_left = NetworkUtils.make_fc(512, 2)
+        self.fc_out_forward = NetworkUtils.make_fc(512, 2)
+        self.fc_out_right = NetworkUtils.make_fc(512, 2)
 
     def forward(self, img, cmd):
         """Describes the connections within the neural network.
@@ -92,16 +94,17 @@ class DriveNet(nn.Module):
         if cmd == 0:
             x = self.fc_forward_1(x)
             x = self.fc_forward_2(x)
+            out = self.fc_out_forward(x)
 
         elif cmd == -1:
             x = self.fc_left_1(x)
             x = self.fc_left_2(x)
+            out = self.fc_out_left(x)
 
         else:
             x = self.fc_right_1(x)
             x = self.fc_right_2(x)
-
-        out = self.fc_out(x)
+            out = self.fc_out_right(x)
 
         return out
 

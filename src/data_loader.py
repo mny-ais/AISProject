@@ -43,19 +43,17 @@ seq = iaa.Sequential([
 ], random_order=True)
 
 
-
 class DrivingSimDataset(Dataset):
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, csv_file, root_dir):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
                 csv_file (string): The CSV data file address
                 root_dir (string): The directory of both the images and csv file
-                transform (string): The transforms used (blur, brightness,
-                                    contrast, saturation, hue)
         """
         super(self).__init__()
-        
+
         # TODO : Check if default for header works
+        self.dataset = []
         self.drive_data = pd.read_csv(os.path.join(root_dir, csv_file), sep=',')
         self.root_dir = root_dir
         self.transform = transform
@@ -64,7 +62,12 @@ class DrivingSimDataset(Dataset):
         """Returns length of the data."""
         return len(self.drive_data)
 
-    def __getitem__(self, idx):
+    def __getitem__(self):
+        """Returns dataset
+        """
+        return self.dataset
+
+    def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
         """
         file_name = 'image_' + str(idx) + '.png'
@@ -76,10 +79,6 @@ class DrivingSimDataset(Dataset):
 
         sample = (image, cur_row)
 
-        
-
-        if self.transform:
-            sample = self.transform(sample)
 
         return sample
 
@@ -88,7 +87,7 @@ class DrivingSimDataset(Dataset):
 
         # apply image augmentation sequential
         image = seq.augment_images(image)
-        
+
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
@@ -98,10 +97,10 @@ class DrivingSimDataset(Dataset):
         return (torch.from_numpy(image), torch.from_numpy(drive_data))
 
     def toProcessedPackage(self):
-        
-        
+
+
         for i in range(0, self.__len__()):
-            self.__toTensor(self.__getitem__(i))
+            self.__add__(self.__toTensor(self.process_img(i)))
 
 
 transformed_dataset = DrivingSimDataset(csv_file='test.csv',

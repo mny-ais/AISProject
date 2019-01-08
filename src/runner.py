@@ -69,6 +69,9 @@ if __name__ == "__main__":
     net = DriveNet()
     #print(net)
 
+    # For non training only
+    # net.eval()
+
     input = torch.randn(1, 3, 200, 88)
     out = net(input, 0)
     print(out)
