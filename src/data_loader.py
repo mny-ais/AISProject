@@ -78,11 +78,11 @@ class DrivingSimDataset(Dataset):
                 csv_file (string): The CSV data file address
                 root_dir (string): The directory of both the images and csv file
         """
-        super(self).__init__()
+        super().__init__()
 
         # TODO : Check if default for header works
         self.dataset = []
-        self.drive_data = pd.read_csv(os.path.join(root_dir, csv_file), sep=',')
+        self.drive_data = pd.read_csv(csv_file, sep=',')
         self.root_dir = root_dir
 
     def __len__(self):
