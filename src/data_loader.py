@@ -103,16 +103,15 @@ class DrivingSimDataset(Dataset):
             self.__add__(self.__toTensor(self.process_img(i)))
 
 
+"""
 transformed_dataset = DrivingSimDataset(csv_file='test.csv',
-                                           root_dir='/home/mr492/Documents/5.Semester/RC-Learn/test',
-                                           transform=transforms.Compose([
-                                               ToTensor()
-                                           ]))
+                                           root_dir='/home/mr492/Documents/5.Semester/RC-Learn/test')
 
 for i in range(len(transformed_dataset)):
     sample = transformed_dataset[i]
 
     print(i, sample['image'].size(), sample['drive_data'].size())
+"""
 
 
 """
@@ -134,4 +133,3 @@ print(hl_comm)
 
 print(csv_file)
 """
-
