@@ -9,7 +9,6 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 
 """
-
 import torch
 
 import torch.nn as nn
@@ -65,7 +64,7 @@ class Trainer:
             for i, (images, data) in enumerate(self.train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
-                self.__run_model(images, data[1])
+                self.run_model(images, data[1])
                 loss = self.__calculate_loss(data[0])
                 loss_list.append(loss.item())
 
@@ -86,11 +85,6 @@ class Trainer:
                                   loss.item())
                           + ": {:2f}%".format(correct / total) * 100)
 
-    def test_model(self):
-        """Connects the model with the AirSim API to drive the car."""
-        # TODO connect the model with the AirSim API
-        pass
-
     def __calculate_loss(self, target):
         """Calculates the loss based on a target tensor.
 
@@ -107,7 +101,7 @@ class Trainer:
 
         return self.loss  # Return the loss, in case it is necessary
 
-    def __run_model(self, input_image, input_command):
+    def run_model(self, input_image, input_command):
         """Runs the model forward.
 
         Args:
@@ -124,6 +118,8 @@ class Trainer:
         return self.out
 
 
+"""
+# Test code to see if the model runs
 if __name__ == "__main__":
     net = DriveNet()
     # print(net)
@@ -135,3 +131,4 @@ if __name__ == "__main__":
 
     net.zero_grad()
     out.backward(torch.randn(1, 2))
+"""
