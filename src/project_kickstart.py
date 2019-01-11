@@ -606,7 +606,7 @@ class AISGame(object):
                         > grab_image_distance:
                 # Record the rgb images
                 if self.record_path is not None:
-                    for i in range(3):
+                    for i in range(2):
                         cv2.imwrite(self.record_path + 'image_'
                                     + str(self.save_counter)
                                     + "-cam_" + str(i)
