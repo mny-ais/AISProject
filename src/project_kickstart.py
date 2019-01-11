@@ -594,7 +594,7 @@ class AISGame(object):
         for i in range(2):
             # Check each segmentation image
             if responses[i + 2]:
-                seg[i] = self.response_to_cv(responses[i + 3], 3)
+                seg[i] = self.response_to_cv(responses[i + 2], 3)
 
             # Add to main image for rending if it's the center camera
             if i == 0:
