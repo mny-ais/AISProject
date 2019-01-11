@@ -582,7 +582,7 @@ class AISGame(object):
         rgb = [None, None, None]
         seg = [None, None, None]
 
-        for i in range(3):
+        for i in range(2):
             if responses[i]:
                 # Check each rgb image
                 rgb[i] = self.response_to_cv(responses[i], 3)
@@ -591,9 +591,9 @@ class AISGame(object):
                 if i == 0:
                     self._main_image = rgb[0]
 
-        for i in range(3):
+        for i in range(2):
             # Check each segmentation image
-            if responses[i + 3]:
+            if responses[i + 2]:
                 seg[i] = self.response_to_cv(responses[i + 3], 3)
 
             # Add to main image for rending if it's the center camera
