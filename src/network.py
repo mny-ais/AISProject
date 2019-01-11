@@ -15,8 +15,6 @@ References:
     arXiv:1710.02410v2 [cs.RO] 2 Mar 2018
 """
 
-import torch
-
 import torch.nn as nn
 
 
