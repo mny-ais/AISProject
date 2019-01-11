@@ -17,21 +17,19 @@ from torch.utils.data.dataloader import DataLoader  # Using this to load data
 
 from data_loader import DrivingSimDataset
 
+from network import DriveNet
+
 from os import path
 
 
 class Runner:
-    def __init__(self, network, csv_file, root_dir, save_dir, batch_size=120):
+    def __init__(self, save_dir):
         """This class is used to train and run a model.
 
         Args:
-            network (nn.Module): The network that is to be trained.
-            csv_file (string): File address of the csv_file for training.
-            root_dir (string): Root directory of the data for training.
             save_dir (string): The directory to save the model parameters to.
-            batch_size (int): Size of the batches for processing
         """
-        self.network = network
+        self.network = DriveNet()
         self.device = torch.device("cuda")  # Set the device to a CUDA device
 
         # Save the last output, so we can calculate the loss using it
@@ -44,32 +42,34 @@ class Runner:
         # We use the Adam optimizer
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.0002)
 
+        # Save file location and name
+        self.save_dir = path.join(save_dir)
+
+    def train_model(self, csv_file, root_dir, num_epochs, batch_size):
+        """Trains the model.
+
+        Args:
+            csv_file (string): File address of the csv_file for training.
+            root_dir (string): Root directory of the data for training.
+            num_epochs (int): Number of epochs to train for
+            batch_size (int): Number of objects in each batch
+        """
         # Datasets
-        self.training_data = DrivingSimDataset(csv_file, root_dir)
+        training_data = DrivingSimDataset(csv_file, root_dir)
 
         # TODO Add a way to create the packaged datasets
 
         # Dataloaders
-        self.train_loader = DataLoader(dataset=self.training_data,
-                                       batch_size=batch_size,
-                                       shuffle=True)
+        train_loader = DataLoader(dataset=training_data,
+                                  batch_size=batch_size,
+                                  shuffle=True)
 
-        # Save file location and name
-        save_name = "drivenet_state_dict.pt"
-        self.save_dir = path.join(save_dir, save_name)
-
-    def train_model(self, num_epochs):
-        """Trains the model.
-
-        Args:
-            num_epochs (int): Number of epochs to train for
-        """
-        total_step = len(self.train_loader)
+        total_step = len(train_loader)
         loss_list = []
         acc_list = []
 
         for epoch in range(num_epochs):
-            for i, (images, data) in enumerate(self.train_loader):
+            for i, (images, data) in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
                 self.run_model(images, data[1], self.save_dir)
