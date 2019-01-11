@@ -382,10 +382,11 @@ class AISGame(object):
                                             airsim.to_quaternion(0,
                                                                  0,
                                                                  0.523599))
-        self.client.simSetCameraOrientation(2,
-                                            airsim.to_quaternion(0,
-                                                                 0,
-                                                                 -0.523599))
+
+        # self.client.simSetCameraOrientation(2,
+        #                                     airsim.to_quaternion(0,
+        #                                                          0,
+        #                                                          -0.523599))
 
         # Internally represents the vehicle control state
         self.vehicle_controls = VehicleControl(control_mode, max_steering,
@@ -542,10 +543,10 @@ class AISGame(object):
                                      airsim.ImageType.Scene,
                                      False,
                                      False),
-                 airsim.ImageRequest("2",
-                                     airsim.ImageType.Scene,
-                                     False,
-                                     False),
+                 # airsim.ImageRequest("2",
+                 #                     airsim.ImageType.Scene,
+                 #                     False,
+                 #                     False),
                  # Camera Segmentations
                  airsim.ImageRequest("0",
                                      airsim.ImageType.Segmentation,
@@ -555,10 +556,11 @@ class AISGame(object):
                                      airsim.ImageType.Segmentation,
                                      False,
                                      False),
-                 airsim.ImageRequest("1",
-                                     airsim.ImageType.Segmentation,
-                                     False,
-                                     False)])
+                 # airsim.ImageRequest("1",
+                 #                     airsim.ImageType.Segmentation,
+                 #                     False,
+                 #                     False)
+            ])
 
 
         else:
@@ -571,10 +573,11 @@ class AISGame(object):
                                      airsim.ImageType.Scene,
                                      False,
                                      False),
-                 airsim.ImageRequest("2",
-                                     airsim.ImageType.Scene,
-                                     False,
-                                     False)])
+                 # airsim.ImageRequest("2",
+                 #                     airsim.ImageType.Scene,
+                 #                     False,
+                 #                     False)
+                 ])
 
         rgb = [None, None, None]
         seg = [None, None, None]
