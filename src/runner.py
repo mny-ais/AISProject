@@ -43,8 +43,7 @@ class Trainer:
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.0002)
 
         # Datasets
-        self.training_data = DrivingSimDataset(csv_file, root_dir,
-                                               transform=None)
+        self.training_data = DrivingSimDataset(csv_file, root_dir)
 
         # TODO Add a way to create the packaged datasets
 
@@ -52,22 +51,6 @@ class Trainer:
         self.train_loader = DataLoader(dataset=self.training_data,
                                        batch_size=batch_size,
                                        shuffle=True)
-
-    def run_model(self, input_image, input_command):
-        """Runs the model forward.
-
-        Args:
-            input_image (torch.Tensor): The input image as a tensor.
-            input_command (int): The input command as an integer value.
-                                 -1 is left,
-                                 0 is center,
-                                 1 is right
-
-        Returns (torch.Tensor):
-            The output as a 2 channel tensor representing steering and throttle.
-        """
-        self.out = self.network(input_image, input_command)
-        return self.out
 
     def train_model(self, num_epochs):
         """Trains the model.
@@ -81,8 +64,9 @@ class Trainer:
         for epoch in range(num_epochs):
             for i, (images, data) in enumerate(self.train_loader):
                 # run the forward pass
-                outputs = self.network(images, data[1])
-                loss = self.criterion(outputs, data[0])
+                # data[0] is the steering info, data[1] is the drive command
+                self.__run_model(images, data[1])
+                loss = self.__calculate_loss(data[0])
                 loss_list.append(loss.item())
 
                 # Backprop and perform Adam optimization
@@ -92,7 +76,7 @@ class Trainer:
 
                 # Track the accuracy
                 total = data[0].size(0)
-                _, predicted = torch.max(outputs.data, 1)
+                _, predicted = torch.max(self.output.data, 1)
                 correct = (predicted == data[0]).sum().item()
                 acc_list.append(correct / total)
 
@@ -105,8 +89,9 @@ class Trainer:
     def test_model(self):
         """Connects the model with the AirSim API to drive the car."""
         # TODO connect the model with the AirSim API
+        pass
 
-    def calculate_loss(self, target):
+    def __calculate_loss(self, target):
         """Calculates the loss based on a target tensor.
 
         Args:
@@ -121,6 +106,22 @@ class Trainer:
         self.loss = self.criterion(self.out, target)
 
         return self.loss  # Return the loss, in case it is necessary
+
+    def __run_model(self, input_image, input_command):
+        """Runs the model forward.
+
+        Args:
+            input_image (torch.Tensor): The input image as a tensor.
+            input_command (int): The input command as an integer value.
+                                 -1 is left,
+                                 0 is center,
+                                 1 is right
+
+        Returns (torch.Tensor):
+            The output as a 2 channel tensor representing steering and throttle.
+        """
+        self.out = self.network(input_image, input_command)
+        return self.out
 
 
 if __name__ == "__main__":
