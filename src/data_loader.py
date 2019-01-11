@@ -1,40 +1,73 @@
 #!/usr/bin/python3
 # -*- coding: iso-8859-15 -*-
+"""DrivingSimDataset.
 
+This module creates a class that extends the torch Dataset object for our
+specific use case. Each data point in the dataset contains an image and a tuple.
+The tuple contains steering and throttle, and the higher level command. This
+module also augments the training dataset.
 
+Authors:
+    Maximilian Roth
+    Nina Pant
+    Yvan Satyawan <ys88@saturn.uni-freiburg.de>
+
+References:
+    Sequential for The Image Augmentations
+    courtesy: https://github.com/mvpcom/carlaILTrainer/blob/master/
+              carlaTrain.ipynb
+"""
 from __future__ import print_function, division
-import os
-import torch
-import pandas as pd
-from skimage import io
-from torch.utils.data import Dataset, DataLoader
-from imgaug import augmenters as iaa
 
+import os
+
+import torch
+
+import pandas as pd
+
+from skimage import io
+
+from torch.utils.data import Dataset
+
+from imgaug import augmenters as iaa
 
 # Ignore warnings
 import warnings
+
 warnings.filterwarnings("ignore")
 
-print('CSV:\n')
+
+# Here we define probabilities
+def st(aug):
+    """Defines the "sometimes" probability value."""
+    return iaa.Sometimes(0.4, aug)
 
 
-"""
-Sequential for The Image Augmentations
-courtesy: https://github.com/mvpcom/carlaILTrainer/blob/master/carlaTrain.ipynb
-"""
+def oc(aug):
+    """Defines the "occasionally" probability value."""
+    return iaa.Sometimes(0.3, aug)
 
-st = lambda aug: iaa.Sometimes(0.4, aug)
-oc = lambda aug: iaa.Sometimes(0.3, aug)
-rl = lambda aug: iaa.Sometimes(0.09, aug)
+
+def rl(aug):
+    """Defines the "rarely" probability value."""
+    return iaa.Sometimes(0.09, aug)
+
+
+# Now we define the sequential
 seq = iaa.Sequential([
-        rl(iaa.GaussianBlur((0, 1.5))),  # blur images with a sigma between 0 and 1.5
-        rl(iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05), per_channel=0.5)),  # add gaussian noise to images
-        oc(iaa.Dropout((0.0, 0.10), per_channel=0.5)),  # randomly remove up to X% of the pixels
-        oc(iaa.CoarseDropout((0.0, 0.10), size_percent=(0.08, 0.2),per_channel=0.5)),  # randomly remove up to X% of the pixels
-        oc(iaa.Add((-40, 40), per_channel=0.5)),  # change brightness of images (by -X to Y of original value)
-        st(iaa.Multiply((0.10, 2.5), per_channel=0.2)),  # change brightness of images (X-Y% of original value)
-        rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),  # improve or worsen the contrast
-        # rl(iaa.Grayscale((0.0, 1))),  # put grayscale
+    # blur images with a sigma between 0 and 1.5
+    rl(iaa.GaussianBlur((0, 1.5))),
+    # randomly remove up to X% of the pixels
+    oc(iaa.Dropout((0.0, 0.10), per_channel=0.5)),
+    # randomly remove up to X% of the pixels
+    oc(iaa.CoarseDropout((0.0, 0.10), size_percent=(0.08, 0.2),
+                         per_channel=0.5)),
+    # change brightness of images (by -X to Y of original value)
+    oc(iaa.Add((-40, 40), per_channel=0.5)),
+    # change brightness of images (X-Y% of original value)
+    st(iaa.Multiply((0.10, 2.5), per_channel=0.2)),
+    # improve or worsen the contrast
+    rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),
 ], random_order=True)
 
 
@@ -56,8 +89,11 @@ class DrivingSimDataset(Dataset):
         """Returns length of the data."""
         return len(self.drive_data)
 
-    def __getitem__(self):
+    def __getitem__(self, **kwargs):
         """Returns dataset
+
+        Args:
+            **kwargs: Not sure yet. Base class has them.
         """
         return self.dataset
 
@@ -75,7 +111,8 @@ class DrivingSimDataset(Dataset):
 
         return sample
 
-    def toTensor(self, sample):
+    @staticmethod
+    def __to_tensor(sample):
         image, drive_data = sample(0), sample(1)
 
         # apply image augmentation sequential
@@ -87,12 +124,12 @@ class DrivingSimDataset(Dataset):
 
         image = image.transpose((2, 0, 1))
 
-        return (torch.from_numpy(image), torch.from_numpy(drive_data))
+        return torch.from_numpy(image), torch.from_numpy(drive_data)
 
-    def toProcessedPackage(self):
+    def __to_processed_package(self):
 
         for i in range(0, self.__len__()):
-            self.__add__(self.__toTensor(self.process_img(i)))
+            self.__add__(self.__to_tensor(self.process_img(i)))
 
 
 """
