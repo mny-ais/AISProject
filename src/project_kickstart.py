@@ -601,7 +601,7 @@ class AISGame(object):
                 self._seg_image = seg[0]
 
         if self.recording:
-            if len(responses) == 6 \
+            if len(responses) == 4 \
                     and np.linalg.norm(self.last_pos - pos)\
                         > grab_image_distance:
                 # Record the rgb images
