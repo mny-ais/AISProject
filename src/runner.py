@@ -20,7 +20,7 @@ from network import DriveNet
 from data_loader import DrivingSimDataset
 
 
-class Trainer:
+class Runner:
     def __init__(self, network, csv_file, root_dir, batch_size=120):
         """This class is used to train a model.
 
