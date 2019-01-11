@@ -15,22 +15,25 @@ import torch.nn as nn
 
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
 
-from network import DriveNet
-
 from data_loader import DrivingSimDataset
+
+from os import path
 
 
 class Runner:
-    def __init__(self, network, csv_file, root_dir, batch_size=120):
-        """This class is used to train a model.
+    def __init__(self, network, csv_file, root_dir, save_dir, batch_size=120):
+        """This class is used to train and run a model.
 
         Args:
             network (nn.Module): The network that is to be trained.
             csv_file (string): File address of the csv_file for training.
             root_dir (string): Root directory of the data for training.
+            save_dir (string): The directory to save the model parameters to.
             batch_size (int): Size of the batches for processing
         """
         self.network = network
+        self.device = torch.device("cuda")  # Set the device to a CUDA device
+
         # Save the last output, so we can calculate the loss using it
         self.out = None
 
@@ -51,8 +54,13 @@ class Runner:
                                        batch_size=batch_size,
                                        shuffle=True)
 
+        # Save file location and name
+        save_name = "drivenet_state_dict.pt"
+        self.save_dir = path.join(save_dir, save_name)
+
     def train_model(self, num_epochs):
         """Trains the model.
+
         Args:
             num_epochs (int): Number of epochs to train for
         """
@@ -64,7 +72,7 @@ class Runner:
             for i, (images, data) in enumerate(self.train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
-                self.run_model(images, data[1])
+                self.run_model(images, data[1], self.save_dir)
                 loss = self.__calculate_loss(data[0])
                 loss_list.append(loss.item())
 
@@ -85,6 +93,10 @@ class Runner:
                                   loss.item())
                           + ": {:2f}%".format(correct / total) * 100)
 
+        # Now save the file
+        torch.save(self.network.state_dict(),
+                   self.save_dir)
+
     def __calculate_loss(self, target):
         """Calculates the loss based on a target tensor.
 
@@ -101,7 +113,8 @@ class Runner:
 
         return self.loss  # Return the loss, in case it is necessary
 
-    def run_model(self, input_image, input_command):
+    def run_model(self, input_image, input_command, model_dir=None,
+                  eval_mode=False):
         """Runs the model forward.
 
         Args:
@@ -110,10 +123,25 @@ class Runner:
                                  -1 is left,
                                  0 is center,
                                  1 is right
+            model_dir (string): The directory of the model parameters.
+            eval_mode (bool): Sets whether the model should be in evaluation
+                              mode.
 
         Returns (torch.Tensor):
             The output as a 2 channel tensor representing steering and throttle.
         """
+        if eval_mode:
+            self.network.train()
+        else:
+            self.network.eval()
+
+        input_image = input_image.to(self.device)
+        if model_dir is not None:
+            # load the model parameters from file, if it exists.
+            if path.isfile(self.save_dir):
+                self.network.load_state_dict(torch.load(self.save_dir))
+
+        self.network.to(self.device)
         self.out = self.network(input_image, input_command)
         return self.out
 
