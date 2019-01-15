@@ -377,11 +377,15 @@ class AISGame(object):
         self.client.confirmConnection()
         self.client.enableApiControl(True)
 
+        # Camera 2 facing left or right? (negative for left)
+        cam_dir = -1
+
         # Change camera direction (in radians)
         self.client.simSetCameraOrientation(1,
                                             airsim.to_quaternion(0,
                                                                  0,
-                                                                 0.523599))
+                                                                 cam_dir
+                                                                 * 0.523599))
 
         # self.client.simSetCameraOrientation(2,
         #                                     airsim.to_quaternion(0,

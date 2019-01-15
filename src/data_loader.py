@@ -29,7 +29,10 @@ from skimage import io
 
 from torch.utils.data import Dataset
 
+"""
+import imgaug as ia
 from imgaug import augmenters as iaa
+"""
 
 # Ignore warnings
 import warnings
@@ -52,8 +55,8 @@ def rl(aug):
     """Defines the "rarely" probability value."""
     return iaa.Sometimes(0.09, aug)
 
-
 # Now we define the sequential
+"""
 seq = iaa.Sequential([
     # blur images with a sigma between 0 and 1.5
     rl(iaa.GaussianBlur((0, 1.5))),
@@ -69,6 +72,7 @@ seq = iaa.Sequential([
     # improve or worsen the contrast
     rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),
 ], random_order=True)
+"""
 
 
 class DrivingSimDataset(Dataset):
@@ -89,13 +93,16 @@ class DrivingSimDataset(Dataset):
         """Returns length of the data."""
         return len(self.drive_data)
 
-    def __getitem__(self, **kwargs):
+    def __getitem__(self, idx):
         """Returns dataset
 
         Args:
             **kwargs: Not sure yet. Base class has them.
         """
-        return self.dataset
+
+        item  = process_img(idx)
+
+        return item 
 
     def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
@@ -107,16 +114,19 @@ class DrivingSimDataset(Dataset):
         cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
         cur_row = cur_row.astype('float')
 
-        sample = (image, cur_row)
+        sample = [image, cur_row]
+        sample = to_tensor(sample)
 
         return sample
 
     @staticmethod
     def to_tensor(sample):
-        image, drive_data = sample(0), sample(1)
-
+    	""" converts images and data to tensor format
+        """
+        image = sample[0]
+        drive_data = sample[1]
         # apply image augmentation sequential
-        image = seq.augment_images(image)
+        # image = seq.augment_images(image)
 
         # swap color axis because
         # numpy image: H x W x C
