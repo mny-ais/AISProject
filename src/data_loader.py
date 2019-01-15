@@ -112,7 +112,7 @@ class DrivingSimDataset(Dataset):
         return sample
 
     @staticmethod
-    def __to_tensor(sample):
+    def to_tensor(sample):
         image, drive_data = sample(0), sample(1)
 
         # apply image augmentation sequential
@@ -129,7 +129,7 @@ class DrivingSimDataset(Dataset):
     def __to_processed_package(self):
 
         for i in range(0, self.__len__()):
-            self.__add__(self.__to_tensor(self.process_img(i)))
+            self.__add__(self.to_tensor(self.process_img(i)))
 
 
 """
