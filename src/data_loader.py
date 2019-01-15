@@ -102,7 +102,7 @@ class DrivingSimDataset(Dataset):
 
         item  = process_img(idx)
 
-        return item 
+        return item
 
     def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
