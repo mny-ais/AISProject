@@ -17,6 +17,7 @@ class Controller:
             simulation inside of Unreal Engine. It is able to receive camera
             images from AirSim as well as send the driving commands to it.
         """
+        raise NotImplementedError
 
     def receive_image(self):
         """Receive images from the AirSim API.
