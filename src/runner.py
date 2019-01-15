@@ -42,7 +42,7 @@ class Runner:
         # We use the Adam optimizer
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.0002)
 
-        # Save file location and name
+        # Weight file location and name
         self.save_dir = path.join(save_dir)
 
     def train_model(self, csv_file, root_dir, num_epochs, batch_size):
