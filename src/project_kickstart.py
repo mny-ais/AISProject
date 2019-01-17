@@ -564,8 +564,7 @@ class AISGame(object):
                  #                     airsim.ImageType.Segmentation,
                  #                     False,
                  #                     False)
-            ])
-
+                 ])
 
         else:
             responses = self.client.simGetImages(
@@ -606,8 +605,8 @@ class AISGame(object):
 
         if self.recording:
             if len(responses) == 4 \
-                    and np.linalg.norm(self.last_pos - pos)\
-                        > grab_image_distance:
+                    and np.linalg.norm(self.last_pos - pos) \
+                    > grab_image_distance:
                 # Record the rgb images
                 if self.record_path is not None:
                     for i in range(2):
@@ -660,7 +659,6 @@ class AISGame(object):
 
         # Print FPS
         if self._timer.elapsed_seconds_since_lap() > 1.0:
-            direction = "Forward"
             if self.vehicle_controls.requested_direction == 0:
                 direction = "Go Forward Yviiiiii"
             elif self.vehicle_controls.requested_direction == -1:

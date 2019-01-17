@@ -121,7 +121,7 @@ class DrivingSimDataset(Dataset):
 
     @staticmethod
     def to_tensor(sample):
-    	""" converts images and data to tensor format
+        """ converts images and data to tensor format
         """
         image = sample[0]
         drive_data = sample[1]

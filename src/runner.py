@@ -72,7 +72,7 @@ class Runner:
             for i, (images, data) in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
-                self.run_model(images, data[1], self.save_dir)
+                self.run_model(images, data[1], eval_mode=False)
                 loss = self.__calculate_loss(data[0])
                 loss_list.append(loss.item())
 
@@ -113,8 +113,7 @@ class Runner:
 
         return self.loss  # Return the loss, in case it is necessary
 
-    def run_model(self, input_image, input_command, model_dir=None,
-                  eval_mode=False):
+    def run_model(self, input_image, input_command, eval_mode=True):
         """Runs the model forward.
 
         Args:
@@ -123,7 +122,6 @@ class Runner:
                                  -1 is left,
                                  0 is center,
                                  1 is right
-            model_dir (string): The directory of the model parameters.
             eval_mode (bool): Sets whether the model should be in evaluation
                               mode.
 
@@ -131,22 +129,21 @@ class Runner:
             The output as a 2 channel tensor representing steering and throttle.
         """
         if eval_mode:
-            self.network.train()
-        else:
             self.network.eval()
+        else:
+            self.network.train()
 
         input_image = input_image.to(self.device)
-        if model_dir is not None:
-            # load the model parameters from file, if it exists.
-            if path.isfile(self.save_dir):
-                self.network.load_state_dict(torch.load(self.save_dir))
+
+        # load the model parameters from file, if it exists.
+        if path.isfile(self.save_dir):
+            self.network.load_state_dict(torch.load(self.save_dir))
 
         self.network.to(self.device)
         self.out = self.network(input_image, input_command)
         return self.out
 
 
-"""
 # Test code to see if the model runs
 if __name__ == "__main__":
     net = DriveNet()
@@ -155,8 +152,9 @@ if __name__ == "__main__":
     # This is to test if it works
     input = torch.randn(1, 3, 200, 88)
     out = net(input, 0)
+    out= out.detach().numpy()
     print(out)
 
-    net.zero_grad()
-    out.backward(torch.randn(1, 2))
-"""
+    # net.zero_grad()
+    # out.backward(torch.randn(1, 2))
+
