@@ -43,7 +43,7 @@ class Runner:
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.0002)
 
         # Weight file location and name
-        self.save_dir = path.join(save_dir)
+        self.save_dir = save_dir
 
     def train_model(self, csv_file, root_dir, num_epochs, batch_size):
         """Trains the model.
@@ -138,6 +138,9 @@ class Runner:
         # load the model parameters from file, if it exists.
         if path.isfile(self.save_dir):
             self.network.load_state_dict(torch.load(self.save_dir))
+        else:
+            print("No state dictionary found. Will run with randomized input.")
+            # Assumption: Network starts with random when nothing is found.
 
         self.network.to(self.device)
         self.out = self.network(input_image, input_command)

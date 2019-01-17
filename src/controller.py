@@ -28,7 +28,7 @@ AIRSIM_HEIGHT = 64
 ADDITIONAL_CROP_TOP = 0
 
 WINDOW_WIDTH = AIRSIM_WIDTH
-WINDOW_HEIGHT = AIRSIM_HEIGHT + 50  # Space to put text below the camera view
+WINDOW_HEIGHT = AIRSIM_HEIGHT + 60  # Space to put text below the camera view
 
 GRAB_IMAGE_DISTANCE = 0.1  # Meters
 
@@ -62,12 +62,14 @@ class Controller:
 
         # Set up timers for fps counting
         self._timer = Timer()
-        self.save_timer = None
-        self._counter = 0
+        self.counter = 0
 
         # Set up display variables
         self._display = None
         self._main_image = None
+        self.fps_text = "FPS: 0"
+        self.direction_text = "Direction: Forwards"
+        self._text_font = None
 
         # Directions:
         # -1 : Left
@@ -75,9 +77,9 @@ class Controller:
         # 1 : Right
         self._direction = 0  # Direction defaults to forwards
 
-        # Drive restrictions
-        self._max_steering = 0.4
-        self._max_throttle = 0.3
+        self.out = None  # Network output
+
+        self.max_throttle = 0.35  # Throttle limit
 
         # Quitting
         self._request_quit = False
@@ -86,6 +88,13 @@ class Controller:
         """"Launch PyGame."""
         pygame.init()
         self.__init_game()
+
+        # Initialize fonts
+        if not pygame.font.get_init():
+            pygame.font.init()
+
+        self._text_font = pygame.font.SysFont("helvetica", 24)
+
         while not self._request_quit:
             self.__on_loop()
             self.__on_render()
@@ -108,22 +117,18 @@ class Controller:
         self._display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT),
                                                 pygame.HWSURFACE
                                                 | pygame.DOUBLEBUF)
-        # TODO Make PyGame print the text
         print("PyGame started")
 
     def __on_reset(self):
         """Resets the state of the client."""
-        # TODO Make PyGame print the text
-        # print("Resetting client")
+        print("Resetting client")
         self.client.reset()
         self._timer = Timer()
-        self.save_timer = Timer()
 
     def __on_loop(self):
         """Commands to execute on every loop."""
         # Make time tick
         self._timer.tick()
-        self.save_timer.tick()
 
         # Get an image from Unreal
         response = self.client.simGetImage("0",
@@ -138,33 +143,60 @@ class Controller:
         events = pygame.event.get()
 
         for event in events:
-            self.__parse_event(event)
+            if event.type == pygame.KEYDOWN:
+                self.__parse_event(event)
+            if event.type == pygame.QUIT:
+                self._request_quit = True
 
-        out = self.network.run_model(self.__to_tensor(rgb), self._direction)
-        out = tuple(out.detach.numpy())
+        self.out = self.network.run_model(self.__to_tensor(rgb),
+                                          self._direction)
+        self.out = tuple(self.out.detach.numpy())
 
-        self.__send_command((out[0], 0.35))  # Currently locked throttle to 0.3
+        self.__send_command((self.out[0], self.max_throttle))
         self.counter += 1
 
-        # Print FPS and direction
-        # TODO Make this print inside of the PyGame window
-        if self._timer.elapsed_seconds_since_lap() > 1.0:
-            if self._direction == 0:
-                direction = "Forward"
-            elif self._direction == -1:
-                direction = "Left"
-            else:
-                direction = "Right"
-            print("FPS: {0}, Drive direction: {1}".
-                  format(self.counter,
-                         direction))
+        # Determine then update direction
+        if self._direction == 0:
+            direction = "Forward"
+        elif self._direction == -1:
+            direction = "Left"
+        else:
+            direction = "Right"
+        self.direction_text = "Direction: {0}".format(direction)
+
+        # Update FPS
+        if self._timer.elapsed_seconds_since_lap() > 0.3:
+            # Determine FPS
+            fps = float(self.counter) / self._timer.elapsed_seconds_since_lap()
+
+            # Update the info
+            self.fps_text = "FPS: {0}".format(int(fps))
+
+            # Reset counters
             self.counter = 0
             self._timer.lap()
 
         pygame.display.update()  # Finally, update the display.
 
     def __on_render(self):
-        return None
+        if self._main_image is not None:
+            surface_main = pygame.surfarray.make_surface(
+                self._main_image.swapaxes(0, 1))
+            self._display.blit(surface_main, (0, 0))
+        surface_fps = self._text_font.render(self.fps_text, True,
+                                             (0, 0, 0))
+        surface_direction = self._text_font.render(self.direction_text, True,
+                                                   (0, 0, 0))
+        surface_steering = self._text_font.render("Steering: %.2f"
+                                                  % self.out[0], True,
+                                                  (0, 0, 0))
+        surface_throttle = self._text_font.render("Throttle: %.2f"
+                                                  % self.out[1], True,
+                                                  (0, 0, 0))
+        self._display.blit(surface_fps, (6, 70))
+        self._display.blit(surface_direction, (120, 70))
+        self._display.blit(surface_steering, (6, 95))
+        self._display.blit(surface_throttle, (120, 95))
 
     @staticmethod
     def __response_to_cv(r, channels):
@@ -187,7 +219,6 @@ class Controller:
         Args:
             event (pygame.Event): The PyGame event to be parsed.
         """
-        # TODO For each event print what was pressed in the window
         if event.key == K_KP8:
             self._direction = 0
         elif event.key == K_KP4:
