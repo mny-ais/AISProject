@@ -50,12 +50,15 @@ class Controller:
                 SPACE   : Reset
 
         Args:
-            network (torch.Module): A pytorch network.
+            network (runner.Runner): A PyTorch network wrapped by a runner.
         """
         # Initialize AirSim connection
         self.client = airsim.CarClient()
         self.client.confirmConnection()
         self.client.enableApiControl(True)
+
+        # Set up the network
+        self.network = network
 
         # Set up timers for fps counting
         self._timer = Timer()
@@ -90,6 +93,7 @@ class Controller:
         if self._request_quit:
             pygame.display.quit()
             pygame.quit()
+            self.client.enableApiControl(False)  # Give control back to user
             return
 
     def __init_game(self):
@@ -105,7 +109,7 @@ class Controller:
                                                 pygame.HWSURFACE
                                                 | pygame.DOUBLEBUF)
         # TODO Make PyGame print the text
-        # print("PyGame started")
+        print("PyGame started")
 
     def __on_reset(self):
         """Resets the state of the client."""
@@ -136,12 +140,31 @@ class Controller:
         for event in events:
             self.__parse_event(event)
 
+        out = self.network.run_model(self.__to_tensor(rgb), self._direction)
+        out = tuple(out.detach.numpy())
 
+        self.__send_command((out[0], 0.35))  # Currently locked throttle to 0.3
         self.counter += 1
 
+        # Print FPS and direction
+        # TODO Make this print inside of the PyGame window
+        if self._timer.elapsed_seconds_since_lap() > 1.0:
+            if self._direction == 0:
+                direction = "Forward"
+            elif self._direction == -1:
+                direction = "Left"
+            else:
+                direction = "Right"
+            print("FPS: {0}, Drive direction: {1}".
+                  format(self.counter,
+                         direction))
+            self.counter = 0
+            self._timer.lap()
+
+        pygame.display.update()  # Finally, update the display.
 
     def __on_render(self):
-        pass
+        return None
 
     @staticmethod
     def __response_to_cv(r, channels):
@@ -164,6 +187,7 @@ class Controller:
         Args:
             event (pygame.Event): The PyGame event to be parsed.
         """
+        # TODO For each event print what was pressed in the window
         if event.key == K_KP8:
             self._direction = 0
         elif event.key == K_KP4:
@@ -175,43 +199,25 @@ class Controller:
         elif event.key == K_q:
             self._request_quit = True
 
-    def receive_image(self):
-        """Receive images from the AirSim API.
-
-        Returns:
-            (torch.Tensor) A tensor of the image from the front camera of the
-            vehicle.
-        """
-        raise NotImplementedError
-
-    def send_command(self, command):
+    def __send_command(self, command):
         """Sends driving commands over the AirSim API.
 
         Args:
             command (tuple): A tuple in the form (steering, throttle).
         """
+        car_control = airsim.CarControls()
+        car_control.steering = command[0]
+        car_control.throttle = command[1]
+        self.client.setCarControls(car_control)
+
+    @staticmethod
+    def __to_tensor(image):
+        """Turns an image into a tensor
+
+        Args:
+            image: The image to be converted
+
+        Returns:
+            (torch.Tensor) the image as a tensor.
+        """
         raise NotImplementedError
-
-        while True:
-            timer.tick()
-            image = Controller.receive_image()
-
-            # Get output, which is a tensor, convert to numpy array, then tuple
-            output = tuple(runner.run_model(image, direction).detach.numpy())
-
-            controller.send_command(output)
-            counter += 1
-
-            # Printing once a second
-            if timer.elapsed_seconds_since_lap() > 1.0:
-                # Get human readable directions
-                if direction == -1:
-                    hr_dir = "Left"
-                elif direction == 0:
-                    hr_dir = "Forwards"
-                else:
-                    hr_dir = "Right"
-
-                print("FPS: {0}, Drive direction: {1}".format(counter, hr_dir))
-                counter = 0
-                timer.lap()
