@@ -77,9 +77,11 @@ class Runner:
                 print(images[i])
                 print("data:")
                 print(data[i])
-                self.run_model(images[i].to(self.device, dtype=torch.float),
+
+                self.run_model(images.to(self.device, dtype=torch.float),
                                data.data.numpy()[i][-1], eval_mode=False)
-                target = data[i][1:3].to(self.device, dtype=torch.float)
+                target = torch.unsqueeze(torch.unsqueeze(data, 0), 0)
+                target = target.to(self.device, dtype=torch.float)
                 loss = self.__calculate_loss(target)
                 loss_list.append(loss.item())
 
