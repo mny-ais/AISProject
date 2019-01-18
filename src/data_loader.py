@@ -100,7 +100,7 @@ class DrivingSimDataset(Dataset):
             **kwargs: Not sure yet. Base class has them.
         """
 
-        item  = process_img(idx)
+        item  = self.process_img(idx)
 
         return item
 
