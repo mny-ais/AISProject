@@ -76,7 +76,6 @@ class Runner:
         #     print(i[1]['image'])
         #     print(i[1]['vehicle_commands'])
 
-        loss_list = []
         acc_list = []
 
         for epoch in range(num_epochs):
@@ -98,24 +97,25 @@ class Runner:
 
                 # now calculate the loss
                 loss = self.__calculate_loss(target)
-                loss_list.append(loss.item())
 
                 # Backprop and perform Adam optimization
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
-                # Track the accuracy
-                total = data.size(0)
-                _, predicted = torch.max(self.output.data, 1)
-                correct = (predicted == data[0]).sum().item()
-                acc_list.append(correct / total)
+                # # Track the accuracy
+                # total = data.size(0)
+                # _, predicted = torch.max(self.output.data, 1)
+                # correct = (predicted == data[0]).sum().item()
+                # acc_list.append(correct / total)
 
-                if (i + 1) % 100 == 0:
-                    print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}, Accuracy"
-                          .format(epoch + 1, num_epochs, i + 1, total_step,
-                                  loss.item())
-                          + ": {:2f}%".format(correct / total) * 100)
+                # TODO: Calculate accuracy
+
+
+                if (data + 1) % 50 == 0:
+                    print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
+                          .format(epoch + 1, num_epochs, data + 1, total_step,
+                                  loss.item()))
 
         # Now save the file
         torch.save(self.network.state_dict(),
