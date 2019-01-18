@@ -73,10 +73,10 @@ class Runner:
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
                 print("running forwards")
-                print("images:")
-                print(images)
+                print("image:")
+                print(images[i])
                 print("data:")
-                print(data)
+                print(data[i])
                 self.run_model(images[i].to(self.device, dtype=torch.float),
                                data.data.numpy()[i][-1], eval_mode=False)
                 target = data[i][1:3].to(self.device, dtype=torch.float)
