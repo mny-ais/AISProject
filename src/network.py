@@ -97,12 +97,12 @@ class DriveNet(nn.Module):
         # Branch according to the higher level commands
         # -1 left, 0 forward, 1 right
         command = cmd.numpy()
-        if command[self.counter] == 0:
+        if command[self.counter][-1] == 0:
             x = self.fc_forward_1(x)
             x = self.fc_forward_2(x)
             out = self.fc_out_forward(x)
 
-        elif command[self.counter] == -1:
+        elif command[self.counter][-1] == -1:
             x = self.fc_left_1(x)
             x = self.fc_left_2(x)
             out = self.fc_out_left(x)
