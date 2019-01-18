@@ -148,20 +148,20 @@ class Controller:
             if event.type == pygame.QUIT:
                 self._request_quit = True
 
-#        # run the network
-#        # First convert the images to tensors
-#        rgb = self.__to_tensor(rgb)
-#        # Then convert the command to a numpy array
-#        command = np.array([0, 0, 0, self._direction])
-#        self.out = self.network.run_model(self.__to_tensor(rgb),
-#                                          command,
-#                                          1)
-#        # Convert out to a cpu tensor, then get its data, then to numpy, then to
-#        # a tuple
-#        self.out = self.out.cpu()
-#        self.out = tuple(self.out.data.numpy())
-#
-#        self.__send_command((self.out[0], self.max_throttle))
+        # # run the network
+        # # First convert the images to tensors
+        # rgb = self.__to_tensor(rgb)
+        # # Then convert the command to a numpy array
+        # command = np.array([0, 0, 0, self._direction])
+        # self.out = self.network.run_model(self.__to_tensor(rgb),
+        #                                  command,
+        #                                  1)
+        # # Convert out to a cpu tensor, then get its data, then to numpy, then to
+        # # a tuple
+        # self.out = self.out.cpu()
+        # self.out = tuple(self.out.data.numpy())
+        #
+        # self.__send_command((self.out[0], self.max_throttle))
         self.counter += 1
 
         # Determine then update direction
@@ -188,25 +188,35 @@ class Controller:
         pygame.display.update()  # Finally, update the display.
 
     def __on_render(self):
+        """Renders the pygame window itself."""
         if self._main_image is not None:
+            # If there is an image in the pipeline, render it.
             surface_main = pygame.surfarray.make_surface(
                 self._main_image.swapaxes(0, 1))
             self._display.blit(surface_main, (0, 0))
-        self._display.blit(pygame.Rect(0, 64, WINDOW_WIDTH, WINDOW_HEIGHT - 64))
+
+        # Render white fill to "reset" the text
+        self._display.fill((255, 255, 255),
+                           rect=pygame.Rect(0, 64, WINDOW_WIDTH,
+                                            WINDOW_HEIGHT - 64))
+
+        # Create the text in the window
         surface_fps = self._text_font.render(self.fps_text, True,
                                              (0, 0, 0))
         surface_direction = self._text_font.render(self.direction_text, True,
                                                    (0, 0, 0))
-#        surface_steering = self._text_font.render("Steering: %.2f"
-#                                                  % self.out[0], True,
-#                                                  (0, 0, 0))
-#        surface_throttle = self._text_font.render("Throttle: %.2f"
-#                                                  % self.out[1], True,
-#                                                  (0, 0, 0))
+        # surface_steering = self._text_font.render("Steering: %.2f"
+        #                                          % self.out[0], True,
+        #                                          (0, 0, 0))
+        # surface_throttle = self._text_font.render("Throttle: %.2f"
+        #                                          % self.out[1], True,
+        #                                          (0, 0, 0))
+
+        # And now render that text
         self._display.blit(surface_fps, (6, 70))
         self._display.blit(surface_direction, (120, 70))
-#        self._display.blit(surface_steering, (6, 95))
-#        self._display.blit(surface_throttle, (120, 95))
+        # self._display.blit(surface_steering, (6, 95))
+        # self._display.blit(surface_throttle, (120, 95))
 
     @staticmethod
     def __response_to_cv(r, channels):
