@@ -69,7 +69,7 @@ class Runner:
         acc_list = []
 
         for epoch in range(num_epochs):
-            for i, (images, data) in enumerate(train_loader):
+            for i, (imagesi.to(self.device, dtype=torch.float), data) in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
                 self.run_model(images, data[1], eval_mode=False)
