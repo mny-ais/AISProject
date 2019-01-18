@@ -114,7 +114,7 @@ class DrivingSimDataset(Dataset):
         cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
         cur_row = cur_row.astype('float')
 
-        sample = [image.to(device, dtype=torch.float), cur_row]
+        sample = [image, cur_row]
         sample = self.to_tensor(sample)
 
         return sample
