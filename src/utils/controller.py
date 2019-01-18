@@ -14,7 +14,7 @@ import airsim
 import cv2
 import pygame
 import numpy as np
-from timer import Timer
+from utils.timer import Timer
 from pygame.locals import K_KP4
 from pygame.locals import K_KP6
 from pygame.locals import K_KP8
