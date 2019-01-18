@@ -74,7 +74,7 @@ class DriveNet(nn.Module):
             tensor representing steering and throttle.
         """
         # Counter used to get the right command from the cmd tensor
-        if self.counter > batch_size:
+        if self.counter >= batch_size:
             self.counter = 0
 
         # Forward through Convolutions
