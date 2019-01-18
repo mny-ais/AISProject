@@ -44,6 +44,10 @@ def parse_arguments():
     parser.add_argument('-e', '--eval', action='store_true',
                         help="set to evaluation mode")
 
+    # CPU or CUDA
+    parser.add_argument('--cpu', action='store_true',
+                        help="run in cpu only mode")
+
     arguments = parser.parse_args()
 
     if arguments.t and arguments.eval:
@@ -58,7 +62,7 @@ def parse_arguments():
 
 def main(arguments):
     """Main function that runs everything"""
-    runner = Runner(arguments.weights[0])
+    runner = Runner(arguments.weights[0], cpu=arguments.cpu)
 
     if arguments.t:
         # Means run in training mode, parse args

@@ -58,7 +58,9 @@ class DriveNet(nn.Module):
         self.fc_out_forward = NetworkUtils.make_fc(512, 2)
         self.fc_out_right = NetworkUtils.make_fc(512, 2)
 
-    def forward(self, img, cmd):
+        self.counter = 0
+
+    def forward(self, img, cmd, batch_size):
         """Describes the connections within the neural network.
 
         Args:
@@ -71,6 +73,9 @@ class DriveNet(nn.Module):
             The commands to be given to the vehicle to drive in a 3 channel
             tensor representing steering and throttle.
         """
+        # Counter used to get the right command from the cmd tensor
+        if self.counter > batch_size:
+            self.counter = 0
 
         # Forward through Convolutions
         x = self.conv1(img)
@@ -91,12 +96,13 @@ class DriveNet(nn.Module):
 
         # Branch according to the higher level commands
         # -1 left, 0 forward, 1 right
-        if cmd == 0:
+        command = cmd.numpy()
+        if command[self.counter] == 0:
             x = self.fc_forward_1(x)
             x = self.fc_forward_2(x)
             out = self.fc_out_forward(x)
 
-        elif cmd == -1:
+        elif command[self.counter] == -1:
             x = self.fc_left_1(x)
             x = self.fc_left_2(x)
             out = self.fc_out_left(x)
@@ -105,6 +111,8 @@ class DriveNet(nn.Module):
             x = self.fc_right_1(x)
             x = self.fc_right_2(x)
             out = self.fc_out_right(x)
+
+        self.counter += 1
 
         return out
 

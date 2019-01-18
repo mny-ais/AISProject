@@ -23,14 +23,19 @@ from os import path
 
 
 class Runner:
-    def __init__(self, save_dir):
+    def __init__(self, save_dir, cpu=True):
         """This class is used to train and run a model.
 
         Args:
             save_dir (string): The directory to save the model parameters to.
+            cpu (bool): Use cpu or CUDA. True means use the CPU only
         """
         self.network = DriveNet()
-        self.device = torch.device("cuda")  # Set the device to a CUDA device
+        if cpu:
+            self.device = torch.device("cpu")  # Set it to be a CPU only device
+        else:
+            self.device = torch.device('cuda')  # Set the device to CUDA
+
 
         # Save the last output, so we can calculate the loss using it
         self.out = None
@@ -85,6 +90,7 @@ class Runner:
 
                 self.run_model(images.to(self.device, dtype=torch.float),
                                command,
+                               batch_size,
                                eval_mode=False)
                 # Prep target by turning it into a CUDA compatible format
                 target = vehicle_commands
@@ -135,7 +141,7 @@ class Runner:
 
         return self.loss  # Return the loss, in case it is necessary
 
-    def run_model(self, input_image, input_command, eval_mode=True):
+    def run_model(self, input_image, input_command, batch_size, eval_mode=True):
         """Runs the model forward.
 
         Args:
@@ -165,7 +171,7 @@ class Runner:
             # Assumption: Network starts with random when nothing is found.
 
         self.network.to(self.device)
-        self.out = self.network(input_image, input_command)
+        self.out = self.network(input_image, input_command, batch_size)
         return self.out
 
 
