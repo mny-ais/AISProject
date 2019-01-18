@@ -114,7 +114,7 @@ class Runner:
 
                 if (data[0] + 1) % 50 == 0:
                     print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
-                          .format(epoch + 1, num_epochs, data + 1, total_step,
+                          .format(epoch + 1, num_epochs, data[0] + 1, total_step,
                                   loss.item()))
 
         # Now save the file
@@ -132,11 +132,6 @@ class Runner:
         """
         if self.out is None:
             raise ValueError("forward() has not been run.")
-        print("running loss calculation")
-        print("out:")
-        print(self.out)
-        print("target:")
-        print(target)
         self.loss = self.criterion(self.out, target)
 
         return self.loss  # Return the loss, in case it is necessary
