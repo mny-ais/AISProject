@@ -74,7 +74,7 @@ class Runner:
                 # data[0] is the steering info, data[1] is the drive command
                 self.run_model(images.to(self.device, dtype=torch.float),
                                data.data.numpy()[i][-1], eval_mode=False)
-                target = data[i][1:2].to(self.device, dtype=torch.float)
+                target = data[i][1:3].to(self.device, dtype=torch.float)
                 loss = self.__calculate_loss(target)
                 loss_list.append(loss.item())
 
@@ -110,7 +110,11 @@ class Runner:
         """
         if self.out is None:
             raise ValueError("forward() has not been run.")
-
+        print("running loss calculation")
+        print("out:")
+        print(self.out)
+        print("target:")
+        print(target)
         self.loss = self.criterion(self.out, target)
 
         return self.loss  # Return the loss, in case it is necessary
