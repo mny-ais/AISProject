@@ -65,11 +65,11 @@ class Runner:
                                   shuffle=True)
 
         total_step = len(train_loader)
-        print("len(train_loader) = {0}".format(total_step))
-        print("Dataset:")
-        for i in enumerate(train_loader):
-            print(i[1]['image'])
-            print(i[1]['vehicle_commands'])
+        # print("len(train_loader) = {0}".format(total_step))
+        # print("Dataset:")
+        # for i in enumerate(train_loader):
+        #     print(i[1]['image'])
+        #     print(i[1]['vehicle_commands'])
 
         loss_list = []
         acc_list = []
