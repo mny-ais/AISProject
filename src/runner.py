@@ -15,9 +15,9 @@ import torch.nn as nn
 
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
 
-from utils.data_loader import DrivingSimDataset
+from data_loader import DrivingSimDataset
 
-from network.network import DriveNet
+from network import DriveNet
 
 from os import path
 
