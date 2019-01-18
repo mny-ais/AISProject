@@ -112,7 +112,7 @@ class Runner:
                 # TODO: Calculate accuracy
 
 
-                if (data + 1) % 50 == 0:
+                if (data[0] + 1) % 50 == 0:
                     print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
                           .format(epoch + 1, num_epochs, data + 1, total_step,
                                   loss.item()))
