@@ -65,9 +65,9 @@ class DriveNet(nn.Module):
 
         Args:
             img (torch.Tensor): The input image as a tensor.
-            cmd (torch.Tensor): The high level command being given to the model.
-                                This is in the form of a 4 dimensional tensor
-                                where the fourth dimension is the command itself
+            cmd (numpy.array): The high level command being given to the model.
+                               This is in the form of a 4 dimensional tensor
+                               where the fourth dimension is the command itself
 
         Returns (torch.Tensor):
             The commands to be given to the vehicle to drive in a 3 channel
@@ -96,13 +96,12 @@ class DriveNet(nn.Module):
 
         # Branch according to the higher level commands
         # -1 left, 0 forward, 1 right
-        command = cmd.numpy()
-        if command[self.counter][-1] == 0:
+        if cmd[self.counter][-1] == 0:
             x = self.fc_forward_1(x)
             x = self.fc_forward_2(x)
             out = self.fc_out_forward(x)
 
-        elif command[self.counter][-1] == -1:
+        elif cmd[self.counter][-1] == -1:
             x = self.fc_left_1(x)
             x = self.fc_left_2(x)
             out = self.fc_out_left(x)

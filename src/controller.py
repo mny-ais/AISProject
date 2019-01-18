@@ -13,6 +13,7 @@ Authors:
 import airsim
 import cv2
 import pygame
+import torch
 import numpy as np
 from utils.timer import Timer
 from pygame.locals import K_KP4
@@ -147,9 +148,18 @@ class Controller:
             if event.type == pygame.QUIT:
                 self._request_quit = True
 
+        # run the network
+        # First convert the images to tensors
+        rgb = self.__to_tensor(rgb)
+        # Then convert the command to a numpy array
+        command = np.array([0, 0, 0, self._direction])
         self.out = self.network.run_model(self.__to_tensor(rgb),
-                                          self._direction)
-        self.out = tuple(self.out.detach.numpy())
+                                          command,
+                                          1)
+        # Convert out to a cpu tensor, then get its data, then to numpy, then to
+        # a tuple
+        self.out = self.out.cpu()
+        self.out = tuple(self.out.data.numpy())
 
         self.__send_command((self.out[0], self.max_throttle))
         self.counter += 1
@@ -245,9 +255,11 @@ class Controller:
         """Turns an image into a tensor
 
         Args:
-            image: The image to be converted
+            image: The image to be converted as an array of uncompressed bits.
 
         Returns:
             (torch.Tensor) the image as a tensor.
         """
-        raise NotImplementedError
+        image = image.transpose((2, 0, 1))
+
+        return torch.from_numpy(image)

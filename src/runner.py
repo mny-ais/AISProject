@@ -85,7 +85,8 @@ class Runner:
 
                 images = data[1]['image']
                 vehicle_commands = data[1]['vehicle_commands']
-                command = data[1]['cmd']
+                command = data[1]['cmd'].numpy()
+
 
                 self.run_model(images.to(self.device, dtype=torch.float),
                                command,
@@ -141,15 +142,17 @@ class Runner:
 
         Args:
             input_image (torch.Tensor): The input image as a tensor.
-            input_command (int): The input command as an integer value.
-                                 -1 is left,
-                                 0 is center,
-                                 1 is right
+            input_command (numpy.array): The input command as an integer value
+                                         in a tensor.
+                                         -1 is left,
+                                         0 is center,
+                                         1 is right
             eval_mode (bool): Sets whether the model should be in evaluation
                               mode.
 
-        Returns (torch.Tensor):
-            The output as a 2 channel tensor representing steering and throttle.
+        Returns:
+            (torch.Tensor) The output as a 2 channel tensor representing
+            steering and throttle.
         """
         if eval_mode:
             self.network.eval()
