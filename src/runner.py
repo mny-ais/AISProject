@@ -72,7 +72,7 @@ class Runner:
             for i, (images, data) in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the steering info, data[1] is the drive command
-                self.run_model(images.to(self.device, dtype=torch.float), data.data.numpy()[1], eval_mode=False)
+                self.run_model(images.to(self.device, dtype=torch.float), data.data.numpy()[i][-1], eval_mode=False)
                 loss = self.__calculate_loss(data[0])
                 loss_list.append(loss.item())
 
