@@ -29,9 +29,11 @@ AIRSIM_HEIGHT = 64
 ADDITIONAL_CROP_TOP = 0
 
 WINDOW_WIDTH = AIRSIM_WIDTH
-WINDOW_HEIGHT = AIRSIM_HEIGHT + 60  # Space to put text below the camera view
+WINDOW_HEIGHT = AIRSIM_HEIGHT + 99  # Space to put text below the camera view
 
 GRAB_IMAGE_DISTANCE = 0.1  # Meters
+
+MAX_THROTTLE_ONLY = True  # Run the car at max speed and ignore model throttle
 
 
 class Controller:
@@ -79,6 +81,7 @@ class Controller:
         self._direction = 0  # Direction defaults to forwards
 
         self.out = None  # Network output
+        self.throttle = 0  # Throttle output
 
         self.max_throttle = 0.35  # Throttle limit
 
@@ -148,20 +151,28 @@ class Controller:
             if event.type == pygame.QUIT:
                 self._request_quit = True
 
-        # # run the network
-        # # First convert the images to tensors
-        # rgb = self.__to_tensor(rgb)
-        # # Then convert the command to a numpy array
-        # command = np.array([0, 0, 0, self._direction])
-        # self.out = self.network.run_model(self.__to_tensor(rgb),
-        #                                  command,
-        #                                  1)
-        # # Convert out to a cpu tensor, then get its data, then to numpy, then to
-        # # a tuple
-        # self.out = self.out.cpu()
-        # self.out = tuple(self.out.data.numpy())
-        #
-        # self.__send_command((self.out[0], self.max_throttle))
+        # run the network
+        # First convert the images to tensors
+        rgb = self.__to_tensor(rgb)
+
+        # Then convert the command to a numpy array
+        command = np.array([0, 0, 0, self._direction])
+        self.out = self.network.run_model(torch.unsqueeze(rgb, 0).float(),
+                                         [command],
+                                         1)
+        # Convert out to a cpu tensor, then get its data, then to numpy, then to
+        # a tuple
+        self.out = self.out.cpu()
+        self.out = tuple(self.out.data.numpy())
+        
+        # Now send the command to airsim
+        if MAX_THROTTLE_ONLY:
+            self.throttle = self.max_throttle
+        else:
+            self.throttle = self.out[0][1]
+        self.__send_command((self.out[0][0], self.throttle))
+
+        # Computation is now complete. Add to the counter.
         self.counter += 1
 
         # Determine then update direction
@@ -205,18 +216,21 @@ class Controller:
                                              (0, 0, 0))
         surface_direction = self._text_font.render(self.direction_text, True,
                                                    (0, 0, 0))
-        # surface_steering = self._text_font.render("Steering: %.2f"
-        #                                          % self.out[0], True,
-        #                                          (0, 0, 0))
-        # surface_throttle = self._text_font.render("Throttle: %.2f"
-        #                                          % self.out[1], True,
-        #                                          (0, 0, 0))
+
+        if self.out is None:
+            self.out = [0, 0]
+        surface_steering = self._text_font.render("Steering: %.2f"
+                                                  % self.out[0][0], True,
+                                                  (0, 0, 0))
+        surface_throttle = self._text_font.render("Throttle: %.2f"
+                                                  % self.throttle, True,
+                                                  (0, 0, 0))
 
         # And now render that text
         self._display.blit(surface_fps, (6, 70))
         self._display.blit(surface_direction, (120, 70))
-        # self._display.blit(surface_steering, (6, 95))
-        # self._display.blit(surface_throttle, (120, 95))
+        self._display.blit(surface_steering, (6, 100))
+        self._display.blit(surface_throttle, (6, 130))
 
     @staticmethod
     def __response_to_cv(r, channels):
@@ -257,7 +271,7 @@ class Controller:
             command (tuple): A tuple in the form (steering, throttle).
         """
         car_control = airsim.CarControls()
-        car_control.steering = command[0]
+        car_control.steering = float(command[0])
         car_control.throttle = command[1]
         self.client.setCarControls(car_control)
 
@@ -274,3 +288,4 @@ class Controller:
         image = image.transpose(2, 0, 1)
 
         return torch.from_numpy(image)
+
