@@ -107,7 +107,7 @@ class DrivingSimDataset(Dataset):
     def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
         """
-        file_name = 'image_' + str(idx) + '.png'
+        file_name = 'image_' + str(idx) + '-cam_0' + '.png'
         img_name = os.path.join(self.root_dir, file_name)
         image = io.imread(img_name)
 
