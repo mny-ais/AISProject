@@ -134,7 +134,7 @@ class DrivingSimDataset(Dataset):
 
         image = image.transpose((2, 0, 1))
 
-        return torch.from_numpy(image), torch.from_numpy(drive_data)
+        return torch.from_numpy(image), torch.from_numpy(drive_data).float()
 
     def __to_processed_package(self):
 
