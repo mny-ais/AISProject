@@ -260,6 +260,6 @@ class Controller:
         Returns:
             (torch.Tensor) the image as a tensor.
         """
-        image = image.transpose((2, 0, 1))
+        image = image.transpose(2, 0, 1)
 
         return torch.from_numpy(image)
