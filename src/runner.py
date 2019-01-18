@@ -74,7 +74,8 @@ class Runner:
                 # data[0] is the steering info, data[1] is the drive command
                 self.run_model(images.to(self.device, dtype=torch.float),
                                data.data.numpy()[i][-1], eval_mode=False)
-                loss = self.__calculate_loss(data[i][1 : 2])
+                target = data[i][1:2].to(self.device, dtype=torch.float)
+                loss = self.__calculate_loss(target)
                 loss_list.append(loss.item())
 
                 # Backprop and perform Adam optimization
