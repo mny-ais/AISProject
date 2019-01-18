@@ -131,12 +131,11 @@ class Controller:
         self._timer.tick()
 
         # Get an image from Unreal
-        response = self.client.simGetImage("0",
-                                           airsim.ImageType.Scene,
-                                           False)
+        response = self.client.simGetImages([
+            airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)])
         rgb = None
         if response:
-            rgb = self.__response_to_cv(response, 3)
+            rgb = self.__response_to_cv(response[0], 3)
             self._main_image = rgb
 
         # Get key presses and parse them
