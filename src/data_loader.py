@@ -114,7 +114,10 @@ class DrivingSimDataset(Dataset):
         cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
         cur_row = cur_row.astype('float')
 
-        sample = [image, cur_row]
+        steering = torch.tensor(0,0,0,cur_row[1]).float()
+        throttle = torch.tensor(0,0,0,cur_row[2]).float()
+        cmd = cur_row[4]
+        sample = {"image": image, "steering": steering, "throttle": throttle, "cmd": cmd}
         sample = self.to_tensor(sample)
 
         return sample
@@ -123,8 +126,7 @@ class DrivingSimDataset(Dataset):
     def to_tensor(sample):
         """ converts images and data to tensor format
         """
-        image = sample[0]
-        drive_data = sample[1]
+        image = sample["image"]
         # apply image augmentation sequential
         # image = seq.augment_images(image)
 
@@ -134,7 +136,7 @@ class DrivingSimDataset(Dataset):
 
         image = image.transpose((2, 0, 1))
 
-        return torch.from_numpy(image), torch.from_numpy(drive_data).float()
+        return {"image": torch.from_numpy(image), "steering": sample["steering"], "throttle": sample["throttle"], "cmd": sample["cmd"]}
 
     def __to_processed_package(self):
 
