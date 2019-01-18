@@ -115,7 +115,7 @@ class DrivingSimDataset(Dataset):
         cur_row = cur_row.astype('float')
 
         sample = [image, cur_row]
-        sample = to_tensor(sample)
+        sample = self.to_tensor(sample)
 
         return sample
 
