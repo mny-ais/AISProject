@@ -70,6 +70,8 @@ class DriveNet(nn.Module):
             tensor representing steering and throttle.
         """
 
+        img.float()
+
         # Forward through Convolutions
         x = self.conv1(img)
         x = self.conv2(x)
