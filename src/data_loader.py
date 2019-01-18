@@ -23,6 +23,8 @@ import os
 
 import torch
 
+import warnings
+
 import pandas as pd
 
 from skimage import io
@@ -35,8 +37,6 @@ from imgaug import augmenters as iaa
 """
 
 # Ignore warnings
-import warnings
-
 warnings.filterwarnings("ignore")
 
 
@@ -54,6 +54,7 @@ def oc(aug):
 def rl(aug):
     """Defines the "rarely" probability value."""
     return iaa.Sometimes(0.09, aug)
+
 
 # Now we define the sequential
 """
@@ -84,7 +85,6 @@ class DrivingSimDataset(Dataset):
         """
         super().__init__()
 
-        # TODO : Check if default for header works
         self.dataset = []
         self.drive_data = pd.read_csv(csv_file, sep=',')
         self.root_dir = root_dir
@@ -100,7 +100,7 @@ class DrivingSimDataset(Dataset):
             **kwargs: Not sure yet. Base class has them.
         """
 
-        item  = self.process_img(idx)
+        item = self.process_img(idx)
 
         return item
 
@@ -114,10 +114,12 @@ class DrivingSimDataset(Dataset):
         cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
         cur_row = cur_row.astype('float')
 
-        steering = torch.tensor(0,0,0,cur_row[1]).float()
-        throttle = torch.tensor(0,0,0,cur_row[2]).float()
-        cmd = cur_row[4]
-        sample = {"image": image, "steering": steering, "throttle": throttle, "cmd": cmd}
+        vehicle_commands = torch.tensor([0, 0, cur_row[1], cur_row[2]]).float()
+        cmd = torch.tensor([0, 0, 0, cur_row[4]]).int()
+
+        sample = {"image": image,
+                  "vehicle_commands": vehicle_commands,
+                  "cmd": cmd}
         sample = self.to_tensor(sample)
 
         return sample
@@ -136,7 +138,9 @@ class DrivingSimDataset(Dataset):
 
         image = image.transpose((2, 0, 1))
 
-        return {"image": torch.from_numpy(image), "steering": sample["steering"], "throttle": sample["throttle"], "cmd": sample["cmd"]}
+        return {"image": torch.from_numpy(image),
+                "vehicle_commands": sample["vehicle_commands"],
+                "cmd": sample["cmd"]}
 
     def __to_processed_package(self):
 

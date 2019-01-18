@@ -63,10 +63,12 @@ class DriveNet(nn.Module):
 
         Args:
             img (torch.Tensor): The input image as a tensor.
-            cmd (int): The high level command being given to the model.
+            cmd (torch.Tensor): The high level command being given to the model.
+                                This is in the form of a 4 dimensional tensor
+                                where the fourth dimension is the command itself
 
         Returns (torch.Tensor):
-            The commands to be given to the vehicle to drive in a 2 channel
+            The commands to be given to the vehicle to drive in a 3 channel
             tensor representing steering and throttle.
         """
 

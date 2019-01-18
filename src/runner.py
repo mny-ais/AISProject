@@ -67,48 +67,53 @@ class Runner:
         total_step = len(train_loader)
         print("len(train_loader) = {0}".format(total_step))
         print("Dataset:")
-        print(enumerate(train_loader))
+        for i in enumerate(train_loader):
+            print(i[1]['image'])
+            print(i[1]['vehicle_commands'])
 
         loss_list = []
         acc_list = []
 
-        # for epoch in range(num_epochs):
-        #     for i, (images, data) in enumerate(train_loader):
-        #         # run the forward pass
-        #         # data[0] is the steering info, data[1] is the drive command
-        #         print("running forwards")
-        #         print("image:")
-        #         print(images[i])
-        #         print("data:")
-        #         print(data[i])
-        #
-        #         self.run_model(images.to(self.device, dtype=torch.float),
-        #                        data.data.numpy()[i][-1], eval_mode=False)
-        #         target = torch.unsqueeze(torch.unsqueeze(data, 0), 0)
-        #         target = target.to(self.device, dtype=torch.float)
-        #         loss = self.__calculate_loss(target)
-        #         loss_list.append(loss.item())
-        #
-        #         # Backprop and perform Adam optimization
-        #         self.optimizer.zero_grad()
-        #         loss.backward()
-        #         self.optimizer.step()
-        #
-        #         # Track the accuracy
-        #         total = data.size(0)
-        #         _, predicted = torch.max(self.output.data, 1)
-        #         correct = (predicted == data[0]).sum().item()
-        #         acc_list.append(correct / total)
-        #
-        #         if (i + 1) % 100 == 0:
-        #             print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}, Accuracy"
-        #                   .format(epoch + 1, num_epochs, i + 1, total_step,
-        #                           loss.item())
-        #                   + ": {:2f}%".format(correct / total) * 100)
-        #
-        # # Now save the file
-        # torch.save(self.network.state_dict(),
-        #            self.save_dir)
+        for epoch in range(num_epochs):
+            for data in enumerate(train_loader):
+                # run the forward pass
+                # data[0] is the iteration, data[1] is the data
+
+                images = data[1]['images']
+                vehicle_commands = data[1]['vehicle_commands']
+                command = data[1]['cmd']
+
+                self.run_model(images.to(self.device, dtype=torch.float),
+                               command,
+                               eval_mode=False)
+                # Prep target by turning it into a CUDA compatible format
+                target = vehicle_commands
+                target = target.to(self.device, dtype=torch.float)
+
+                # now calculate the loss
+                loss = self.__calculate_loss(target)
+                loss_list.append(loss.item())
+
+                # Backprop and perform Adam optimization
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+                # Track the accuracy
+                total = data.size(0)
+                _, predicted = torch.max(self.output.data, 1)
+                correct = (predicted == data[0]).sum().item()
+                acc_list.append(correct / total)
+
+                if (i + 1) % 100 == 0:
+                    print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}, Accuracy"
+                          .format(epoch + 1, num_epochs, i + 1, total_step,
+                                  loss.item())
+                          + ": {:2f}%".format(correct / total) * 100)
+
+        # Now save the file
+        torch.save(self.network.state_dict(),
+                   self.save_dir)
 
     def __calculate_loss(self, target):
         """Calculates the loss based on a target tensor.
