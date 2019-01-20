@@ -119,6 +119,8 @@ class Runner:
                     print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
                           .format(epoch + 1, num_epochs, data[0] + 1, total_step,
                                   loss.item()))
+                    with open('plotdata.txt','a') as file:
+                        file.write(loss.item()+"\n")
 		
 
         # Now save the file
