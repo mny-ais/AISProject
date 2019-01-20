@@ -16,6 +16,8 @@ from runner import Runner
 
 from controller import Controller
 
+from utils.visualizer import Visualizer
+
 from os import path
 
 
@@ -71,17 +73,26 @@ def main(arguments):
         else:
             csv_dir = path.join(arguments.t, "control_input.csv")
 
-        # Now run the training
-        runner.train_model(csv_dir, arguments.t, arguments.epoch,
-                           arguments.batch_size)
+        # Now run the training with the visualizer
+        # visualizer = Visualizer(runner, csv_dir, arguments.t, arguments.epoch,
+        #                         arguments.batch_size)
+        # visualizer.execute()
+
+        # Run with the runner
+        runner.train_model(csv_dir, arguments.t,
+                                 arguments.epoch, arguments.batch_size)
 
         # Quit when done
         sys.exit()
 
     elif arguments.eval:
-        # First initialize the controller and timer objects, and the direction
+        # First initialize the controller object
         controller = Controller(runner)
+
+        # Then execute it
         controller.execute()
+
+        # Don't forget to do a clean exit
         sys.exit()
 
 
