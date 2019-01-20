@@ -8,7 +8,7 @@ Authors:
 """
 import argparse
 from PIL import Image
-from imageresize import imageresize
+from resizeimage import resizeimage as imageresize
 from os import path
 from os import listdir
 
@@ -30,15 +30,42 @@ def resize_image(image_path):
     with open(image_path, 'r+b') as f:
         with Image.open(f) as image:
             cover = imageresize.resize_cover(image, [320, 64])
-            new_save_path = path.join(path.dirname(image_path), "resized",
-                                      path.basename(image_path))
-            cover.save(new_save_path)
+            cover.save(image_path)
 
 def batch_resize(dir_path):
     """Batch resize all images in the path in the argument"""
+    counter = 0
     for filename in listdir(dir_path):
         if filename.endswith(".png"):
-            resize_image(filename)
+            image = path.join(dir_path, filename)
+            resize_image(image)
+            counter += 1
+
+
+def batch_folder(dir_path):
+    """Batch resize all subfolders in the path."""
+    # First get all files
+    total = 0
+    for dir in listdir(dir_path):
+        if path.isdir(path.join(dir_path, dir)):
+            total += len(listdir(path.join(dir_path, dir)))
+
+    counter = 0  # reset counter to 0
+    for dir in listdir(dir_path):
+        if path.isdir(path.join(dir_path, dir)):
+            for file in listdir(path.join(dir_path, dir)):
+                if file.endswith(".png"):
+                    image = path.join(dir_path, dir, file)
+                    resize_image(image)
+                    counter += 1
+                    print("Resized: {0} of {1}".format(counter, total))
+
+
+
+def main(arguments):
+    """Main function that runs everything."""
+    batch_folder(arguments.dir[0])
 
 if __name__ == "__main__":
-    batch_resize(parse_args())
+    arguments = parse_args()
+    main(arguments)
