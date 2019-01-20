@@ -5,9 +5,12 @@ class PlotIt():
     """ Generates plot of loss function from txt file """
 
     def __init__(self):
-        with open("/home/aisgrp3/Documents/src_ln/plotdata.txt", "r") as file:
+        file_name = "/home/aisgrp3/Documents/src_ln/plotdata.txt" 
+        
+        with open(file_name, "r") as file:
             data = file.read()
 
+        open(file_name, "w").close()
         xaxis = []
         print("yay im here")
         data = data.splitlines()
@@ -15,7 +18,7 @@ class PlotIt():
         for i in range(0,len(data)):
             data[i] = float(data[i])
             xaxis.append(i)
-        plt.bar(len(data), data, 1/1.5, color="blue")
+        plt.bar(xaxis, data, 1/1.5, color="blue")
         plt.show(block=True)
 
 

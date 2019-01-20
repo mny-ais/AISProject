@@ -173,7 +173,7 @@ class Runner:
                 # Update data
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
                 progress_var.set("Progress: {}%".format(((data[0] + 1)
-                                                         / total_step * 100))
+                                                         / total_step * 100)))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
                 loss_var.set("Loss: {}".format(loss.item()))
 
