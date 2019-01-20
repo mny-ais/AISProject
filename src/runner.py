@@ -82,6 +82,8 @@ class Runner:
             for data in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
+                				
+                print(torch.cuda.memory_cached())
 
                 images = data[1]['image']
                 vehicle_commands = data[1]['vehicle_commands']
@@ -117,10 +119,12 @@ class Runner:
                     print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
                           .format(epoch + 1, num_epochs, data[0] + 1, total_step,
                                   loss.item()))
+		
 
         # Now save the file
         torch.save(self.network.state_dict(),
                    self.save_dir)
+        torch.cuda.empty_cache()
 
     def __calculate_loss(self, target):
         """Calculates the loss based on a target tensor.
