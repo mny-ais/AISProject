@@ -18,6 +18,12 @@ import torch
 
 import torch.nn as nn
 
+import tkinter as tk
+
+import numpy as np
+
+from PIL import Image, ImageTk
+
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
 
 from data_loader import DrivingSimDataset
@@ -72,8 +78,9 @@ class Runner:
             batch_size (int): Number of objects in each batch
         """
         # Start by making the tkinter parts
-        # root = tk.Tk()
-        #  root.title("DriveNet Training")
+        root = tk.Tk()
+        root.title("DriveNet Training")
+        main_image = None
 
         # Configure the grid
         # ________________________
@@ -86,9 +93,24 @@ class Runner:
         # |----------------------|
         # | status message       |
         # ------------------------
-        # root.grid_columnconfigure(0, minsize=160)
-        # root.grid_columnconfigure(1, minsize=160)
-        # root.grid_rowconfigure(0, minsize=60)
+        root.grid_columnconfigure(0, minsize=160)
+        root.grid_columnconfigure(1, minsize=160)
+        root.grid_rowconfigure(0, minsize=60)
+
+        # Prepare tk variables with default values
+        step_var = tk.StringVar(master=root, value="Step: 0/0")
+        progress_var = tk.StringVar(master=root, value="Progress: 0%")
+        epoch_var = tk.StringVar(master=root, value="Epoch: 1/{}"
+                             .format(num_epochs))
+        loss_var = tk.StringVar(master=root, value="Loss: 0")
+        status = tk.StringVar(master=root, value="Preparing dataset")
+
+        # Prepare tk labels to be put on the grid
+        tk.Label(root, textvariable=step_var).grid(row=1, column=0)
+        tk.Label(root, textvariable=progress_var).grid(row=1, column=1)
+        tk.Label(root, textvariable=epoch_var).grid(row=2, column=0)
+        tk.Label(root, textvariable=loss_var).grid(row=2, column=1)
+        tk.Label(root, textvariable=status).grid(row=2, column=0, columnspan=2)
 
         # Prepare the dataset
         training_data = DrivingSimDataset(csv_file, root_dir)
@@ -99,21 +121,25 @@ class Runner:
                                   shuffle=True)
 
         total_step = len(train_loader)
+        step_var.set("Step: 0/{}".format(total_step))
+        status.set("Finished loading dataset")
+
+        if not path.isfile(self.save_dir):
+            status.set("No state dictionary found. Will run with randomized "
+                       "weights.")
+
         # print("len(train_loader) = {0}".format(total_step))
         # print("Dataset:")
         # for i in enumerate(train_loader):
         #     print(i[1]['image'])
         #     print(i[1]['vehicle_commands'])
 
-        acc_list = []
+        # acc_list = []
 
         for epoch in range(num_epochs):
             for data in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
-                				
-                print(torch.cuda.memory_cached())
-
                 images = data[1]['image']
                 vehicle_commands = data[1]['vehicle_commands']
                 command = data[1]['cmd'].numpy()
@@ -141,15 +167,15 @@ class Runner:
                 # correct = (predicted == data[0]).sum().item()
                 # acc_list.append(correct / total)
 
-                # TODO: Calculate accuracy
-
+                # Update data
+                step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
+                progress_var.set("Progress: {}%".format(((data[0] + 1) / 100)
+                                                    * 100))
+                epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
+                loss_var.set("Loss: {}".format(loss.item()))
 
                 lossy = loss.item()
 
-                if (data[0] + 1) % 50 == 0:
-                    print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
-                          .format(epoch + 1, num_epochs, data[0] + 1, total_step,
-                                  lossy))
                 with open('plotdata.txt','a') as file:
                     file.write("{:4f}\n".format(lossy))
 		
@@ -201,9 +227,6 @@ class Runner:
         # load the model parameters from file, if it exists.
         if path.isfile(self.save_dir):
             self.network.load_state_dict(torch.load(self.save_dir))
-        else:
-            print("No state dictionary found. Will run with randomized input.")
-            # Assumption: Network starts with random when nothing is found.
 
         self.network.to(self.device)
         self.out = self.network(input_image, input_command, batch_size)
