@@ -1,24 +1,24 @@
 import matplotlib.pyplot as plt
 
 
-class PlotIt(file):
+class PlotIt():
     """ Generates plot of loss function from txt file """
 
-    with open(file, "r") as file:
-        data = file.read()
+    def __init__(self):
+        with open("/home/aisgrp3/Documents/src_ln/plotdata.txt", "r") as file:
+            data = file.read()
 
-    xaxis = []
+        xaxis = []
+        print("yay im here")
+        data = data.splitlines()
+        print(data)
+        for i in range(0,len(data)):
+            data[i] = float(data[i])
+            xaxis.append(i)
+        plt.bar(len(data), data, 1/1.5, color="blue")
+        plt.show(block=True)
 
-    data = data.splitlines()
-    for i in range(0,len(data)):
-        data[i] = int(data[i])
-        xaxis.append(i)
 
-    plt.bar(xaxis, data)
-    plt.show()
-    
-
-    
- 
-
-    
+if __name__ == "__main__":
+        print("hi im nina")
+        PlotIt()

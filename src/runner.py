@@ -72,8 +72,8 @@ class Runner:
             batch_size (int): Number of objects in each batch
         """
         # Start by making the tkinter parts
-        root = tk.Tk()
-        root.title("DriveNet Training")
+        # root = tk.Tk()
+        #  root.title("DriveNet Training")
 
         # Configure the grid
         # ________________________
@@ -86,9 +86,9 @@ class Runner:
         # |----------------------|
         # | status message       |
         # ------------------------
-        root.grid_columnconfigure(0, minsize=160)
-        root.grid_columnconfigure(1, minsize=160)
-        root.grid_rowconfigure(0, minsize=60)
+        # root.grid_columnconfigure(0, minsize=160)
+        # root.grid_columnconfigure(1, minsize=160)
+        # root.grid_rowconfigure(0, minsize=60)
 
         # Prepare the dataset
         training_data = DrivingSimDataset(csv_file, root_dir)
@@ -149,7 +149,7 @@ class Runner:
                           .format(epoch + 1, num_epochs, data[0] + 1, total_step,
                                   loss.item()))
                     with open('plotdata.txt','a') as file:
-                        file.write(loss.item()+"\n")
+                        file.write("%d\n"% loss.item())
 		
 
         # Now save the file
