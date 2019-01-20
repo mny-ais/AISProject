@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Visualizer.
 
-This module is used to visualize the training of the network. It is able to
-show the progress in terms of step, batch, and epoch number, loss, and the first
-image from the batch. It should also show a plot of the loss over time.
+This module is used to visualize the training of the network.
 
 Authors:
     Maximilian Roth
@@ -11,6 +9,7 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import tkinter as tk
+
 
 class Visualizer:
     def __init__(self, network, csv_dir, training_path, epoch, batch_size):
@@ -30,15 +29,32 @@ class Visualizer:
         self.epoch = epoch
         self.batch_size = batch_size
 
-
     def execute(self):
         """Executes the training with a tkinter based visualizer."""
         # Start by making the tkinter parts
         root = tk.Tk()
         root.title("DriveNet Visualizer")
 
-        # Configure the grid
+        # Set up tk variables
+        step = tk.StringVar(master=root, value="Step: {0}/{1}"
+                            .format(0, total_step))
+        batch = tk.StringVar(master=root, value="Batch: {0}/{1}"
+                             .format())
 
+        # Configure the grid
+        # ________________________
+        # |         image        |
+        # |                      |
+        # |----------------------|
+        # |   step    |   batch  |
+        # |----------------------|
+        # |   epoch   |   loss   |
+        # ------------------------
+        root.grid_columnconfigure(0, minsize=160)
+        root.grid_columnconfigure(1, minsize=160)
+        root.grid_rowconfigure(0, minsize=60)
+
+        # Set text
 
         self.network.train_model(self.csv_dir, self.training_path,
                                  self.epoch, self.batch_size)
