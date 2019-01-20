@@ -3,6 +3,11 @@
 
 This module is used to run and train the model described in network.py.
 
+The train_model method also visualizes the data being trained. It first creates
+a GUI window that shows a sample from the current batch being trained along
+with information about the current progress of the training. When it is done,
+it outputs a plot of the loss over time.
+
 Authors:
     Maximilian Roth
     Nina Pant
@@ -53,18 +58,40 @@ class Runner:
     def train_model(self, csv_file, root_dir, num_epochs, batch_size):
         """Trains the model.
 
+        This method also visualizes the training of the network. It is able to
+        show the progress in terms of step, batch, and epoch number, loss, and
+        the first image from the batch. It also outputs a plot of the loss over
+        time after training is finished.
+
         Args:
             csv_file (string): File address of the csv_file for training.
             root_dir (string): Root directory of the data for training.
             num_epochs (int): Number of epochs to train for
             batch_size (int): Number of objects in each batch
         """
-        # Datasets
+        # Start by making the tkinter parts
+        root = tk.Tk()
+        root.title("DriveNet Training")
+
+        # Configure the grid
+        # ________________________
+        # |         image        |
+        # |                      |
+        # |----------------------|
+        # |   step    |   batch  |
+        # |----------------------|
+        # |   epoch   |   loss   |
+        # |----------------------|
+        # | status message       |
+        # ------------------------
+        root.grid_columnconfigure(0, minsize=160)
+        root.grid_columnconfigure(1, minsize=160)
+        root.grid_rowconfigure(0, minsize=60)
+
+        # Prepare the dataset
         training_data = DrivingSimDataset(csv_file, root_dir)
 
-        # TODO Add a way to create the packaged datasets
-
-        # Dataloaders
+        # Prepare the dataloader
         train_loader = DataLoader(dataset=training_data,
                                   batch_size=batch_size,
                                   shuffle=True)

@@ -73,14 +73,9 @@ def main(arguments):
         else:
             csv_dir = path.join(arguments.t, "control_input.csv")
 
-        # Now run the training with the visualizer
-        # visualizer = Visualizer(runner, csv_dir, arguments.t, arguments.epoch,
-        #                         arguments.batch_size)
-        # visualizer.execute()
-
         # Run with the runner
-        runner.train_model(csv_dir, arguments.t,
-                                 arguments.epoch, arguments.batch_size)
+        runner.train_model(csv_dir, arguments.t, arguments.epoch,
+                           arguments.batch_size)
 
         # Quit when done
         sys.exit()
