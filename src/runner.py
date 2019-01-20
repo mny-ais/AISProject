@@ -112,6 +112,9 @@ class Runner:
         tk.Label(root, textvariable=loss_var).grid(row=2, column=1)
         tk.Label(root, textvariable=status).grid(row=2, column=0, columnspan=2)
 
+        root.update_idletasks()
+        root.update()
+
         # Prepare the dataset
         training_data = DrivingSimDataset(csv_file, root_dir)
 
@@ -173,6 +176,9 @@ class Runner:
                                                     * 100))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
                 loss_var.set("Loss: {}".format(loss.item()))
+
+                root.update()
+                root.update_idletasks()
 
                 if (data[0] + 1) % 50 == 0:
                     with open('plotdata.txt','a') as file:
