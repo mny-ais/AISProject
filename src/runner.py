@@ -26,6 +26,8 @@ from network import DriveNet
 
 from os import path
 
+from plot import PlotIt
+
 
 class Runner:
     def __init__(self, save_dir, cpu=True):
@@ -216,6 +218,8 @@ if __name__ == "__main__":
     out = net(input, 0)
     out= out.detach().numpy()
     print(out)
+    plotit = PlotIt('plotdata.txt')
+    
 
     # net.zero_grad()
     # out.backward(torch.randn(1, 2))
