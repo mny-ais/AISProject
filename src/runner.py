@@ -144,12 +144,14 @@ class Runner:
                 # TODO: Calculate accuracy
 
 
+                lossy = loss.item()
+
                 if (data[0] + 1) % 50 == 0:
                     print("Epoch [{}/{}], Step[{}/{}], Loss: {:4f}"
                           .format(epoch + 1, num_epochs, data[0] + 1, total_step,
-                                  loss.item()))
-                    with open('plotdata.txt','a') as file:
-                        file.write("%d\n"% loss.item())
+                                  lossy))
+                with open('plotdata.txt','a') as file:
+                    file.write("{:4f}\n".format(lossy))
 		
 
         # Now save the file
