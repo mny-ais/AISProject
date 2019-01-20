@@ -110,7 +110,7 @@ class Runner:
         tk.Label(root, textvariable=progress_var).grid(row=1, column=1)
         tk.Label(root, textvariable=epoch_var).grid(row=2, column=0)
         tk.Label(root, textvariable=loss_var).grid(row=2, column=1)
-        tk.Label(root, textvariable=status).grid(row=2, column=0, columnspan=2)
+        tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2)
 
         root.update_idletasks()
         root.update()
@@ -172,8 +172,8 @@ class Runner:
 
                 # Update data
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
-                progress_var.set("Progress: {}%".format(((data[0] + 1) / 100)
-                                                    * 100))
+                progress_var.set("Progress: {}%".format(((data[0] + 1)
+                                                         / total_step * 100))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
                 loss_var.set("Loss: {}".format(loss.item()))
 
