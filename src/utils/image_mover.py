@@ -116,6 +116,8 @@ def move_images(parent_dir):
                 num_vals[0] = int(num_vals[0]) + int(count)
                 num_vals[1] = int(num_vals[1])
 
+                print(num_vals[0])
+
                 # put the max value as image_count
                 image_count = max(image_count, num_vals[0])
                 # Now the 2 cases of seg or image
@@ -126,7 +128,7 @@ def move_images(parent_dir):
                     new_name = "seg_{:0>5d}-cam_{}.png".format(num_vals[0],
                                                                num_vals[1])
 
-                rename(path.join(dir, file), path.join(all_dir, new_name))
+                # rename(path.join(dir, file), path.join(all_dir, new_name))
 
         count += image_count
         print("Processing {:0>5d}/{}".format(count, total))
