@@ -12,27 +12,17 @@ Authors:
     Maximilian Roth
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
-
 """
 import torch
-
 import torch.nn as nn
-
 import tkinter as tk
-
-import numpy as np
-
-from PIL import Image, ImageTk
-
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
-
 from data_loader import DrivingSimDataset
-
 from network import DriveNet
-
+from utils.timer import Timer
 from os import path
-
 from plot import PlotIt
+from time import strftime, gmtime
 
 
 class Runner:
@@ -48,13 +38,11 @@ class Runner:
             self.device = torch.device("cpu")  # Set it to be a CPU only device
         else:
             self.device = torch.device('cuda')  # Set the device to CUDA
-
+            self.network.cuda()
 
         # Save the last output, so we can calculate the loss using it
         self.out = None
 
-        # Save the loss, so we can use it to backpropagate
-        self.loss = None
         self.criterion = nn.MSELoss()  # So this is only initialized once
 
         # We use the Adam optimizer
@@ -63,55 +51,67 @@ class Runner:
         # Weight file location and name
         self.save_dir = save_dir
 
-    def train_model(self, csv_file, root_dir, num_epochs, batch_size):
+    def train_model(self, csv_file, root_dir, num_epochs, batch_size,
+                    silent=False):
         """Trains the model.
 
         This method also visualizes the training of the network. It is able to
         show the progress in terms of step, batch, and epoch number, loss, and
-        the first image from the batch. It also outputs a plot of the loss over
-        time after training is finished.
+        the plot from the batch. It also outputs a plot of the loss over
+        time.
 
         Args:
             csv_file (string): File address of the csv_file for training.
             root_dir (string): Root directory of the data for training.
             num_epochs (int): Number of epochs to train for
             batch_size (int): Number of objects in each batch
+            silent (bool): Whether to show the plot or not. True hides the plot.
         """
         # Start by making the tkinter parts
         root = tk.Tk()
         root.title("DriveNet Training")
-        main_image = None
+        root.geometry("350x100")
 
-        # Configure the grid
-        # ________________________
-        # |         image        |
-        # |                      |
-        # |----------------------|
-        # |   step   |  progress |
-        # |----------------------|
-        # |   epoch   |   loss   |
-        # |----------------------|
-        # | status message       |
-        # ------------------------
-        root.grid_columnconfigure(0, minsize=160)
-        root.grid_columnconfigure(1, minsize=160)
-        root.grid_rowconfigure(0, minsize=60)
+        # Create timer and counter to calculate processing rate
+        timer = Timer()
+        counter = 0
+
+        # Plot save location
+        plot_loc = path.join(path.split(self.save_dir)[0],
+                             strftime("%Y_%m_%d_%H-%M-%S", gmtime())
+                             + '-loss_data.txt')
+
+        # Configure the grid and geometry
+        # -----------------------
+        # | step     | rate     |
+        # | epoch    | loss     |
+        # | status message      |
+        # -----------------------
+        root.columnconfigure(0, minsize=175)
+        root.columnconfigure(1, minsize=175)
 
         # Prepare tk variables with default values
         step_var = tk.StringVar(master=root, value="Step: 0/0")
-        progress_var = tk.StringVar(master=root, value="Progress: 0%")
+        rate_var = tk.StringVar(master=root, value="Rate: 0 steps/s")
         epoch_var = tk.StringVar(master=root, value="Epoch: 1/{}"
-                             .format(num_epochs))
+                                 .format(num_epochs))
         loss_var = tk.StringVar(master=root, value="Loss: 0")
         status = tk.StringVar(master=root, value="Preparing dataset")
 
         # Prepare tk labels to be put on the grid
-        tk.Label(root, textvariable=step_var).grid(row=1, column=0)
-        tk.Label(root, textvariable=progress_var).grid(row=1, column=1)
-        tk.Label(root, textvariable=epoch_var).grid(row=2, column=0)
-        tk.Label(root, textvariable=loss_var).grid(row=2, column=1)
-        tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2)
+        tk.Label(root, textvariable=step_var).grid(row=0, column=0, sticky="W",
+                                                   padx=5, pady=5)
+        tk.Label(root, textvariable=rate_var).grid(row=0, column=1,
+                                                   sticky="W", padx=5,
+                                                   pady=5)
+        tk.Label(root, textvariable=epoch_var).grid(row=1, column=0,
+                                                    sticky="W", padx=5, pady=5)
+        tk.Label(root, textvariable=loss_var).grid(row=1, column=1,
+                                                   sticky="W", padx=5, pady=5)
+        tk.Label(root, textvariable=status).grid(row=2, column=0, columnspan=2,
+                                                 sticky="SW", padx=5, pady=5)
 
+        # Update root so it actually shows something
         root.update_idletasks()
         root.update()
 
@@ -125,7 +125,7 @@ class Runner:
 
         total_step = len(train_loader)
         step_var.set("Step: 0/{}".format(total_step))
-        status.set("Finished loading dataset")
+        status.set("Training")
 
         if not path.isfile(self.save_dir):
             status.set("No state dictionary found. Will run with randomized "
@@ -147,7 +147,6 @@ class Runner:
                 vehicle_commands = data[1]['vehicle_commands']
                 command = data[1]['cmd'].numpy()
 
-
                 self.run_model(images.to(self.device, dtype=torch.float),
                                command,
                                batch_size,
@@ -157,7 +156,9 @@ class Runner:
                 target = target.to(self.device, dtype=torch.float)
 
                 # now calculate the loss
-                loss = self.__calculate_loss(target)
+                if self.out is None:
+                    raise ValueError("forward() has not been run properly.")
+                loss = self.criterion(self.out, target)
 
                 # Backprop and perform Adam optimization
                 self.optimizer.zero_grad()
@@ -171,39 +172,34 @@ class Runner:
                 # acc_list.append(correct / total)
 
                 # Update data
+
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
-                progress_var.set("Progress: {}%".format(((data[0] + 1)
-                                                         / total_step * 100)))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
-                loss_var.set("Loss: {}".format(loss.item()))
+                loss_var.set("Loss: {:.3f}".format(loss.item()))
+
+                counter += 1
+                if timer.elapsed_seconds_since_lap() > 0.3:
+                    sps = float(counter) / timer.elapsed_seconds_since_lap()
+                    rate_var.set("Rate: {:.0f} steps/s".format(sps))
+                    timer.lap()
+                    counter = 0
 
                 root.update()
                 root.update_idletasks()
 
-                if (data[0] + 1) % 50 == 0:
-                    with open('plotdata.txt','a') as file:
-                        file.write("%d\n"% loss.item())
-		
+                if (data[0] + 1) % 20 == 0:
+                    with open(plot_loc, 'a') \
+                            as file:
+                        file.write("{}\n".format(loss.item()))
 
         # Now save the file
         torch.save(self.network.state_dict(),
                    self.save_dir)
         torch.cuda.empty_cache()
 
-    def __calculate_loss(self, target):
-        """Calculates the loss based on a target tensor.
+        status.set("Done")
+        PlotIt(plot_loc)
 
-        Args:
-            target (torch.Tensor): The (1 x 3) ground truth tensor,
-
-        Returns:
-            The loss criterion. Also saves this internally.
-        """
-        if self.out is None:
-            raise ValueError("forward() has not been run.")
-        self.loss = self.criterion(self.out, target)
-
-        return self.loss  # Return the loss, in case it is necessary
 
     def run_model(self, input_image, input_command, batch_size, eval_mode=True):
         """Runs the model forward.
@@ -215,6 +211,7 @@ class Runner:
                                          -1 is left,
                                          0 is center,
                                          1 is right
+            batch_size (int): The size of the batch to run.
             eval_mode (bool): Sets whether the model should be in evaluation
                               mode.
 
@@ -237,20 +234,18 @@ class Runner:
         self.out = self.network(input_image, input_command, batch_size)
         return self.out
 
-
 # Test code to see if the model runs
-if __name__ == "__main__":
-    net = DriveNet()
-    # print(net)
+# if __name__ == "__main__":
+#     net = DriveNet()
+#     # print(net)
+#
+#     # This is to test if it works
+#     input = torch.randn(1, 3, 200, 88)
+#     out = net(input, 0)
+#     out= out.detach().numpy()
+#     print(out)
+#     plotit = PlotIt('plotdata.txt')
 
-    # This is to test if it works
-    input = torch.randn(1, 3, 200, 88)
-    out = net(input, 0)
-    out= out.detach().numpy()
-    print(out)
-    plotit = PlotIt('plotdata.txt')
-    
 
-    # net.zero_grad()
-    # out.backward(torch.randn(1, 2))
-
+# net.zero_grad()
+# out.backward(torch.randn(1, 2))

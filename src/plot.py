@@ -1,27 +1,50 @@
+# -*- coding: utf-8 -*-
+"""PlotIt.
+
+This module visualizes the plot of the loss function created while training the
+network.
+
+Authors:
+    Maximilian Roth
+    Nina Pant
+"""
+import argparse
 import matplotlib.pyplot as plt
 
 
-class PlotIt():
-    """ Generates plot of loss function from txt file """
+def parse_args():
+    """Parses command line arguments."""
+    description = "Plots loss data from DriveNet"
+    parser = argparse.ArgumentParser(description=description)
 
-    def __init__(self):
-        file_name = "/home/aisgrp3/Documents/src_ln/plotdata.txt" 
+    parser.add_argument('path', metavar='P', type=str, nargs='?',
+                        help='path of the loss data to be plotted.')
+    return parser.parse_args()
+
+class PlotIt:
+    """Generates plot of loss function from .txt file."""
+    def __init__(self, plot_location=None):
+        if plot_location == None:
+            file_name = "/home/aisgrp3/Documents/src_ln/plotdata.txt"
+        else:
+            file_name = plot_location
         
         with open(file_name, "r") as file:
             data = file.read()
 
         open(file_name, "w").close()
-        xaxis = []
+        x_axis = []
         print("yay im here")
         data = data.splitlines()
         print(data)
-        for i in range(0,len(data)):
+        for i in range(0, len(data)):
             data[i] = float(data[i])
-            xaxis.append(i)
-        plt.bar(xaxis, data, 1/1.5, color="blue")
+            x_axis.append(i)
+        plt.bar(x_axis, data, 1/1.5, color="blue")
         plt.show(block=True)
 
 
 if __name__ == "__main__":
         print("hi im nina")
-        PlotIt()
+        arguments = parse_args()
+        PlotIt(arguments.path)

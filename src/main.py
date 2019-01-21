@@ -16,8 +16,6 @@ from runner import Runner
 
 from controller import Controller
 
-from utils.visualizer import Visualizer
-
 from os import path
 
 
@@ -50,6 +48,11 @@ def parse_arguments():
     parser.add_argument('--cpu', action='store_true',
                         help="run in cpu only mode")
 
+    # Enabled silent mode
+    parser.add_argument('--silent', action='store_true',
+                        help='runs training without the interactive plot'
+                             'window.')
+
     arguments = parser.parse_args()
 
     if arguments.t and arguments.eval:
@@ -75,7 +78,7 @@ def main(arguments):
 
         # Run with the runner
         runner.train_model(csv_dir, arguments.t, arguments.epoch,
-                           arguments.batch_size)
+                           arguments.batch_size, arguments.silent)
 
         # Quit when done
         sys.exit()
@@ -93,8 +96,6 @@ def main(arguments):
 
 if __name__ == "__main__":
     try:
-        args = parse_arguments()
-        print(args)
-        main(args)
+        main(parse_arguments())
     except KeyboardInterrupt:
         print("Killing process.")
