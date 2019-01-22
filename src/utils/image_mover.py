@@ -91,10 +91,9 @@ def move_images(parent_dir):
                     line_list = list(reader)[1:]
                     for line in line_list:
                         data = line
-                        data[0] = int(csv_line_count) + int(data[0])
                         csv_data.append(data)
 
-                    csv_line_count += len(line_list) + 1
+                    # csv_line_count += len(line_list)
                 old_csv.close()
 
                 with open(path.join(all_dir, "control_input.csv"),
