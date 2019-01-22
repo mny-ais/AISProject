@@ -100,27 +100,34 @@ class DrivingSimDataset(Dataset):
             **kwargs: Not sure yet. Base class has them.
         """
 
-        item = self.process_img(idx)
+        item = None
+        while item is None:
+            item = self.process_img(idx)
+	    # TODO THIS IS HACKY AND ONLY TEMPORARY UNTIL WE GET A PROPER WAY
+	    # TO SEPERATE THE DIFFERENT COMMANDS
+            idx += 1
 
         return item
 
     def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
         """
-        file_name = 'image_' + str(idx) + '-cam_0' + '.png'
+        file_name = 'forward-image_{:0>5d}-cam_0.png'.format(idx)
         img_name = os.path.join(self.root_dir, file_name)
-        image = io.imread(img_name)
+        sample = None
+        if os.path.isfile(img_name):
+            image = io.imread(img_name)
 
-        cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
-        cur_row = cur_row.astype('float')
+            cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
+            cur_row = cur_row.astype('float')
 
-        vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
-        cmd = torch.tensor([0, 0, 0, cur_row[4]]).int()
+            vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
+            cmd = torch.tensor([0, 0, 0, cur_row[4]]).int()
 
-        sample = {"image": image,
-                  "vehicle_commands": vehicle_commands,
-                  "cmd": cmd}
-        sample = self.to_tensor(sample)
+            sample = {"image": image,
+                      "vehicle_commands": vehicle_commands,
+                      "cmd": cmd}
+            sample = self.to_tensor(sample)
 
         return sample
 
