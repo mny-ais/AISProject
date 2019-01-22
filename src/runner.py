@@ -162,7 +162,7 @@ class Runner:
 
                 # calculate the loss
                 if self.out is None:
-                    raise ValueError("forward() has not been run properlz.")
+                    raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, target)
 
                 # Backdrop and preform Adam optimization
