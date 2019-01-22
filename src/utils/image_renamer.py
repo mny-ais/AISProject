@@ -30,7 +30,7 @@ def rename_images(path_dir):
     p = re.compile("\d+")
 
     # Read the csv data
-    with open(path_dir.join(path_dir, "control_input.csv"), mode='r') as csv_file:
+    with open(path.join(path_dir, "control_input.csv"), mode='r') as csv_file:
         reader = csv.reader(csv_file)
         line_list = list(reader)[1:]  # Put all the lines into a list
 
@@ -47,11 +47,10 @@ def rename_images(path_dir):
             if num_val == "":
                 num_val = "0"
             num_val = int(num_val)
-            print(num_val)
 
             # Compare the number value to the dict
             try:
-                curr_command = command_data[num_val + 1]
+                curr_command = command_data[num_val]
                 # Add the value to the new name
                 if curr_command == -1:
                     new_name = "left-"
@@ -61,9 +60,9 @@ def rename_images(path_dir):
                     new_name = "right-"
 
                 new_name = new_name + file
-                rename(path_dir.join(path_dir, file), path_dir.join(path_dir, new_name))
+                rename(path.join(path_dir, file), path.join(path_dir, new_name))
             except KeyError:
-                print("No key for: {}".format(num_val + 1))
+                print("No key for: {}".format(num_val))
                 prompt = input("Skip? [y or n]")
                 if prompt == "y":
                     continue
