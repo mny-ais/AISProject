@@ -82,7 +82,6 @@ def move_images(parent_dir):
     for dir in dir_list:
         # Get a 0th index for the current folder
         file_list = listdir(dir)
-        num_files = len(file_list)
         image_count = 0
 
         for file in file_list:
@@ -97,7 +96,7 @@ def move_images(parent_dir):
                         data[0] = int(csv_line_count) + int(data[0])
                         csv_data.append(data)
 
-                    csv_line_count += len(line_list)
+                    csv_line_count += len(line_list) + 1
                 old_csv.close()
 
                 with open(path.join(all_dir, "control_input.csv"),
@@ -116,10 +115,9 @@ def move_images(parent_dir):
                 num_vals[0] = int(num_vals[0]) + int(count)
                 num_vals[1] = int(num_vals[1])
 
-                print(num_vals[0])
-
                 # put the max value as image_count
                 image_count = max(image_count, num_vals[0])
+
                 # Now the 2 cases of seg or image
                 if file.startswith("image"):
                     new_name = "image_{:0>5d}-cam_{}.png".format(num_vals[0],
@@ -128,9 +126,10 @@ def move_images(parent_dir):
                     new_name = "seg_{:0>5d}-cam_{}.png".format(num_vals[0],
                                                                num_vals[1])
 
-                # rename(path.join(dir, file), path.join(all_dir, new_name))
+                rename(path.join(dir, file), path.join(all_dir, new_name))
 
-        count += image_count
+        print(image_count)
+        count = image_count
         print("Processing {:0>5d}/{}".format(count, total))
 
 
@@ -141,11 +140,11 @@ def parse_args():
     description = "Moves all recorded images and associated data to one folder."
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument('dir', metavar='D', type=str, nargs='?',
+    parser.add_argument('dir', metavar='D', type=str, nargs=1,
                         help='path of the parent recordings directory.')
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     arguments = parse_args()
-    move_images(arguments.dir)
+    move_images(arguments.dir[0])
