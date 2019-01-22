@@ -229,14 +229,17 @@ class Runner:
                     time_left = str(time_left)
                     time_var.set("Time left: {}".format(time_left))
 
-
                 root.update()
                 root.update_idletasks()
 
+                print("TK GUI updated")
+
+                print("Writing to loss data")
                 if (data[0] + 1) % 20 == 0:
                     with open(plot_loc, 'a') \
                             as file:
                         file.write("{}\n".format(loss.item()))
+                print("Written to loss data")
 
         # Now save the file
         torch.save(self.network.state_dict(),
