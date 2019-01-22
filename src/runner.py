@@ -181,13 +181,14 @@ class Runner:
                 target = vehicle_commands
                 target = target.to(self.device, dtype=torch.float)
 
-
                 self.optimizer.zero_grad()
 
+                print("starting model")
                 self.run_model(images.to(self.device, dtype=torch.float),
                               command,
                               batch_size,
                               eval_mode=False)
+                print("Run model finished")
 
                 # calculate the loss
                 if self.out is None:
