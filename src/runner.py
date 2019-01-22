@@ -163,6 +163,7 @@ class Runner:
 
         for epoch in range(num_epochs):
             command = random.randint(-1, 1)
+            print("Choosing random direction: {}".format(command))
             if command == -1:
                 train_loader = left_loader
             elif command == 0:
