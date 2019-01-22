@@ -43,7 +43,6 @@ def move_images(parent_dir):
     # Create regex stuff
     p = re.compile("\d+")
 
-
     # Count total so we can see progress
     for dir in listdir(parent_dir):
         if path.isdir(path.join(parent_dir, dir)):
@@ -53,7 +52,6 @@ def move_images(parent_dir):
                 total += len(listdir(cur_dir))
 
     all_dir = path.join(parent_dir, 'all')
-
 
     # Check to see if the all dir already exists
     if not path.isdir(all_dir):
@@ -100,7 +98,7 @@ def move_images(parent_dir):
                 old_csv.close()
 
                 with open(path.join(all_dir, "control_input.csv"),
-                                    mode=write_mode, newline='') as csv_file:
+                          mode=write_mode, newline='') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerows(csv_data)
                 csv_file.close()
@@ -131,8 +129,6 @@ def move_images(parent_dir):
         print(image_count)
         count = image_count
         print("Processing {:0>5d}/{}".format(count, total))
-
-
 
 
 def parse_args():

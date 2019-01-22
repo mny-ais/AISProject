@@ -6,23 +6,23 @@ prefix "left-", "right-", or "forward-" appended.
 Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
+import argparse
+import csv
+import re
+from os import listdir, path, rename
 """
 First read the csv.
 Then turn it into a dict with the image number as the key and the command as the
 value.
 Then iterate through every file, renaming it according to its number value.
 """
-import argparse
-import csv
-import re
-from os import listdir, path, rename
 
 
-def rename_images(dir):
+def rename_images(path_dir):
     """Renames images according to command.
 
     Args:
-        dir (str): The directory to execute the command.
+        path_dir (str): The directory to execute the command.
     """
     command_data = {}
 
@@ -30,7 +30,7 @@ def rename_images(dir):
     p = re.compile("\d+")
 
     # Read the csv data
-    with open (path.join(dir, "control_input.csv"), mode='r') as csv_file:
+    with open(path_dir.join(path_dir, "control_input.csv"), mode='r') as csv_file:
         reader = csv.reader(csv_file)
         line_list = list(reader)[1:]  # Put all the lines into a list
 
@@ -39,7 +39,7 @@ def rename_images(dir):
 
     csv_file.close()
 
-    for file in listdir(dir):
+    for file in listdir(path_dir):
         if file.endswith(".png"):
             # Get the number value
             num_val = re.search(p, file)
@@ -61,7 +61,7 @@ def rename_images(dir):
                     new_name = "right-"
 
                 new_name = new_name + file
-                rename(path.join(dir, file), path.join(dir, new_name))
+                rename(path_dir.join(path_dir, file), path_dir.join(path_dir, new_name))
             except KeyError:
                 print("No key for: {}".format(num_val + 1))
                 prompt = input("Skip? [y or n]")
@@ -69,9 +69,6 @@ def rename_images(dir):
                     continue
                 else:
                     raise KeyError
-
-
-
 
 
 def parse_args():

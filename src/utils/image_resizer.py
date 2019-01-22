@@ -25,12 +25,14 @@ def parse_args():
 
     return arguments
 
+
 def resize_image(image_path):
     """Resize images in the path in the argument to 320 x 64."""
     with open(image_path, 'r+b') as f:
         with Image.open(f) as image:
             cover = imageresize.resize_cover(image, [320, 64])
             cover.save(image_path)
+
 
 def batch_resize(dir_path):
     """Batch resize all images in the path in the argument"""
@@ -61,10 +63,10 @@ def batch_folder(dir_path):
                     print("Resized: {0} of {1}".format(counter, total))
 
 
-
 def main(arguments):
     """Main function that runs everything."""
     batch_folder(arguments.dir[0])
+
 
 if __name__ == "__main__":
     arguments = parse_args()
