@@ -151,8 +151,7 @@ class Runner:
         status.set("Training")
 
         if not path.isfile(self.save_dir):
-            status.set("No state dictionary found. Will run with randomized "
-                       "weights.")
+            status.set("Weights do not exist. Running with random weights.")
 
         # print("len(train_loader) = {0}".format(total_step))
         # print("Dataset:")
@@ -224,9 +223,12 @@ class Runner:
                     timer.lap()
                     counter = 0
 
-                    time_left = int((total_step - data[0] + 1) / sps)
-                    time_left = datetime.timedelta(seconds=time_left)
-                    time_left = str(time_left)
+                    if sps == 0:
+                        time_left = "NaN"
+                    else:
+                        time_left = int((total_step - data[0] + 1) / sps)
+                        time_left = datetime.timedelta(seconds=time_left)
+                        time_left = str(time_left)
                     time_var.set("Time left: {}".format(time_left))
 
                 root.update()
@@ -239,6 +241,7 @@ class Runner:
                     with open(plot_loc, 'a') \
                             as file:
                         file.write("{}\n".format(loss.item()))
+                    file.close()
                 print("Written to loss data")
 
         # Now save the file
