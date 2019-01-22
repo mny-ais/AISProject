@@ -120,21 +120,29 @@ class Runner:
         root.update_idletasks()
         root.update()
 
-        # Prepare the datasets
+        # Prepare the datasets and their corresponding dataloaders
         left_data = DrivingSimDataset(csv_file, root_dir, -1)
-        forward_data = DrivingSimDataset(csv_file, root_dir, 0)
-        right_data = DrivingSimDataset(csv_file, root_dir, 1)
-
-        # Prepare the dataloader
         left_loader = DataLoader(dataset=left_data,
                                  batch_size=batch_size,
                                  shuffle=True)
+        status.set("Left data set loaded")
+        root.update_idletasks()
+        root.update()
+
+        forward_data = DrivingSimDataset(csv_file, root_dir, 0)
         forward_loader = DataLoader(dataset=forward_data,
                                     batch_size=batch_size,
                                     shuffle=True)
+        status.set("Forward data set loaded")
+        root.update_idletasks()
+        root.update()
+        right_data = DrivingSimDataset(csv_file, root_dir, 1)
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)
+        status.set("Right data set loaded")
+        root.update_idletasks()
+        root.update()
 
         total_step = 0
         step_var.set("Step: 0/0".format(total_step))
