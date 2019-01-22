@@ -31,7 +31,7 @@ class DriveNet(nn.Module):
         super(DriveNet, self).__init__()  # First initialize the superclass
 
         # Input images are pushed through 8 convolutions to extract features
-        self.conv1 = NetworkUtils.make_conv(3, 32, 5, 2)
+        self.conv1 = NetworkUtils.make_conv(3, 32, 5, 2, pad=2)
         self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1)
         self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2)
         self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1)
@@ -41,7 +41,7 @@ class DriveNet(nn.Module):
         self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0)
 
         # 2 fully connected layers to extract the features in the images
-        self.fc1 = NetworkUtils.make_fc(8448)  # This must be changed later
+        self.fc1 = NetworkUtils.make_fc(81920)  # This must be changed later
         self.fc2 = NetworkUtils.make_fc(512)
 
         # 2 fully connected layers for each high-level command branch
@@ -132,7 +132,7 @@ class DriveNet(nn.Module):
 
 class NetworkUtils:
     @staticmethod
-    def make_conv(input_channels, output_channels, kernel, stride=1, dropout=0.2):
+    def make_conv(input_channels, output_channels, kernel, stride=1, dropout=0.2, pad=1):
         """Makes a set of modules which represent is convolutional layer.
 
         Makes a convolution, batchnorm, dropout, and ReLU module set that is
@@ -152,7 +152,7 @@ class NetworkUtils:
         """
         layer = nn.Sequential(
             nn.Conv2d(input_channels, output_channels, kernel_size=kernel,
-                      stride=stride),
+                      stride=stride, padding=pad),
             nn.BatchNorm2d(output_channels),
             nn.Dropout(dropout),
             nn.ReLU()
