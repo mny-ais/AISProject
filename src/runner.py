@@ -148,8 +148,7 @@ class Runner:
         root.update()
         print("Right loaded")
 
-        total_step = 0
-        step_var.set("Step: 0/0".format(total_step))
+        # total_step = 0
         status.set("Training")
 
         if not path.isfile(self.save_dir):
