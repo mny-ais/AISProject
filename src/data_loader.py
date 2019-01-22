@@ -77,7 +77,7 @@ seq = iaa.Sequential([
 
 
 class DrivingSimDataset(Dataset):
-    def __init__(self, csv_file, root_dir):
+    def __init__(self, csv_file, root_dir, direction):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
                 csv_file (string): The CSV data file address
@@ -88,6 +88,7 @@ class DrivingSimDataset(Dataset):
         self.dataset = []
         self.drive_data = pd.read_csv(csv_file, sep=',')
         self.root_dir = root_dir
+        self.direction = direction
 
     def __len__(self):
         """Returns length of the data."""
@@ -103,16 +104,26 @@ class DrivingSimDataset(Dataset):
         item = None
         while item is None:
             item = self.process_img(idx)
-	    # TODO THIS IS HACKY AND ONLY TEMPORARY UNTIL WE GET A PROPER WAY
-	    # TO SEPERATE THE DIFFERENT COMMANDS
             idx += 1
 
         return item
 
     def process_img(self, idx):
         """Returns next transformed datapoint in correct format for the model.
+
+        Returns:
+            (dict) in the form {"image": torch.Tensor,
+            "vehicle_commands": torch.Tensor,
+            "cmd": int
         """
-        file_name = 'forward-image_{:0>5d}-cam_0.png'.format(idx)
+        if self.direction == -1:
+            direction = "left"
+        elif self.direction == 0:
+            direction = "forward"
+        else:
+            direction = "right"
+
+        file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
         img_name = os.path.join(self.root_dir, file_name)
         sample = None
         if os.path.isfile(img_name):
@@ -122,11 +133,10 @@ class DrivingSimDataset(Dataset):
             cur_row = cur_row.astype('float')
 
             vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
-            cmd = torch.tensor([0, 0, 0, cur_row[4]]).int()
 
             sample = {"image": image,
                       "vehicle_commands": vehicle_commands,
-                      "cmd": cmd}
+                      "cmd": self.direction}
             sample = self.to_tensor(sample)
 
         return sample

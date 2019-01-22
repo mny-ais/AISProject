@@ -13,6 +13,8 @@ Authors:
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
+import datetime
+import random
 import torch
 import torch.nn as nn
 import tkinter as tk
@@ -96,6 +98,7 @@ class Runner:
         epoch_var = tk.StringVar(master=root, value="Epoch: 1/{}"
                                  .format(num_epochs))
         loss_var = tk.StringVar(master=root, value="Loss: 0")
+        time_var = tk.StringVar(master=root, value="Time left: 0:00")
         status = tk.StringVar(master=root, value="Preparing dataset")
 
         # Prepare tk labels to be put on the grid
@@ -108,23 +111,33 @@ class Runner:
                                                     sticky="W", padx=5, pady=5)
         tk.Label(root, textvariable=loss_var).grid(row=1, column=1,
                                                    sticky="W", padx=5, pady=5)
-        tk.Label(root, textvariable=status).grid(row=2, column=0, columnspan=2,
+        tk.Label(root, textvariable=time_var).grid(row=2, column=0,
+                                                   sticky="W", padx=5, pady=5)
+        tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2,
                                                  sticky="SW", padx=5, pady=5)
 
         # Update root so it actually shows something
         root.update_idletasks()
         root.update()
 
-        # Prepare the dataset
-        training_data = DrivingSimDataset(csv_file, root_dir)
+        # Prepare the datasets
+        left_data = DrivingSimDataset(csv_file, root_dir, -1)
+        forward_data = DrivingSimDataset(csv_file, root_dir, 0)
+        right_data = DrivingSimDataset(csv_file, root_dir, 1)
 
         # Prepare the dataloader
-        train_loader = DataLoader(dataset=training_data,
+        left_loader = DataLoader(dataset=left_data,
+                                 batch_size=batch_size,
+                                 shuffle=True)
+        forward_loader = DataLoader(dataset=forward_data,
+                                    batch_size=batch_size,
+                                    shuffle=True)
+        right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)
 
-        total_step = len(train_loader)
-        step_var.set("Step: 0/{}".format(total_step))
+        total_step = 0
+        step_var.set("Step: 0/0".format(total_step))
         status.set("Training")
 
         if not path.isfile(self.save_dir):
@@ -140,13 +153,21 @@ class Runner:
         # acc_list = []
 
         for epoch in range(num_epochs):
+            command = random.randint(-1, 1)
+            if command == -1:
+                train_loader = left_loader
+            elif command == 0:
+                train_loader = forward_loader
+            else:
+                train_loader = right_loader
+
+            total_step = len(train_loader)
+
             for data in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 images = data[1]['image']
                 vehicle_commands = data[1]['vehicle_commands']
-                command = data[1]['cmd'].numpy()
-
 
                 # Prep target by turning it into a CUDA compatible format
                 target = vehicle_commands
@@ -187,6 +208,12 @@ class Runner:
                     rate_var.set("Rate: {:.0f} steps/s".format(sps))
                     timer.lap()
                     counter = 0
+
+                    time_left = int((total_step - data[0] + 1) / sps)
+                    time_left = datetime.timedelta(seconds=time_left)
+                    time_left = str(time_left)
+                    time_var.set("Time left: {}".format(time_left))
+
 
                 root.update()
                 root.update_idletasks()
