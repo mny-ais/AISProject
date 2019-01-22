@@ -38,25 +38,25 @@ class DriveNet(nn.Module):
         self.conv5 = NetworkUtils.make_conv(64, 128, 3, 2)
         self.conv6 = NetworkUtils.make_conv(128, 128, 3, 1)
         self.conv7 = NetworkUtils.make_conv(128, 256, 3, 1)
-        self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1)
+        self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0)
 
         # 2 fully connected layers to extract the features in the images
         self.fc1 = NetworkUtils.make_fc(8448)  # This must be changed later
         self.fc2 = NetworkUtils.make_fc(512)
 
         # 2 fully connected layers for each high-level command branch
-        self.fc_left_1 = NetworkUtils.make_fc(512)
-        self.fc_left_2 = NetworkUtils.make_fc(512)
-        self.fc_forward_1 = NetworkUtils.make_fc(512)
-        self.fc_forward_2 = NetworkUtils.make_fc(512)
-        self.fc_right_1 = NetworkUtils.make_fc(512)
-        self.fc_right_2 = NetworkUtils.make_fc(512)
+        self.fc_left_1 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_left_2 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_forward_1 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_forward_2 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_right_1 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_right_2 = NetworkUtils.make_fc(512, dropout=0)
 
         # Output layer which turns the previous values into steering, throttle,
         # and brakes
-        self.fc_out_left = NetworkUtils.make_fc(512, 2)
-        self.fc_out_forward = NetworkUtils.make_fc(512, 2)
-        self.fc_out_right = NetworkUtils.make_fc(512, 2)
+        self.fc_out_left = NetworkUtils.make_fc(512, 2, dropout=0)
+        self.fc_out_forward = NetworkUtils.make_fc(512, 2, dropout=0)
+        self.fc_out_right = NetworkUtils.make_fc(512, 2, dropout=0)
 
         self.counter = 0
 
@@ -85,7 +85,7 @@ class DriveNet(nn.Module):
         x = self.conv5(x)
         x = self.conv6(x)
         x = self.conv7(x)
-        # x = self.conv8(x)
+        x = self.conv8(x)
 
         # Flatten to prepare for fully connected layers
         x = x.view(-1, self.num_flat_features(x))
@@ -132,7 +132,7 @@ class DriveNet(nn.Module):
 
 class NetworkUtils:
     @staticmethod
-    def make_conv(input_channels, output_channels, kernel, stride=1):
+    def make_conv(input_channels, output_channels, kernel, stride=1, dropout=0.2):
         """Makes a set of modules which represent is convolutional layer.
 
         Makes a convolution, batchnorm, dropout, and ReLU module set that is
@@ -154,13 +154,13 @@ class NetworkUtils:
             nn.Conv2d(input_channels, output_channels, kernel_size=kernel,
                       stride=stride),
             nn.BatchNorm2d(output_channels),
-            nn.Dropout(0.2),
+            nn.Dropout(dropout),
             nn.ReLU()
         )
         return layer
 
     @staticmethod
-    def make_fc(size, output=512):
+    def make_fc(size, output=512, dropout=0.5):
         """Makes a set modules which represent a fully connected layer.
 
         Args:
@@ -173,7 +173,7 @@ class NetworkUtils:
         """
         layer = nn.Sequential(
             nn.Linear(size, output),
-            nn.Dropout(0.5),
+            nn.Dropout(dropout),
             nn.ReLU()
         )
         return layer
