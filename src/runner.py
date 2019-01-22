@@ -162,7 +162,7 @@ class Runner:
         # acc_list = []
 
         for epoch in range(num_epochs):
-            command = random.randint(-1, 1)
+            command = 0  # random.randint(-1, 1)
             print("Choosing random direction: {}".format(command))
             if command == -1:
                 train_loader = left_loader
@@ -171,7 +171,10 @@ class Runner:
             else:
                 train_loader = right_loader
 
+            print("Dataloader selected")
+
             total_step = len(train_loader)
+            print("len of the data_loader calculated")
 
             for data in enumerate(train_loader):
                 # run the forward pass
