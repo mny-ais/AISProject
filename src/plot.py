@@ -29,17 +29,15 @@ class PlotIt:
         else:
             file_name = plot_location
         
-        with open(file_name, "r") as file:
-            data = file.read()
+        data = open(file_name, "r").read()
 
-        open(file_name, "w").close()
         x_axis = []
         print("yay im here")
         data = data.splitlines()
         for i in range(0, len(data)):
             data[i] = float(data[i])
             x_axis.append(i)
-        plt.bar(x_axis, data, 1/1.5, color="blue")
+        plt.bar(x_axis, data, 1.0, color="blue")
         plt.title("Loss")
         plt.xlabel("Step")
         plt.ylabel("Loss")
