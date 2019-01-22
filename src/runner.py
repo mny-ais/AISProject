@@ -128,6 +128,7 @@ class Runner:
         status.set("Left data set loaded")
         root.update_idletasks()
         root.update()
+        print("Left loaded)")
 
         forward_data = DrivingSimDataset(csv_file, root_dir, 0)
         forward_loader = DataLoader(dataset=forward_data,
@@ -136,6 +137,8 @@ class Runner:
         status.set("Forward data set loaded")
         root.update_idletasks()
         root.update()
+        print("Forward loaded")
+
         right_data = DrivingSimDataset(csv_file, root_dir, 1)
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
@@ -143,6 +146,7 @@ class Runner:
         status.set("Right data set loaded")
         root.update_idletasks()
         root.update()
+        print("Right loaded")
 
         total_step = 0
         step_var.set("Step: 0/0".format(total_step))
