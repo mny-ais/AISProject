@@ -36,11 +36,13 @@ class PlotIt:
         x_axis = []
         print("yay im here")
         data = data.splitlines()
-        print(data)
         for i in range(0, len(data)):
             data[i] = float(data[i])
             x_axis.append(i)
         plt.bar(x_axis, data, 1/1.5, color="blue")
+        plt.title("Loss")
+        plt.xlabel("Step")
+        plt.ylabel("Loss")
         plt.show(block=True)
 
 

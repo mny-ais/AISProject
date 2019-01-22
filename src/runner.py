@@ -53,6 +53,9 @@ class Runner:
         # Weight file location and name
         self.save_dir = save_dir
 
+        torch.backends.cudnn.benchmark = True  # Should make it faster
+
+
     def train_model(self, csv_file, root_dir, num_epochs, batch_size,
                     silent=False):
         """Trains the model.
@@ -72,7 +75,7 @@ class Runner:
         # Start by making the tkinter parts
         root = tk.Tk()
         root.title("DriveNet Training")
-        root.geometry("350x100")
+        root.geometry("350x130")
 
         # Create timer and counter to calculate processing rate
         timer = Timer()
@@ -120,6 +123,9 @@ class Runner:
         root.update_idletasks()
         root.update()
 
+        # Open file for loss data plot
+        loss_file = open(plot_loc, 'a')
+
         # Prepare the datasets and their corresponding dataloaders
         left_data = DrivingSimDataset(csv_file, root_dir, -1)
         left_loader = DataLoader(dataset=left_data,
@@ -141,7 +147,7 @@ class Runner:
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)
-        status.set("All data sets loaded")
+        status.set("Data sets loaded")
         root.update_idletasks()
         root.update()
 
@@ -180,11 +186,11 @@ class Runner:
 
                 # Prep target by turning it into a CUDA compatible format
                 target = vehicle_commands
-                target = target.to(self.device, dtype=torch.float)
+                target = target.to(self.device, non_blocking=True)
 
                 self.optimizer.zero_grad()
 
-                self.run_model(images.to(self.device, dtype=torch.float),
+                self.run_model(images.to(self.device, non_blocking=True),
                               command,
                               batch_size,
                               eval_mode=False)
@@ -212,15 +218,15 @@ class Runner:
                 counter += 1
                 if timer.elapsed_seconds_since_lap() > 0.3:
                     sps = float(counter) / timer.elapsed_seconds_since_lap()
-                    rate_var.set("Rate: {:.0f} steps/s".format(sps))
+                    rate_var.set("Rate: {:.2f} steps/s".format(sps))
                     timer.lap()
                     counter = 0
 
                     if sps == 0:
                         time_left = "NaN"
                     else:
-                        time_left = int(((total_step * num_epochs) - data[0]
-                                         + 1) / sps)
+                        time_left = int(((total_step * num_epochs)
+                                         - float(data[0]) + 1.0) / sps)
                         time_left = datetime.timedelta(seconds=time_left)
                         time_left = str(time_left)
                     time_var.set("Time left: {}".format(time_left))
@@ -228,13 +234,10 @@ class Runner:
                 root.update()
                 root.update_idletasks()
 
-                if (data[0] + 1) % 20 == 0:
-                    with open(plot_loc, 'a') \
-                            as file:
-                        file.write("{}\n".format(loss.item()))
-                    file.close()
+                loss_file.write("{}\n".format(loss.item()))
 
-        # Now save the file
+        # Now save the loss file and the weights
+        loss_file.close()
         torch.save(self.network.state_dict(),
                    self.save_dir)
         torch.cuda.empty_cache()
@@ -248,11 +251,12 @@ class Runner:
 
         Args:
             input_image (torch.Tensor): The input image as a tensor.
-            input_command (numpy.array): The input command as an integer value
-                                         in a tensor.
-                                         -1 is left,
-                                         0 is center,
-                                         1 is right
+                                        Must already be cuda type
+            input_command (int): The input command as an integer value
+                                 in a tensor.
+                                -1 is left,
+                                0 is center,
+                                1 is right
             batch_size (int): The size of the batch to run.
             eval_mode (bool): Sets whether the model should be in evaluation
                               mode.
@@ -272,7 +276,6 @@ class Runner:
         if path.isfile(self.save_dir):
             self.network.load_state_dict(torch.load(self.save_dir))
 
-        self.network.to(self.device)
         self.out = self.network(input_image, input_command, batch_size)
         return self.out
 

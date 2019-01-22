@@ -157,7 +157,7 @@ class DrivingSimDataset(Dataset):
 
         image = image.transpose((2, 0, 1))
 
-        return {"image": torch.from_numpy(image),
+        return {"image": torch.from_numpy(image).to(dtype=torch.float),
                 "vehicle_commands": sample["vehicle_commands"],
                 "cmd": sample["cmd"]}
 
