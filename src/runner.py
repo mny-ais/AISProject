@@ -128,7 +128,6 @@ class Runner:
         status.set("Left data set loaded")
         root.update_idletasks()
         root.update()
-        print("Left loaded)")
 
         forward_data = DrivingSimDataset(csv_file, root_dir, 0)
         forward_loader = DataLoader(dataset=forward_data,
@@ -137,7 +136,6 @@ class Runner:
         status.set("Forward data set loaded")
         root.update_idletasks()
         root.update()
-        print("Forward loaded")
 
         right_data = DrivingSimDataset(csv_file, root_dir, 1)
         right_loader = DataLoader(dataset=right_data,
@@ -163,7 +161,7 @@ class Runner:
 
         for epoch in range(num_epochs):
             command = 0  # random.randint(-1, 1)
-            print("Choosing random direction: {}".format(command))
+            # TODO Figure out why directions other than forwards do not work.
             if command == -1:
                 train_loader = left_loader
             elif command == 0:
@@ -171,10 +169,8 @@ class Runner:
             else:
                 train_loader = right_loader
 
-            print("Dataloader selected")
 
             total_step = len(train_loader)
-            print("len of the data_loader calculated")
 
             for data in enumerate(train_loader):
                 # run the forward pass
@@ -192,20 +188,15 @@ class Runner:
                               command,
                               batch_size,
                               eval_mode=False)
-                print("Run model finished")
 
-                print("Calculating loss")
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, target)
-                print("Loss calculated")
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
-                print("Backwards done")
                 self.optimizer.step()
-                print("Optimizer stepped")
 
                 # # Track the accuracy
                 # total = data.size(0)
@@ -214,12 +205,10 @@ class Runner:
                 # acc_list.append(correct / total)
 
                 # Update data
-                print("Updating screen data")
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
                 loss_var.set("Loss: {:.3f}".format(loss.item()))
 
-                print("Screen data updated")
                 counter += 1
                 if timer.elapsed_seconds_since_lap() > 0.3:
                     sps = float(counter) / timer.elapsed_seconds_since_lap()
@@ -230,7 +219,8 @@ class Runner:
                     if sps == 0:
                         time_left = "NaN"
                     else:
-                        time_left = int((total_step - data[0] + 1) / sps)
+                        time_left = int(((total_step * num_epochs) - data[0]
+                                         + 1) / sps)
                         time_left = datetime.timedelta(seconds=time_left)
                         time_left = str(time_left)
                     time_var.set("Time left: {}".format(time_left))
@@ -238,15 +228,11 @@ class Runner:
                 root.update()
                 root.update_idletasks()
 
-                print("TK GUI updated")
-
-                print("Writing to loss data")
                 if (data[0] + 1) % 20 == 0:
                     with open(plot_loc, 'a') \
                             as file:
                         file.write("{}\n".format(loss.item()))
                     file.close()
-                print("Written to loss data")
 
         # Now save the file
         torch.save(self.network.state_dict(),
