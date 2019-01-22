@@ -147,21 +147,25 @@ class Runner:
                 vehicle_commands = data[1]['vehicle_commands']
                 command = data[1]['cmd'].numpy()
 
-                self.run_model(images.to(self.device, dtype=torch.float),
-                               command,
-                               batch_size,
-                               eval_mode=False)
+
                 # Prep target by turning it into a CUDA compatible format
                 target = vehicle_commands
                 target = target.to(self.device, dtype=torch.float)
 
-                # now calculate the loss
+
+                self.optimizer.zero_grad()
+
+                self.run_model(images.to(self.device, dtype=torch.float),
+                              command,
+                              batch_size,
+                              eval_model0=False)
+
+                # calculate the loss
                 if self.out is None:
-                    raise ValueError("forward() has not been run properly.")
+                    raise ValueError("forward() has not been run properlz.")
                 loss = self.criterion(self.out, target)
 
-                # Backprop and perform Adam optimization
-                self.optimizer.zero_grad()
+                # Backdrop and preform Adam optimization
                 loss.backward()
                 self.optimizer.step()
 
