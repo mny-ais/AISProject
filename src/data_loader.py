@@ -120,8 +120,10 @@ class DrivingSimDataset(Dataset):
             direction = "left"
         elif self.direction == 0:
             direction = "forward"
-        else:
+        elif self.direction == 1:
             direction = "right"
+        else:
+            raise IndexError
 
         file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
         img_name = os.path.join(self.root_dir, file_name)
