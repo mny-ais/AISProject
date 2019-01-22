@@ -143,10 +143,9 @@ class Runner:
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)
-        status.set("Right data set loaded")
+        status.set("All data sets loaded")
         root.update_idletasks()
         root.update()
-        print("Right loaded")
 
         # total_step = 0
         status.set("Training")
@@ -186,21 +185,24 @@ class Runner:
 
                 self.optimizer.zero_grad()
 
-                print("starting model")
                 self.run_model(images.to(self.device, dtype=torch.float),
                               command,
                               batch_size,
                               eval_mode=False)
                 print("Run model finished")
 
+                print("Calculating loss")
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, target)
+                print("Loss calculated")
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
+                print("Backwards done")
                 self.optimizer.step()
+                print("Optimizer stepped")
 
                 # # Track the accuracy
                 # total = data.size(0)
@@ -209,11 +211,12 @@ class Runner:
                 # acc_list.append(correct / total)
 
                 # Update data
-
+                print("Updating screen data")
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
                 loss_var.set("Loss: {:.3f}".format(loss.item()))
 
+                print("Screen data updated")
                 counter += 1
                 if timer.elapsed_seconds_since_lap() > 0.3:
                     sps = float(counter) / timer.elapsed_seconds_since_lap()
