@@ -158,7 +158,7 @@ class Runner:
                 self.run_model(images.to(self.device, dtype=torch.float),
                               command,
                               batch_size,
-                              eval_model0=False)
+                              eval_mode=False)
 
                 # calculate the loss
                 if self.out is None:
