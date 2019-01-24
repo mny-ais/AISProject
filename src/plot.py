@@ -10,6 +10,8 @@ Authors:
 """
 import argparse
 import matplotlib.pyplot as plt
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
 
 
 def parse_args():
@@ -25,7 +27,8 @@ class PlotIt:
     """Generates plot of loss function from .txt file."""
     def __init__(self, plot_location=None):
         if plot_location == None:
-            file_name = "/home/aisgrp3/Documents/src_ln/plotdata.txt"
+            tk.Tk().withdraw()
+            file_name = askopenfilename()
         else:
             file_name = plot_location
         

@@ -48,14 +48,13 @@ class Runner:
         self.criterion = nn.MSELoss()  # So this is only initialized once
 
         # We use the Adam optimizer
-        # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.02)
-        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
+        # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
+        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.0002)
 
         # Weight file location and name
         self.save_dir = save_dir
 
         torch.backends.cudnn.benchmark = True  # Should make it faster
-
 
     def train_model(self, csv_file, root_dir, num_epochs, batch_size,
                     silent=False):
@@ -85,7 +84,7 @@ class Runner:
         # Plot save location
         plot_loc = path.join(path.split(self.save_dir)[0],
                              strftime("%Y_%m_%d_%H-%M-%S", gmtime())
-                             + '-loss_data.txt')
+                             + '-loss_data.csv')
 
         # Configure the grid and geometry
         # -----------------------
@@ -167,8 +166,9 @@ class Runner:
         # acc_list = []
 
         for epoch in range(num_epochs):
-            command = 0  # random.randint(-1, 1)
-            # TODO Figure out why directions other than forwards do not work.
+            command = random.randint(-1, 1)
+            hr_dir = ["left", "forward", "right"]
+            status.set("Training: {}".format(hr_dir[command + 1]))
             if command == -1:
                 train_loader = left_loader
             elif command == 0:
@@ -176,14 +176,13 @@ class Runner:
             else:
                 train_loader = right_loader
 
-
             total_step = len(train_loader)
 
             for data in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 images = data[1]['image']
-                vehicle_commands = data[1]['vehicle_commands']
+                vehicle_commands = data[1]['vehicle_commands'][0]
 
                 # Prep target by turning it into a CUDA compatible format
                 target = vehicle_commands
@@ -192,9 +191,9 @@ class Runner:
                 self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
-                              command,
-                              batch_size,
-                              eval_mode=False)
+                               command,
+                               batch_size,
+                               eval_mode=False)
 
                 # calculate the loss
                 if self.out is None:
@@ -244,9 +243,9 @@ class Runner:
         torch.cuda.empty_cache()
 
         status.set("Done")
-        PlotIt(plot_loc)
+        if not silent:
+            PlotIt(plot_loc)
         root.mainloop()
-
 
     def run_model(self, input_image, input_command, batch_size, eval_mode=True):
         """Runs the model forward.

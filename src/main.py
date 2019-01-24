@@ -18,6 +18,8 @@ from controller import Controller
 
 from os import path
 
+import cProfile
+
 
 def parse_arguments():
     """Parses arguments from terminal."""
@@ -53,6 +55,9 @@ def parse_arguments():
                         help='runs training without the interactive plot'
                              'window.')
 
+    parser.add_argument('--profile', action='store_true',
+                        help='runs a profiling attempt')
+
     arguments = parser.parse_args()
 
     if arguments.t and arguments.eval:
@@ -61,6 +66,9 @@ def parse_arguments():
 
     if not arguments.t and not arguments.eval:
         parser.error("What do you want me to do?")
+
+    if arguments.profile and not arguments.t or arguments.eval:
+        parser.error("Must profile a specific mode")
 
     return arguments
 
@@ -92,6 +100,38 @@ def main(arguments):
 
         # Don't forget to do a clean exit
         sys.exit()
+
+    elif arguments.profile:
+        profile_path = path.join(path.dirname(path.abspath(__file__)),
+                                 "profile.txt")
+        if arguments.t:
+            # Means run in training mode, parse args
+            if arguments.csv_dir is not None:
+                csv_dir = arguments.csv_dir
+            else:
+                csv_dir = path.join(arguments.t, "control_input.csv")
+
+            # Run with the runner
+            cProfile.runctx("runner.train_model({}, {}, {}, {}, {})"
+                            .format(csv_dir, arguments.t, arguments.epoch,
+                                    arguments.batch_size, arguments.silent),
+                            globals(),
+                            locals(),
+                            filename=profile_path)
+
+            # Quit when done
+            sys.exit()
+
+        elif arguments.eval:
+            # First initialize the controller object
+            controller = Controller(runner)
+
+            # Then execute it
+            cProfile.runctx(controller.execute(),
+                            globals(), locals(), filename=profile_path)
+
+            # Don't forget to do a clean exit
+            sys.exit()
 
 
 if __name__ == "__main__":
