@@ -92,22 +92,26 @@ class DriveNet(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
 
+        x = self.fc_forward_1(x)
+        x = self.fc_forward_2(x)
+        out = self.fc_out_forward(x)
+
         # Branch according to the higher level commands
         # -1 left, 0 forward, 1 right
-        if cmd == 0:
-            x = self.fc_forward_1(x)
-            x = self.fc_forward_2(x)
-            out = self.fc_out_forward(x)
-
-        elif cmd == -1:
-            x = self.fc_left_1(x)
-            x = self.fc_left_2(x)
-            out = self.fc_out_left(x)
-
-        else:
-            x = self.fc_right_1(x)
-            x = self.fc_right_2(x)
-            out = self.fc_out_right(x)
+        # if cmd == 0:
+        #     x = self.fc_forward_1(x)
+        #     x = self.fc_forward_2(x)
+        #     out = self.fc_out_forward(x)
+        #
+        # elif cmd == -1:
+        #     x = self.fc_left_1(x)
+        #     x = self.fc_left_2(x)
+        #     out = self.fc_out_left(x)
+        #
+        # else:
+        #     x = self.fc_right_1(x)
+        #     x = self.fc_right_2(x)
+        #     out = self.fc_out_right(x)
 
         self.counter += 1
 

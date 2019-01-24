@@ -105,6 +105,8 @@ class DrivingSimDataset(Dataset):
         while item is None:
             item = self.process_img(idx)
             idx += 1
+            if idx >= len(self.drive_data):
+                idx = 0
 
         return item
 

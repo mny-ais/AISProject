@@ -48,7 +48,8 @@ class Runner:
         self.criterion = nn.MSELoss()  # So this is only initialized once
 
         # We use the Adam optimizer
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.0002)
+        # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.02)
+        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
 
         # Weight file location and name
         self.save_dir = save_dir
@@ -244,6 +245,7 @@ class Runner:
 
         status.set("Done")
         PlotIt(plot_loc)
+        root.mainloop()
 
 
     def run_model(self, input_image, input_command, batch_size, eval_mode=True):
