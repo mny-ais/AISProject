@@ -49,7 +49,7 @@ class Runner:
 
         # We use the Adam optimizer
         # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
-        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.0002)
+        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
 
         # Weight file location and name
         self.save_dir = save_dir
@@ -226,7 +226,8 @@ class Runner:
                         time_left = "NaN"
                     else:
                         time_left = int(((total_step * num_epochs)
-                                         - float(data[0]) + 1.0) / sps)
+                                         - ((float(data[0]) + 1.0)
+                                         + (total_step * epoch))) / sps)
                         time_left = datetime.timedelta(seconds=time_left)
                         time_left = str(time_left)
                     time_var.set("Time left: {}".format(time_left))
