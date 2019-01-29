@@ -147,12 +147,19 @@ class Runner:
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)
+        none_data = DrivingSimDataset(csv_file, root_dir)
+        none_loader = DataLoader(dataset=none_data,
+                                  batch_size=batch_size,
+                                  shuffle=True)
         status.set("Data sets loaded")
+
         root.update_idletasks()
         root.update()
 
         # total_step = 0
         status.set("Training")
+        root.update_idletasks()
+        root.update() 
 
         if not path.isfile(self.save_dir):
             status.set("Weights do not exist. Running with random weights.")
@@ -166,10 +173,12 @@ class Runner:
         # acc_list = []
 
         for epoch in range(num_epochs):
-            command = random.randint(-1, 1)
+            command = 0
             hr_dir = ["left", "forward", "right"]
             status.set("Training: {}".format(hr_dir[command + 1]))
-            if command == -1:
+            root.update_idletasks()
+	    root.update()
+	    if command == -1:
                 train_loader = left_loader
             elif command == 0:
                 train_loader = forward_loader
