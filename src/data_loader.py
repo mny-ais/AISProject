@@ -81,7 +81,7 @@ seq = iaa.Sequential([
 
 
 class DrivingSimDataset(Dataset):
-    def __init__(self, csv_file, root_dir, direction):
+    def __init__(self, csv_file, root_dir, direction=None):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
                 csv_file (string): The CSV data file address
@@ -122,16 +122,20 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        if self.direction == -1:
-            direction = "left"
-        elif self.direction == 0:
-            direction = "forward"
-        elif self.direction == 1:
-            direction = "right"
-        else:
-            raise IndexError
+        if direction == None:
+            img_name = 'image_{:0>5d}-cam_0.png'.format(idx)
 
-        file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
+        else:
+            if self.direction == -1:
+                direction = "left"
+            elif self.direction == 0:
+                direction = "forward"
+            elif self.direction == 1:
+                direction = "right"
+            else:
+                raise IndexError
+            file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
+
         img_name = os.path.join(self.root_dir, file_name)
         sample = None
         if os.path.isfile(img_name):

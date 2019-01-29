@@ -72,7 +72,7 @@ class Runner:
             batch_size (int): Number of objects in each batch
             silent (bool): Whether to show the plot or not. True hides the plot.
         """
-        # Start by making the tkinter parts
+        # Start by making the tkinter parts{{{
         root = tk.Tk()
         root.title("DriveNet Training")
         root.geometry("350x130")
@@ -117,7 +117,7 @@ class Runner:
         tk.Label(root, textvariable=time_var).grid(row=2, column=0,
                                                    sticky="W", padx=5, pady=5)
         tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2,
-                                                 sticky="SW", padx=5, pady=5)
+                                                 sticky="SW", padx=5, pady=5)# }}}
 
         # Update root so it actually shows something
         root.update_idletasks()
