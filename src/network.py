@@ -31,18 +31,18 @@ class DriveNet(nn.Module):
         super(DriveNet, self).__init__()  # First initialize the superclass
 
         # Input images are pushed through 8 convolutions to extract features
-        self.conv1 = NetworkUtils.make_conv(3, 32, 5, 2, pad=2)
-        self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1)
-        self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2)
-        self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1)
-        self.conv5 = NetworkUtils.make_conv(64, 128, 3, 2)
-        self.conv6 = NetworkUtils.make_conv(128, 128, 3, 1)
-        self.conv7 = NetworkUtils.make_conv(128, 256, 3, 1)
+        self.conv1 = NetworkUtils.make_conv(3, 32, 5, 2, pad=2, dropout=0)
+        self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1, dropout=0)
+        self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2, dropout=0)
+        self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1, dropout=0)
+        self.conv5 = NetworkUtils.make_conv(64, 128, 3, 2, dropout=0)
+        self.conv6 = NetworkUtils.make_conv(128, 128, 3, 1, dropout=0)
+        self.conv7 = NetworkUtils.make_conv(128, 256, 3, 1, dropout=0)
         self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0)
 
         # 2 fully connected layers to extract the features in the images
-        self.fc1 = NetworkUtils.make_fc(81920)  # This must be changed later
-        self.fc2 = NetworkUtils.make_fc(512)
+        self.fc1 = NetworkUtils.make_fc(81920, dropout=0)  # This must be changed later
+        self.fc2 = NetworkUtils.make_fc(512, dropout=0)
 
         # 2 fully connected layers for each high-level command branch
         self.fc_left_1 = NetworkUtils.make_fc(512, dropout=0)
