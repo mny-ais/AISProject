@@ -168,9 +168,9 @@ class Runner:
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 print(images)
-                images = data[1]['image']
                 print(data[1]['vehicle_commands'])
-                vehicle_commands = data[1]
+                images = data[1]['image']
+                vehicle_commands = data[1]["vehicle_commands"]
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_commands
