@@ -74,7 +74,7 @@ class DriveNet(nn.Module):
 
         # Split into single images and data/command
 
-        print(car_data)
+        print(car_data[1])
         cmd = car_data[1]
 
         # Counter used to get the right command from the cmd tensor
