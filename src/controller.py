@@ -161,7 +161,7 @@ class Controller:
                                          [command],
                                          1)
         # get its data, then to numpy, then to a tuple
-        self.out = tuple(self.out.cpu.detach.numpy())
+        self.out = tuple(self.out.cpu().detach().numpy())
         
         # Now send the command to airsim
         if MAX_THROTTLE_ONLY:

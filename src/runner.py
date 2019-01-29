@@ -183,7 +183,7 @@ class Runner:
 
                 # Print the out result
                 print("Network output:")
-                print(self.out.cpu.detach.numpy())
+                print(self.out.cpu().detach().numpy())
 
                 # calculate the loss
                 if self.out is None:
