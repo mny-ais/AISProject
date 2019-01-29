@@ -96,6 +96,7 @@ class DrivingSimDataset(Dataset):
 
     def __len__(self):
         """Returns length of the data."""
+        print("counting size of data loader i guess")
         return len(self.drive_data)
 
     def __getitem__(self, idx):
@@ -123,7 +124,7 @@ class DrivingSimDataset(Dataset):
             "cmd": int
         """
         if self.direction == None:
-            file_name = 'image_{:0>5d}-cam_0.png'.format(idx)
+            file_name = 'image_{}-cam_0.png'.format(idx)
 
         else:
             if self.direction == -1:
