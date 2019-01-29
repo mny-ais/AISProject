@@ -148,7 +148,7 @@ class DrivingSimDataset(Dataset):
             vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
 
             print(image)
-            print)vehicle_commands)
+            print(vehicle_commands)
             print(self.direction)
 
             sample = {"image": image,
