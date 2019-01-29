@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-{{{
 """Runner.
 
 This module is used to run and train the model described in network.py.
@@ -71,7 +71,7 @@ class Runner:
             num_epochs (int): Number of epochs to train for
             batch_size (int): Number of objects in each batch
             silent (bool): Whether to show the plot or not. True hides the plot.
-        """
+        """# }}}
         # Start by making the tkinter parts{{{
         root = tk.Tk()
         root.title("DriveNet Training")
@@ -119,7 +119,7 @@ class Runner:
         tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2,
                                                  sticky="SW", padx=5, pady=5)# }}}
 
-        # Update root so it actually shows something
+        # Update root so it actually shows something{{{
         root.update_idletasks()
         root.update()
 
@@ -146,7 +146,7 @@ class Runner:
         right_data = DrivingSimDataset(csv_file, root_dir, 1)
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
-                                  shuffle=True)
+                                  shuffle=True)# }}}
         none_data = DrivingSimDataset(csv_file, root_dir)
         none_loader = DataLoader(dataset=none_data,
                                   batch_size=batch_size,
@@ -194,16 +194,16 @@ class Runner:
                 # data[0] is the iteration, data[1] is the data
                 images = data[1]['image']
                 print(data[1]['vehicle_commands'])
-                vehicle_commands = data[1]['vehicle_commands'][0]
+                vehicle_commands = data[1]
 
                 # Prep target by turning it into a CUDA compatible format
-                target = vehicle_commands
-                target = target.to(self.device, non_blocking=True)
+                car_data = vehicle_commands
+                car_data= target.to(self.device, non_blocking=True)
 
                 self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
-                               target,
+                               car_data,
                                batch_size,
                                eval_mode=False)
 
@@ -303,7 +303,7 @@ class Runner:
 #     out = net(input, 0)
 #     out= out.detach().numpy()
 #     print(out)
-#     plotit = PlotIt('plotdata.txt')
+#     plotit = PlotIt(' plotdata.txt')
 
 
 # net.zero_grad()
