@@ -178,7 +178,7 @@ class Runner:
             status.set("Training: {}".format(hr_dir[command + 1]))
             root.update_idletasks()
             root.update()
-	    if command == -1:
+            if command == -1:
                 train_loader = left_loader
             elif command == 0:
                 train_loader = forward_loader
