@@ -106,12 +106,12 @@ class DrivingSimDataset(Dataset):
             **kwargs: Not sure yet. Base class has them.
         """
 
-        item = None
-        while item is None:
-            item = self.process_img(idx)
-            idx += 1
-            if idx >= len(self.drive_data):
-                idx = 0
+        item = self.process_img(idx)
+        # while item is None:
+        #
+        #     idx += 1
+        #     if idx >= len(self.drive_data):
+        #         idx = 0
 
         return item
 
