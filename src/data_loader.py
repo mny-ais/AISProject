@@ -123,7 +123,7 @@ class DrivingSimDataset(Dataset):
             "cmd": int
         """
         if self.direction == None:
-            file_name = 'image_{:0>5d}-cam_0.png'.format(idx)
+            file_name = 'image_{}-cam_0.png'.format(idx)
 
         else:
             if self.direction == -1:
