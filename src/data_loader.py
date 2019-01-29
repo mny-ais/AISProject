@@ -123,7 +123,7 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        if self.direction == None:
+        if self.direction == 2:
             file_name = 'image_{}-cam_0.png'.format(idx)
 
         else:
