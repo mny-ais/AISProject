@@ -173,19 +173,12 @@ class Runner:
         # acc_list = []
 # }}}
         for epoch in range(num_epochs):
-            command = 2
             hr_dir = ["left", "forward", "right", "none"]
             status.set("Training: {}".format(hr_dir[command + 1]))
             root.update_idletasks()
             root.update()
-            if command == -1:
-                train_loader = left_loader
-            elif command == 0:
-                train_loader = forward_loader
-            elif command == 1:
-                train_loader = right_loader
-            else:
-                train_loader = none_loader
+
+            train_loader = none_loader
 
             total_step = len(train_loader)
 
