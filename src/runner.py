@@ -182,6 +182,7 @@ class Runner:
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 images = data[1]['image']
+                print(data[1]['vehicle_commands'])
                 vehicle_commands = data[1]['vehicle_commands'][0]
 
                 # Prep target by turning it into a CUDA compatible format
@@ -191,7 +192,7 @@ class Runner:
                 self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
-                               command,
+                               target,
                                batch_size,
                                eval_mode=False)
 

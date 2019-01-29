@@ -60,7 +60,7 @@ class DriveNet(nn.Module):
 
         self.counter = 0
 
-    def forward(self, img, cmd, batch_size):
+    def forward(self, img, target, batch_size):
         """Describes the connections within the neural network.
 
         Args:
@@ -71,6 +71,9 @@ class DriveNet(nn.Module):
             The commands to be given to the vehicle to drive in a 3 channel
             tensor representing steering and throttle.
         """
+
+        print(target)
+
         # Counter used to get the right command from the cmd tensor
         if self.counter >= batch_size:
             self.counter = 0
