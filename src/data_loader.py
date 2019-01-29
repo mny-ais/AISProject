@@ -81,7 +81,7 @@ seq = iaa.Sequential([
 
 
 class DrivingSimDataset(Dataset):
-    def __init__(self, csv_file, root_dir, direction=None):
+    def __init__(self, csv_file, root_dir, direction=2):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
                 csv_file (string): The CSV data file address

@@ -119,7 +119,7 @@ class Runner:
         tk.Label(root, textvariable=status).grid(row=3, column=0, columnspan=2,
                                                  sticky="SW", padx=5, pady=5)# }}}
 
-        # Update root so it actually shows something{{{
+        # Update root so it actually shows something
         root.update_idletasks()
         root.update()
 
