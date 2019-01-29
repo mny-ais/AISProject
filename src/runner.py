@@ -171,6 +171,8 @@ class Runner:
                 print(data[1]['vehicle_commands'])
                 images = data[1]['image']
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
+                print("Vehicle_info is:")
+                print(vehicle_info)
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_info
