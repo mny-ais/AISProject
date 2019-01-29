@@ -77,49 +77,60 @@ class DriveNet(nn.Module):
         print(car_data)
         cmd = car_data[1]
 
-        # Counter used to get the right command from the cmd tensor
-        if self.counter >= batch_size:
-            self.counter = 0
+        # Output tensor
+        out = None
 
-        # Forward through Convolutions
-        x = self.conv1(img)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
-        x = self.conv6(x)
-        x = self.conv7(x)
-        x = self.conv8(x)
+        for i in range(batch_size):
 
-        # Flatten to prepare for fully connected layers
-        x = x.view(-1, self.num_flat_features(x))
+            # Counter used to get the right command from the cmd tensor
+            if self.counter >= batch_size:
+                self.counter = 0
 
-        # Forward through fully connected layers
-        x = self.fc1(x)
-        x = self.fc2(x)
+            # Forward through Convolutions
+            x = self.conv1(img[i])
+            x = self.conv2(x)
+            x = self.conv3(x)
+            x = self.conv4(x)
+            x = self.conv5(x)
+            x = self.conv6(x)
+            x = self.conv7(x)
+            x = self.conv8(x)
 
-        # x = self.fc_forward_1(x)
-        # x = self.fc_forward_2(x)
-        # out = self.fc_out_forward(x)
+            # Flatten to prepare for fully connected layers
+            x = x.view(-1, self.num_flat_features(x))
 
-        # Branch according to the higher level commands
-        # -1 left, 0 forward, 1 right
-        if cmd == 0:
-            x = self.fc_forward_1(x)
-            x = self.fc_forward_2(x)
-            out = self.fc_out_forward(x)
+            # Forward through fully connected layers
+            x = self.fc1(x)
+            x = self.fc2(x)
 
-        elif cmd == -1:
-            x = self.fc_left_1(x)
-            x = self.fc_left_2(x)
-            out = self.fc_out_left(x)
+            # x = self.fc_forward_1(x)
+            # x = self.fc_forward_2(x)
+            # out = self.fc_out_forward(x)
 
-        else:
-            x = self.fc_right_1(x)
-            x = self.fc_right_2(x)
-            out = self.fc_out_right(x)
+            current_cmd = cmd[i]
 
-        self.counter += 1
+            # Branch according to the higher level commands
+            # -1 left, 0 forward, 1 right
+            if current_cmd == 0:
+                x = self.fc_forward_1(x)
+                x = self.fc_forward_2(x)
+                x = self.fc_out_forward(x)
+
+            elif current_cmd == -1:
+                x = self.fc_left_1(x)
+                x = self.fc_left_2(x)
+                x = self.fc_out_left(x)
+
+            else:
+                x = self.fc_right_1(x)
+                x = self.fc_right_2(x)
+                x = self.fc_out_right(x))
+            if out == None:
+                out = x
+            else:
+                out = torch.cat((out, x))
+
+            self.counter += 1
 
         return out
 
