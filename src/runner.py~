@@ -47,7 +47,7 @@ class Runner:
 
         self.criterion = nn.MSELoss()  # So this is only initialized once
 
-        # We use the SGD optimizer
+        # We use the Adam optimizer
         # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
         self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
 
