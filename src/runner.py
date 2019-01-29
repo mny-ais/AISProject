@@ -188,7 +188,7 @@ class Runner:
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
-                loss = self.criterion(self.out, car_data)
+                loss = self.criterion(self.out, car_data[0])
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
