@@ -174,7 +174,7 @@ class Runner:
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_commands
-                car_data= target.to(self.device, non_blocking=True)
+                car_data= car_data.to(self.device, non_blocking=True)
 
                 self.optimizer.zero_grad()
 
