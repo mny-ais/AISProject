@@ -15,6 +15,7 @@ References:
     arXiv:1710.02410v2 [cs.RO] 2 Mar 2018
 """
 
+from torch import unsqueeze
 import torch.nn as nn
 
 
@@ -87,7 +88,7 @@ class DriveNet(nn.Module):
                 self.counter = 0
 
             # Forward through Convolutions
-            x = self.conv1(torch.unsqueeze(img[i], 0))
+            x = self.conv1(unsqueeze(img[i], 0))
             x = self.conv2(x)
             x = self.conv3(x)
             x = self.conv4(x)
