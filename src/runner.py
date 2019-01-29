@@ -154,7 +154,7 @@ class Runner:
 # }}}
         for epoch in range(num_epochs):
             hr_dir = ["left", "forward", "right", "none"]
-            status.set("Training: {}".format(hr_dir[command + 1]))
+            status.set("Training: {}".format(hr_dir[3]))
             root.update_idletasks()
             root.update()
 
