@@ -160,10 +160,8 @@ class Controller:
         self.out = self.network.run_model(torch.unsqueeze(rgb, 0).float(),
                                          [command],
                                          1)
-        # Convert out to a cpu tensor, then get its data, then to numpy, then to
-        # a tuple
-        self.out = self.out.cpu()
-        self.out = tuple(self.out.data.numpy())
+        # get its data, then to numpy, then to a tuple
+        self.out = tuple(self.out.cpu.detach.numpy())
         
         # Now send the command to airsim
         if MAX_THROTTLE_ONLY:

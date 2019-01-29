@@ -181,6 +181,10 @@ class Runner:
                                batch_size,
                                eval_mode=False)
 
+                # Print the out result
+                print("Network output:")
+                print(self.out.cpu.detach.numpy())
+
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
