@@ -170,7 +170,7 @@ class Runner:
                 #  print(images)
                 print(data[1]['vehicle_commands'])
                 images = data[1]['image']
-                vehicle_commands = data[1]["vehicle_commands"]
+                vehicle_commands = (data[1]["vehicle_commands"], data[1]["cmd"])
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_commands
@@ -186,7 +186,7 @@ class Runner:
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
-                loss = self.criterion(self.out, target)
+                loss = self.criterion(self.out, data[1]["vehicle_commands"])
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
