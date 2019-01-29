@@ -170,23 +170,23 @@ class Runner:
                 #  print(images)
                 print(data[1]['vehicle_commands'])
                 images = data[1]['image']
-                vehicle_commands = (data[1]["vehicle_commands"], data[1]["cmd"])
+                vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
 
                 # Prep target by turning it into a CUDA compatible format
-                car_data = vehicle_commands
-                car_data= car_data.to(self.device, non_blocking=True)
+                car_data = vehicle_info
+                car_data= car_data[0].to(self.device, non_blocking=True)
 
                 self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
-                               car_data,
+                               vehicle_info,
                                batch_size,
                                eval_mode=False)
 
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
-                loss = self.criterion(self.out, data[1]["vehicle_commands"])
+                loss = self.criterion(self.out, car_data)
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
