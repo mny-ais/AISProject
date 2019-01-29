@@ -42,20 +42,20 @@ from imgaug import augmenters as iaa
 warnings.filterwarnings("ignore")
 
 
-# Here we define probabilities
-def st(aug):
-    """Defines the "sometimes" probability value."""
-    return iaa.Sometimes(0.4, aug)
-
-
-def oc(aug):
-    """Defines the "occasionally" probability value."""
-    return iaa.Sometimes(0.3, aug)
-
-
-def rl(aug):
-    """Defines the "rarely" probability value."""
-    return iaa.Sometimes(0.09, aug)
+# # Here we define probabilities
+# def st(aug):
+#     """Defines the "sometimes" probability value."""
+#     return iaa.Sometimes(0.4, aug)
+#
+#
+# def oc(aug):
+#     """Defines the "occasionally" probability value."""
+#     return iaa.Sometimes(0.3, aug)
+#
+#
+# def rl(aug):
+#     """Defines the "rarely" probability value."""
+#     return iaa.Sometimes(0.09, aug)
 
 
 # Now we define the sequential
