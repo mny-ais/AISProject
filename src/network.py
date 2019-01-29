@@ -126,7 +126,7 @@ class DriveNet(nn.Module):
             if i == 0:
                 out = x
             else:
-                out = torch.cat((out, x))
+                out = cat((out, x))
 
             self.counter += 1
 
