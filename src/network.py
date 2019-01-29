@@ -73,6 +73,7 @@ class DriveNet(nn.Module):
         """
 
         print(target)
+        command = target[2]
 
         # Counter used to get the right command from the cmd tensor
         if self.counter >= batch_size:
