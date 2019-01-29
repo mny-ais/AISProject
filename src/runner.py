@@ -190,6 +190,7 @@ class Runner:
             total_step = len(train_loader)
 
             for data in enumerate(train_loader):
+                print("finished enumerating")
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 images = data[1]['image']

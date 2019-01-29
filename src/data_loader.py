@@ -96,6 +96,7 @@ class DrivingSimDataset(Dataset):
 
     def __len__(self):
         """Returns length of the data."""
+        print("counting size of data loader i guess")
         return len(self.drive_data)
 
     def __getitem__(self, idx):
