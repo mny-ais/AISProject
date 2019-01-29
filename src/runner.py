@@ -159,7 +159,7 @@ class Runner:
         # total_step = 0
         status.set("Training")
         root.update_idletasks()
-        root.update() 
+        root.update()
 
         if not path.isfile(self.save_dir):
             status.set("Weights do not exist. Running with random weights.")
@@ -173,17 +173,19 @@ class Runner:
         # acc_list = []
 
         for epoch in range(num_epochs):
-            command = 0
-            hr_dir = ["left", "forward", "right"]
+            command = 2
+            hr_dir = ["left", "forward", "right", "none"]
             status.set("Training: {}".format(hr_dir[command + 1]))
             root.update_idletasks()
-	    root.update()
+            root.update()
 	    if command == -1:
                 train_loader = left_loader
             elif command == 0:
                 train_loader = forward_loader
-            else:
+            elif command == 1:
                 train_loader = right_loader
+            else:
+                train_loader = none_loader
 
             total_step = len(train_loader)
 
