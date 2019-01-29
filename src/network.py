@@ -15,7 +15,7 @@ References:
     arXiv:1710.02410v2 [cs.RO] 2 Mar 2018
 """
 
-from torch import unsqueeze
+from torch import unsqueeze, cat
 import torch.nn as nn
 
 
@@ -78,9 +78,6 @@ class DriveNet(nn.Module):
         print(car_data[1])
         cmd = car_data[1]
 
-        # Output tensor
-        out = None
-
         for i in range(batch_size):
 
             # Counter used to get the right command from the cmd tensor
@@ -126,7 +123,7 @@ class DriveNet(nn.Module):
                 x = self.fc_right_1(x)
                 x = self.fc_right_2(x)
                 x = self.fc_out_right(x)
-            if out == None:
+            if i == 0:
                 out = x
             else:
                 out = torch.cat((out, x))
