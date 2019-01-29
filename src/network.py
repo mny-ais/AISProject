@@ -76,7 +76,7 @@ class DriveNet(nn.Module):
         # Split into single images and data/command
         cmd = car_data[1]
 
-        for i in range(batch_size - 1):
+        for i in range(len(img)):
 
             # Counter used to get the right command from the cmd tensor
             if self.counter >= batch_size:
