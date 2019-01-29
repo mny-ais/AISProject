@@ -167,7 +167,7 @@ class Runner:
                 print("finished enumerating")
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
-                print(images)
+                #  print(images)
                 print(data[1]['vehicle_commands'])
                 images = data[1]['image']
                 vehicle_commands = data[1]["vehicle_commands"]
