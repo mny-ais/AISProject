@@ -138,7 +138,7 @@ class DrivingSimDataset(Dataset):
             file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
 
         img_name = os.path.join(self.root_dir, file_name)
-        sample = None
+        "sample = None"
         if os.path.isfile(img_name):
             image = io.imread(img_name)
 
@@ -146,6 +146,10 @@ class DrivingSimDataset(Dataset):
             cur_row = cur_row.astype('float')
 
             vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
+            
+	    print(image)
+	    print)vehicle_commands)
+	    print(self.direction)
 
             sample = {"image": image,
                       "vehicle_commands": vehicle_commands,
