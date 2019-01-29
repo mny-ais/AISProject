@@ -78,7 +78,7 @@ class DriveNet(nn.Module):
         print(car_data[1])
         cmd = car_data[1]
 
-        for i in range(batch_size):
+        for i in range(batch_size - 1):
 
             # Counter used to get the right command from the cmd tensor
             if self.counter >= batch_size:
