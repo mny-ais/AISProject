@@ -145,7 +145,11 @@ class DrivingSimDataset(Dataset):
             cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
             cur_row = cur_row.astype('float')
 
-            vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
+            # This is if we're training both the steering and the throttle
+            # vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
+
+            vehicle_commands = torch.tensor([cur_row[1]]).float()  # only
+                                                                   # steering
 
             sample = {"image": image,
                       "vehicle_commands": vehicle_commands,
