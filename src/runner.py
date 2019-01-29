@@ -147,7 +147,7 @@ class Runner:
         right_loader = DataLoader(dataset=right_data,
                                   batch_size=batch_size,
                                   shuffle=True)# }}}
-        none_data = DrivingSimDataset(csv_file, root_dir)
+        none_data = DrivingSimDataset(csv_file, root_dir)# {{{
         none_loader = DataLoader(dataset=none_data,
                                   batch_size=batch_size,
                                   shuffle=True)
@@ -171,7 +171,7 @@ class Runner:
         #     print(i[1]['vehicle_commands'])
 
         # acc_list = []
-
+# }}}
         for epoch in range(num_epochs):
             command = 2
             hr_dir = ["left", "forward", "right", "none"]
@@ -193,6 +193,7 @@ class Runner:
                 print("finished enumerating")
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
+                print(images)
                 images = data[1]['image']
                 print(data[1]['vehicle_commands'])
                 vehicle_commands = data[1]
