@@ -127,26 +127,6 @@ class Runner:
         loss_file = open(plot_loc, 'a')
 
         # Prepare the datasets and their corresponding dataloaders
-        left_data = DrivingSimDataset(csv_file, root_dir, -1)
-        left_loader = DataLoader(dataset=left_data,
-                                 batch_size=batch_size,
-                                 shuffle=True)
-        status.set("Left data set loaded")
-        root.update_idletasks()
-        root.update()
-
-        forward_data = DrivingSimDataset(csv_file, root_dir, 0)
-        forward_loader = DataLoader(dataset=forward_data,
-                                    batch_size=batch_size,
-                                    shuffle=True)
-        status.set("Forward data set loaded")
-        root.update_idletasks()
-        root.update()
-
-        right_data = DrivingSimDataset(csv_file, root_dir, 1)
-        right_loader = DataLoader(dataset=right_data,
-                                  batch_size=batch_size,
-                                  shuffle=True)# }}}
         none_data = DrivingSimDataset(csv_file, root_dir)# {{{
         none_loader = DataLoader(dataset=none_data,
                                   batch_size=batch_size,
@@ -178,6 +158,7 @@ class Runner:
             root.update_idletasks()
             root.update()
 
+            #  Former different loaders are now one single loader for all data
             train_loader = none_loader
 
             total_step = len(train_loader)
