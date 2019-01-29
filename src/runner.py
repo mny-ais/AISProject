@@ -164,21 +164,15 @@ class Runner:
             total_step = len(train_loader)
 
             for data in enumerate(train_loader):
-                print("finished enumerating")
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
                 #  print(images)
-                print(data[1]['vehicle_commands'])
                 images = data[1]['image']
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
-                print("Vehicle_info is:")
-                print(vehicle_info)
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_info
                 car_data= car_data[0].to(self.device, non_blocking=True)
-                print("Car_data:")
-                print(car_data)
 
                 self.optimizer.zero_grad()
 
