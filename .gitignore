@@ -453,3 +453,6 @@ venv.bak/
 # PyTorch unnecessary
 **/weights.pt
 **/*-loss_data.txt
+
+# temp files
+**/*~
