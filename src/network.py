@@ -124,7 +124,7 @@ class DriveNet(nn.Module):
             else:
                 x = self.fc_right_1(x)
                 x = self.fc_right_2(x)
-                x = self.fc_out_right(x))
+                x = self.fc_out_right(x)
             if out == None:
                 out = x
             else:
