@@ -81,7 +81,7 @@ seq = iaa.Sequential([
 
 
 class DrivingSimDataset(Dataset):
-    def __init__(self, csv_file, root_dir, direction=2):
+    def __init__(self, csv_file, root_dir):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
                 csv_file (string): The CSV data file address
@@ -92,7 +92,7 @@ class DrivingSimDataset(Dataset):
         self.dataset = []
         self.drive_data = pd.read_csv(csv_file, sep=',')
         self.root_dir = root_dir
-        self.direction = direction
+        self.direction = 2
 
     def __len__(self):
         """Returns length of the data."""
@@ -122,26 +122,14 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        if self.direction == 2:
-            file_name = 'image_{}-cam_0.png'.format(idx)
-
-        else:
-            if self.direction == -1:
-                direction = "left"
-            elif self.direction == 0:
-                direction = "forward"
-            elif self.direction == 1:
-                direction = "right"
-            else:
-                raise IndexError
-            file_name = '{}-image_{:0>5d}-cam_0.png'.format(direction, idx)
+        file_name = 'image_{}-cam_0.png'.format(idx)
 
         img_name = os.path.join(self.root_dir, file_name)
         "sample = None"
         if os.path.isfile(img_name):
             image = io.imread(img_name)
 
-            cur_row = self.drive_data.iloc[idx, 0:5].as_matrix()
+            cur_row = self.drive_data.iloc[idx, 0:6].as_matrix()
             cur_row = cur_row.astype('float')
 
             # This is if we're training both the steering and the throttle
@@ -152,8 +140,10 @@ class DrivingSimDataset(Dataset):
 
             sample = {"image": image,
                       "vehicle_commands": vehicle_commands,
-                      "cmd": self.direction}
+                      "cmd": cur_row[6]
             sample = self.to_tensor(sample)
+        else:
+            print("image not found by data_loader.py")
 
         return sample
 
@@ -175,10 +165,12 @@ class DrivingSimDataset(Dataset):
                 "vehicle_commands": sample["vehicle_commands"],
                 "cmd": sample["cmd"]}
 
+    """
     def __to_processed_package(self):
 
         for i in range(0, self.__len__()):
             self.__add__(self.to_tensor(self.process_img(i)))
+    """
 
 
 """

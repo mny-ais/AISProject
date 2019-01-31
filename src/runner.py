@@ -72,7 +72,7 @@ class Runner:
             batch_size (int): Number of objects in each batch
             silent (bool): Whether to show the plot or not. True hides the plot.
         """# }}}
-        # Start by making the tkinter parts{{{
+        # Start by making the tkinter parts{{{{{{{{{
         root = tk.Tk()
         root.title("DriveNet Training")
         root.geometry("350x130")
@@ -124,14 +124,14 @@ class Runner:
         root.update()
 
         # Open file for loss data plot
-        loss_file = open(plot_loc, 'a')
+        loss_file = open(plot_loc, 'a')# }}}}}}
 
         # Prepare the datasets and their corresponding dataloaders
-        none_data = DrivingSimDataset(csv_file, root_dir)# {{{
-        none_loader = DataLoader(dataset=none_data,
+        complete_data = DrivingSimDataset(csv_file, root_dir)# {{{
+        train_loader = DataLoader(dataset=complete_data,
                                   batch_size=batch_size,
                                   shuffle=True)
-        status.set("Data sets loaded")
+        status.set("Data sets loaded")# {{{
 
         root.update_idletasks()
         root.update()
@@ -142,7 +142,7 @@ class Runner:
         root.update()
 
         if not path.isfile(self.save_dir):
-            status.set("Weights do not exist. Running with random weights.")
+            status.set("Weights do not exist. Running with random weights.")# }}}
 
         # print("len(train_loader) = {0}".format(total_step))
         # print("Dataset:")
@@ -153,14 +153,11 @@ class Runner:
         # acc_list = []
 # }}}
         for epoch in range(num_epochs):
-            hr_dir = ["left", "forward", "right", "none"]
-            status.set("Training: {}".format(hr_dir[3]))
+            status.set("Training: all")# {{{
             root.update_idletasks()
-            root.update()
+            root.update()# }}}
 
             #  Former different loaders are now one single loader for all data
-            train_loader = none_loader
-
             total_step = len(train_loader)
 
             for data in enumerate(train_loader):
@@ -171,9 +168,7 @@ class Runner:
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
 
                 # Prep target by turning it into a CUDA compatible format
-                car_data = vehicle_info
-                car_data= car_data[0].to(self.device, non_blocking=True)
-
+                car_data = vehicle_info[0].to(self.device, non_blocking=True)
                 self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
@@ -188,7 +183,7 @@ class Runner:
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
-                loss = self.criterion(self.out, car_data[0])
+                loss = self.criterion(self.out, car_data)
 
                 # Backdrop and preform Adam optimization
                 loss.backward()
@@ -238,7 +233,7 @@ class Runner:
             PlotIt(plot_loc)
         root.mainloop()
 
-    def run_model(self, input_image, input_command, batch_size, eval_mode=True):
+    def run_model(self, input_images, input_command, batch_size, eval_mode=True):
         """Runs the model forward.
 
         Args:
@@ -262,7 +257,7 @@ class Runner:
         else:
             self.network.train()
 
-        input_image = input_image.to(self.device)
+        # input_images = input_images.to(self.device)
 
         # load the model parameters from file, if it exists.
         if path.isfile(self.save_dir):
