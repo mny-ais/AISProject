@@ -169,6 +169,7 @@ class Runner:
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_info[0].to(self.device, non_blocking=True)
+
                 # self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
@@ -180,18 +181,19 @@ class Runner:
                 print("Network output:")
                 print(self.out.cpu().detach().numpy())# }}}
 
-                self.optimizer.zero_grad()
 
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, car_data)
 
+                # Zero grad
+                self.optimizer.zero_grad()
                 # Backprop and preform Adam optimization
                 loss.backward()
                 self.optimizer.step()
 
-                # # Track the accuracy
+                # # Track the accuracy{{{
                 # total = data.size(0)
                 # _, predicted = torch.max(self.output.data, 1)
                 # correct = (predicted == data[0]).sum().item()
@@ -200,10 +202,10 @@ class Runner:
                 # Update data
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
-                loss_var.set("Loss: {:.3f}".format(loss.item()))
+                loss_var.set("Loss: {:.3f}".format(loss.item()))# }}}
 
                 counter += 1
-                if timer.elapsed_seconds_since_lap() > 0.3:
+                if timer.elapsed_seconds_since_lap() > 0.3:# {{{
                     sps = float(counter) / timer.elapsed_seconds_since_lap()
                     rate_var.set("Rate: {:.2f} steps/s".format(sps))
                     timer.lap()
@@ -220,20 +222,23 @@ class Runner:
                     time_var.set("Time left: {}".format(time_left))
 
                 root.update()
-                root.update_idletasks()
+                root.update_idletasks()# }}}
 
                 loss_file.write("{}\n".format(loss.item()))
 
         # Now save the loss file and the weights
         loss_file.close()
+
+        # Save the bias and weights
         torch.save(self.network.state_dict(),
                    self.save_dir)
+
         torch.cuda.empty_cache()
 
-        status.set("Done")
+        status.set("Done")# {{{
         if not silent:
             PlotIt(plot_loc)
-        root.mainloop()
+        root.mainloop()# }}}
 
     def run_model(self, input_images, input_command, batch_size, eval_mode=True):
         """Runs the model forward.
