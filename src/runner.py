@@ -169,23 +169,25 @@ class Runner:
 
                 # Prep target by turning it into a CUDA compatible format
                 car_data = vehicle_info[0].to(self.device, non_blocking=True)
-                self.optimizer.zero_grad()
+                # self.optimizer.zero_grad()
 
                 self.run_model(images.to(self.device, non_blocking=True),
                                vehicle_info,
                                batch_size,
                                eval_mode=False)
 
-                # Print the out result
+                # Print the out result{{{
                 print("Network output:")
-                print(self.out.cpu().detach().numpy())
+                print(self.out.cpu().detach().numpy())# }}}
+
+                self.optimizer.zero_grad()
 
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, car_data)
 
-                # Backdrop and preform Adam optimization
+                # Backprop and preform Adam optimization
                 loss.backward()
                 self.optimizer.step()
 
