@@ -55,9 +55,9 @@ class DriveNet(nn.Module):
 
         # Output layer which turns the previous values into steering, throttle,
         # and brakes
-        self.fc_out_left = NetworkUtils.make_fc(512, 1, dropout=0)
-        self.fc_out_forward = NetworkUtils.make_fc(512, 1, dropout=0)
-        self.fc_out_right = NetworkUtils.make_fc(512, 1, dropout=0)
+        self.fc_out_left = nn.Linear(512, 1)
+        self.fc_out_forward = nn.Linear(512,1)
+        self.fc_out_right = nn.Linear(512, 1)
 
         self.counter = 0
 
@@ -168,7 +168,7 @@ class NetworkUtils:
         layer = nn.Sequential(
             nn.Conv2d(input_channels, output_channels, kernel_size=kernel,
                       stride=stride, padding=pad),
-            nn.BatchNorm2d(output_channels),
+            # nn.BatchNorm2d(output_channels),
             nn.Dropout(dropout),
             nn.ReLU()
         )

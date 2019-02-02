@@ -54,6 +54,9 @@ class Runner:
         # Weight file location and name
         self.save_dir = save_dir
 
+        # Parameters for debugging
+        self.state_dict = self.network.state_dict()
+
         torch.backends.cudnn.benchmark = True  # Should make it faster
 
     def train_model(self, csv_file, root_dir, num_epochs, batch_size,
@@ -186,6 +189,16 @@ class Runner:
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(self.out, car_data)
+                print("Loss:")
+                print(loss)
+                print()
+
+                if self.network.state_dict() is self.state_dict:
+                    print("No change from last run")
+                else:
+                    print("Some changes detected")
+                    #print(self.network.state_dict())
+                self.state_dict = self.network.state_dict()
 
                 # Zero grad
                 self.optimizer.zero_grad()
