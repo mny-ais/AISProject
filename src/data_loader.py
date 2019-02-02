@@ -96,6 +96,7 @@ class DrivingSimDataset(Dataset):
 
     def __len__(self):
         """Returns length of the data."""
+        # TODO make this count only the direction that's requested
         return len(self.drive_data)
 
     def __getitem__(self, idx):
@@ -106,11 +107,6 @@ class DrivingSimDataset(Dataset):
         """
 
         item = self.process_img(idx)
-        # while item is None:
-        #
-        #     idx += 1
-        #     if idx >= len(self.drive_data):
-        #         idx = 0
 
         return item
 
@@ -122,10 +118,10 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        file_name = 'image_{}-cam_0.png'.format(idx)
+        file_name = 'image_{}-cam_0.png'.format(idx + 1)
 
         img_name = os.path.join(self.root_dir, file_name)
-        "sample = None"
+
         if os.path.isfile(img_name):
             image = io.imread(img_name)
 
@@ -140,7 +136,7 @@ class DrivingSimDataset(Dataset):
 
             sample = {"image": image,
                       "vehicle_commands": vehicle_commands,
-                      "cmd": cur_row[6]
+                      "cmd": cur_row[5]}
             sample = self.to_tensor(sample)
         else:
             print("image not found by data_loader.py")
