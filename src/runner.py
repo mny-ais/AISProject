@@ -251,7 +251,7 @@ class Runner:
             PlotIt(plot_loc)
         root.mainloop()# }}}
 
-    def run_model(self, input_image, input_command, batch_size, eval_mode=True):
+    def run_model(self, input_image, input_command, batch_size):
         """Runs the model forward.
 
         Args:
