@@ -158,7 +158,7 @@ class Controller:
         # Then convert the command to a numpy array
         command = np.array([0, 0, 0, self._direction])
         self.out = self.network.run_model(torch.unsqueeze(rgb, 0).float(),
-                                         [command],
+                                         [0, command],
                                          1)
         # get its data, then to numpy, then to a tuple
         self.out = tuple(self.out.cpu().detach().numpy())
