@@ -155,7 +155,7 @@ class Controller:
         # First convert the images to tensors
         rgb = self.__to_tensor(rgb)
 
-        self.out = self.network.run_model(torch.unsqueeze(rgb, 0).float(),
+        self.out = self.network.run_model([torch.unsqueeze(rgb, 0).float()],
                                          [0, self._direction],
                                          1)
         # get its data, then to numpy, then to a tuple
