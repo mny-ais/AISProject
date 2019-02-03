@@ -451,8 +451,10 @@ venv.bak/
 .mypy_cache/
 
 # PyTorch unnecessary
-**/weights.pt
-**/*-loss_data.txt
+**/*.pt
+**/*-loss_data.csv
+
 
 # temp files
 **/*~
+src/loss-plot-key.txt
