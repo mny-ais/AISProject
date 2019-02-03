@@ -28,11 +28,13 @@ from time import strftime, gmtime
 
 
 class Runner:
-    def __init__(self, save_dir, cpu=True):
+    def __init__(self, save_dir, eval_mode, cpu=True):
         """This class is used to train and run a model.
 
         Args:
             save_dir (string): The directory to save the model parameters to.
+            eval_mode (bool): Sets whether the model should be in evaluation
+                              mode.
             cpu (bool): Use cpu or CUDA. True means use the CPU only
         """
         self.network = DriveNet()
@@ -41,6 +43,11 @@ class Runner:
         else:
             self.device = torch.device('cuda')  # Set the device to CUDA
             self.network.cuda()
+
+        if eval_mode:
+            self.network.eval()
+        else:
+            self.network.train()
 
         # Save the last output, so we can calculate the loss using it
         self.out = None
@@ -144,6 +151,7 @@ class Runner:
         root.update_idletasks()
         root.update()
 
+        self.load_state_dict()
         if not path.isfile(self.save_dir):
             status.set("Weights do not exist. Running with random weights.")# }}}
 
@@ -255,26 +263,21 @@ class Runner:
                                 0 is center,
                                 1 is right
             batch_size (int): The size of the batch to run.
-            eval_mode (bool): Sets whether the model should be in evaluation
-                              mode.
 
         Returns:
             (torch.Tensor) The output as a 2 channel tensor representing
             steering and throttle.
         """
-        if eval_mode:
-            self.network.eval()
-        else:
-            self.network.train()
 
         # input_images = input_images.to(self.device)
 
+        self.out = self.network(input_image, input_command, batch_size)
+        return self.out
+
+    def load_state_dict(self):
         # load the model parameters from file, if it exists.
         if path.isfile(self.save_dir):
             self.network.load_state_dict(torch.load(self.save_dir))
-
-        self.out = self.network(input_image, input_command, batch_size)
-        return self.out
 
 # Test code to see if the model runs
 # if __name__ == "__main__":

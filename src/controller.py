@@ -121,6 +121,8 @@ class Controller:
         self._display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT),
                                                 pygame.HWSURFACE
                                                 | pygame.DOUBLEBUF)
+
+        self.network.load_state_dict()
         print("PyGame started")
 
     def __on_reset(self):
@@ -155,7 +157,7 @@ class Controller:
         # First convert the images to tensors
         rgb = self.__to_tensor(rgb)
 
-        self.out = self.network.run_model([torch.unsqueeze(rgb, 0).float()],
+        self.out = self.network.run_model([torch.unsqueeze(rgb, 0).float().to(torch.device("cpu"))],
                                          [0, self._direction],
                                          1)
         # get its data, then to numpy, then to a tuple

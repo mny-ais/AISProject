@@ -83,7 +83,7 @@ class DriveNet(nn.Module):
                 self.counter = 0
 
             # Forward through Convolutions
-            x = self.conv1(img[i])  # Unsqueeze only if 1 pic
+            x = self.conv1(img[i])
             x = self.conv2(x)
             x = self.conv3(x)
             x = self.conv4(x)

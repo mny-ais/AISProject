@@ -75,10 +75,9 @@ def parse_arguments():
 
 def main(arguments):
     """Main function that runs everything"""
-    runner = Runner(arguments.weights[0], cpu=arguments.cpu)
-
     if arguments.t:
         # Means run in training mode, parse args
+        runner = Runner(arguments.weights[0], False, cpu=arguments.cpu)
         if arguments.csv_dir is not None:
             csv_dir = arguments.csv_dir
         else:
@@ -92,6 +91,7 @@ def main(arguments):
         sys.exit()
 
     elif arguments.eval:
+        runner = Runner(arguments.weights[0], True, cpu=arguments.cpu)
         # First initialize the controller object
         controller = Controller(runner)
 
@@ -105,6 +105,7 @@ def main(arguments):
         profile_path = path.join(path.dirname(path.abspath(__file__)),
                                  "profile.txt")
         if arguments.t:
+            runner = Runner(arguments.weights[0], False, cpu=arguments.cpu)
             # Means run in training mode, parse args
             if arguments.csv_dir is not None:
                 csv_dir = arguments.csv_dir
@@ -123,6 +124,7 @@ def main(arguments):
             sys.exit()
 
         elif arguments.eval:
+            runner = Runner(arguments.weights[0], True, cpu=arguments.cpu)
             # First initialize the controller object
             controller = Controller(runner)
 
