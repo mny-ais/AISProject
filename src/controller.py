@@ -159,7 +159,7 @@ class Controller:
 
         self.out = self.network.run_model([torch.unsqueeze(rgb, 0)],
                                          [0, self._direction],
-                                         1)
+                                         [1])
         # get its data, then to numpy, then to a tuple
         self.out = tuple(self.out.cpu().detach().numpy())
         
