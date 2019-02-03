@@ -62,6 +62,7 @@ class Controller:
 
         # Set up the network
         self.network = network
+        self.network.network.cuda()
 
         # Set up timers for fps counting
         self._timer = Timer()
@@ -157,7 +158,7 @@ class Controller:
         # First convert the images to tensors
         rgb = self.__to_tensor(rgb)
 
-        self.out = self.network.run_model([torch.unsqueeze(rgb, 0).float().to(torch.device("cpu"))],
+        self.out = self.network.run_model([torch.unsqueeze(rgb, 0).float()],
                                          [0, self._direction],
                                          1)
         # get its data, then to numpy, then to a tuple
