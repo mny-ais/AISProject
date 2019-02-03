@@ -67,7 +67,7 @@ def parse_arguments():
     if not arguments.t and not arguments.eval:
         parser.error("What do you want me to do?")
 
-    if arguments.profile and not arguments.t or arguments.eval:
+    if arguments.profile and not (arguments.t or arguments.eval):
         parser.error("Must profile a specific mode")
 
     return arguments
