@@ -43,25 +43,29 @@ non_existing_images = non_existing_images_cam_0 + differences
 
 non_existing_images = sorted(non_existing_images)
 
-# Delete unnecessary csv entries
-for index in non_existing_images:
-    # TODO This part. Basically go through each line and find if it exists
+print(non_existing_images)
+new_csv_data = [header]
 
-# Delete unnecessary images with just one camera value
-for index in differences:
-    # Make the file names first
-    cam_0_file = "image_{:0>5d}-cam_0.png".format(index)
-    cam_0_file = os.path.join(dir_path, cam_0_file)
-    cam_1_file = "image_{:0>5d}-cam_1.png".format(index)
-    cam_1_file = os.path.join(dir_path, cam_1_file)
-
-    if os.path.isfile(cam_0_file):
-        os.remove(cam_0_file)
-    if os.path.isfile(cam_1_file):
-        os.remove(cam_1_file)
-
-# Write csv file
-csv_file = open(os.path.join(dir_path, "control_input.csv"), mode='w')
-writer = csv.writer(csv_file)
-writer.writerows(csv_data)
-csv_file.close()
+# # Delete unnecessary csv entries
+# for line in csv_data:
+#     if int(line[0]) not in non_existing_images:
+#         new_csv_data.append(line)
+#
+# # Write csv file
+# csv_file = open(os.path.join(dir_path, "control_input.csv"), mode='w')
+# writer = csv.writer(csv_file)
+# writer.writerows(new_csv_data)
+# csv_file.close()
+#
+# # Delete unnecessary images with just one camera value
+# for index in differences:
+#     # Make the file names first
+#     cam_0_file = "image_{:0>5d}-cam_0.png".format(index)
+#     cam_0_file = os.path.join(dir_path, cam_0_file)
+#     cam_1_file = "image_{:0>5d}-cam_1.png".format(index)
+#     cam_1_file = os.path.join(dir_path, cam_1_file)
+#
+#     if os.path.isfile(cam_0_file):
+#         os.remove(cam_0_file)
+#     if os.path.isfile(cam_1_file):
+#         os.remove(cam_1_file)
