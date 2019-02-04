@@ -92,6 +92,7 @@ class DrivingSimDataset(Dataset):
         self.dataset = []
         # self.drive_data = pd.read_csv(csv_file, sep=',')
         self.drive_data = list(csv.reader(open(csv_file, mode='r')))
+        del self.drive_data[0]
         self.root_dir = root_dir
 
     def __len__(self):
