@@ -19,6 +19,7 @@ reader = csv.reader(csv_file)
 csv_data = list(reader)
 csv_file.close()
 
+header = csv_data[0]
 del csv_data[0]
 
 non_existing_images_cam_0 = []
@@ -44,7 +45,7 @@ non_existing_images = sorted(non_existing_images)
 
 # Delete unnecessary csv entries
 for index in non_existing_images:
-    del csv_data[index]
+    # TODO This part. Basically go through each line and find if it exists
 
 # Delete unnecessary images with just one camera value
 for index in differences:
@@ -58,10 +59,6 @@ for index in differences:
         os.remove(cam_0_file)
     if os.path.isfile(cam_1_file):
         os.remove(cam_1_file)
-
-# Now renumber the files
-counter = 0
-while
 
 # Write csv file
 csv_file = open(os.path.join(dir_path, "control_input.csv"), mode='w')
