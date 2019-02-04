@@ -182,11 +182,11 @@ class Runner:
                 car_data = vehicle_info[0].to(self.device, non_blocking=True)
 
                 # self.optimizer.zero_grad()
+                images = torch.unsqueeze(images, 0)
 
                 self.run_model(images.to(self.device, non_blocking=True),
                                vehicle_info,
-                               batch_size,
-                               eval_mode=False)
+                               batch_size)
                 #
                 # # Print the out result{{{
                 # print("Network output:")

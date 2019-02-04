@@ -32,35 +32,33 @@ from skimage import io
 from torch.utils.data import Dataset
 
 
-"""
 import imgaug as ia
 from imgaug import augmenters as iaa
-"""
 
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
 
 
-# # Here we define probabilities
-# def st(aug):
-#     """Defines the "sometimes" probability value."""
-#     return iaa.Sometimes(0.4, aug)
-#
-#
-# def oc(aug):
-#     """Defines the "occasionally" probability value."""
-#     return iaa.Sometimes(0.3, aug)
-#
-#
-# def rl(aug):
-#     """Defines the "rarely" probability value."""
-#     return iaa.Sometimes(0.09, aug)
+# Here we define probabilities
+def st(aug):
+    """Defines the "sometimes" probability value."""
+    return iaa.Sometimes(0.4, aug)
+
+
+def oc(aug):
+    """Defines the "occasionally" probability value."""
+    return iaa.Sometimes(0.3, aug)
+
+
+def rl(aug):
+    """Defines the "rarely" probability value."""
+    return iaa.Sometimes(0.09, aug)
 
 
 # Now we define the sequential
 
-"""
+
 seq = iaa.Sequential([
     # blur images with a sigma between 0 and 1.5
     rl(iaa.GaussianBlur((0, 1.5))),
@@ -76,7 +74,7 @@ seq = iaa.Sequential([
     # improve or worsen the contrast
     rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),
 ], random_order=True)
-"""
+
 
 
 
@@ -155,7 +153,7 @@ class DrivingSimDataset(Dataset):
         """
         image = sample["image"]
         # apply image augmentation sequential
-        # image = seq.augment_images(image)
+        image = seq.augment_images(image)
 
         # swap color axis because
         # numpy image: H x W x C
