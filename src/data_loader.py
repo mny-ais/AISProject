@@ -27,6 +27,8 @@ import warnings
 
 import pandas as pd
 
+import csv
+
 from skimage import io
 
 from torch.utils.data import Dataset
@@ -88,7 +90,9 @@ class DrivingSimDataset(Dataset):
         super().__init__()
 
         self.dataset = []
-        self.drive_data = pd.read_csv(csv_file, sep=',')
+        # self.drive_data = pd.read_csv(csv_file, sep=',')
+        self.drive_data = list(csv.reader(open(csv_file, mode='r')))
+        del self.drive_data[0]
         self.root_dir = root_dir
 
     def __len__(self):
@@ -101,17 +105,19 @@ class DrivingSimDataset(Dataset):
         Args:
             **kwargs: Not sure yet. Base class has them.
         """
-        item = self.process_img(idx)
+        actual_index = int(self.drive_data[idx][0])
+        # print(int(self.drive_data.iloc[idx][0]))
+        item = self.process_img(idx, actual_index)
 
-        while item is None:
-            idx += 1
-            item = self.process_img(idx)
-            if idx >= len(self.drive_data):
-                idx = 0
+        # while item is None:
+        #     idx += 1
+        #     item = self.process_img(idx)
+        #     if idx >= len(self.drive_data):
+        #         idx = 0
 
         return item
 
-    def process_img(self, idx):
+    def process_img(self, idx, actual_index):
         """Returns next transformed datapoint in correct format for the model.
 
         Returns:
@@ -119,7 +125,7 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        file_name = 'image_{:0>5d}-cam_0.png'.format(idx + 1)
+        file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
 
         img_name = os.path.join(self.root_dir, file_name)
 
@@ -128,8 +134,11 @@ class DrivingSimDataset(Dataset):
         if os.path.isfile(img_name):
             image = io.imread(img_name)
 
-            cur_row = self.drive_data.iloc[idx, 0:6].as_matrix()
-            cur_row = cur_row.astype('float')
+            cur_row = self.drive_data[idx]
+
+            for i in range(len(cur_row)):
+                cur_row[i] = float(cur_row[i])
+
 
             # This is if we're training both the steering and the throttle
             # vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
@@ -142,7 +151,7 @@ class DrivingSimDataset(Dataset):
                       "cmd": cur_row[5]}
             sample = self.to_tensor(sample)
         else:
-            print("image not found by data_loader.py: {}".format(idx))
+            print("image not found by data_loader.py: {}".format(actual_index))
             pass
 
         return sample
