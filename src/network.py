@@ -32,7 +32,7 @@ class DriveNet(nn.Module):
         super(DriveNet, self).__init__()  # First initialize the superclass
 
         # Input images are pushed through 8 convolutions to extract features
-        self.conv1 = NetworkUtils.make_conv(6, 32, 5, 2, pad=2, dropout=0)
+        self.conv1 = NetworkUtils.make_conv(3, 32, 5, 2, pad=2, dropout=0)
         self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1, dropout=0)
         self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2, dropout=0)
         self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1, dropout=0)
