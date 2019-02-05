@@ -180,7 +180,7 @@ class Runner:
                 segmented = data[1]['seg']
 
                 # Put segmented and normal into one tensor
-                images = cat((images, segmented), dim=3)
+                images = cat((images, segmented), dim=1)
 
 
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
