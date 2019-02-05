@@ -177,10 +177,10 @@ class Runner:
                 # data[0] is the iteration, data[1] is the data
                 #  print(images)
                 images = data[1]['image']
-                prev = data[1]['prev']
+                sec = data[1]['sec']
 
                 # Put segmented and normal into one tensor
-                images = cat((images, prev), dim=1)
+                images = cat((images, sec), dim=1)
 
 
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])

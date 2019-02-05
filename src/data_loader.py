@@ -126,19 +126,19 @@ class DrivingSimDataset(Dataset):
             "cmd": int
         """
         normal_file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
-        prev_file_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index - 1)
+        second_file_name = 'seg_{:0>5d}-cam_1.png'.format(actual_index)
 
 
         img_name = os.path.join(self.root_dir, normal_file_name)
-        prev_name = os.path.join(self.root_dir, prev_file_name)
+        sec_name = os.path.join(self.root_dir, sec_file_name)
 
 
         sample = None
 
         if os.path.isfile(img_name):
             image = io.imread(img_name)
-            if os.path.isfile(prev_name):
-                prev_image = io.imread(prev_name)
+            if os.path.isfile(sec_name):
+                sec_image = io.imread(sec_name)
 
                 cur_row = self.drive_data[idx]
 
@@ -153,7 +153,7 @@ class DrivingSimDataset(Dataset):
                                                                        # steering
 
                 sample = {"image": image,
-                          "prev" : seg_image,
+                          "sec" : sec_image,
                           "vehicle_commands": vehicle_commands,
                           "cmd": cur_row[5]}
                 sample = self.to_tensor(sample)
