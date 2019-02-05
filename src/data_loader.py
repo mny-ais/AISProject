@@ -31,51 +31,51 @@ from skimage import io
 
 from torch.utils.data import Dataset
 
-
-import imgaug as ia
-from imgaug import augmenters as iaa
+try:
+    import imgaug as ia
+    from imgaug import augmenters as iaa
+    with_aug = True
+except ImportError:
+    print("imgaug not installed. Running without augmentation.")
+    with_aug = False
 
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
 
-
-# Here we define probabilities
-def st(aug):
-    """Defines the "sometimes" probability value."""
-    return iaa.Sometimes(0.4, aug)
-
-
-def oc(aug):
-    """Defines the "occasionally" probability value."""
-    return iaa.Sometimes(0.3, aug)
+if with_aug:
+    # Here we define probabilities
+    def st(aug):
+        """Defines the "sometimes" probability value."""
+        return iaa.Sometimes(0.4, aug)
 
 
-def rl(aug):
-    """Defines the "rarely" probability value."""
-    return iaa.Sometimes(0.09, aug)
+    def oc(aug):
+        """Defines the "occasionally" probability value."""
+        return iaa.Sometimes(0.3, aug)
 
 
-# Now we define the sequential
+    def rl(aug):
+        """Defines the "rarely" probability value."""
+        return iaa.Sometimes(0.09, aug)
 
+    # Now we define the sequential
 
-seq = iaa.Sequential([
-    # blur images with a sigma between 0 and 1.5
-    rl(iaa.GaussianBlur((0, 1.5))),
-    # randomly remove up to X% of the pixels
-    oc(iaa.Dropout((0.0, 0.10), per_channel=0.5)),
-    # randomly remove up to X% of the pixels
-    oc(iaa.CoarseDropout((0.0, 0.10), size_percent=(0.08, 0.2),
-                         per_channel=0.5)),
-    # change brightness of images (by -X to Y of original value)
-    oc(iaa.Add((-40, 40), per_channel=0.5)),
-    # change brightness of images (X-Y% of original value)
-    st(iaa.Multiply((0.10, 2.5), per_channel=0.2)),
-    # improve or worsen the contrast
-    rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),
-], random_order=True)
-
-
+    seq = iaa.Sequential([
+        # blur images with a sigma between 0 and 1.5
+        rl(iaa.GaussianBlur((0, 1.5))),
+        # randomly remove up to X% of the pixels
+        oc(iaa.Dropout((0.0, 0.10), per_channel=0.5)),
+        # randomly remove up to X% of the pixels
+        oc(iaa.CoarseDropout((0.0, 0.10), size_percent=(0.08, 0.2),
+                             per_channel=0.5)),
+        # change brightness of images (by -X to Y of original value)
+        oc(iaa.Add((-40, 40), per_channel=0.5)),
+        # change brightness of images (X-Y% of original value)
+        st(iaa.Multiply((0.10, 2.5), per_channel=0.2)),
+        # improve or worsen the contrast
+        rl(iaa.ContrastNormalization((0.5, 1.5), per_channel=0.5)),
+    ], random_order=True)
 
 
 class DrivingSimDataset(Dataset):
@@ -152,8 +152,9 @@ class DrivingSimDataset(Dataset):
         """ converts images and data to tensor format
         """
         image = sample["image"]
-        # apply image augmentation sequential
-        image = seq.augment_images(image)
+        if with_aug:
+            # apply image augmentation sequential
+            image = seq.augment_images(image)
 
         # swap color axis because
         # numpy image: H x W x C
