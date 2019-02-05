@@ -126,19 +126,19 @@ class DrivingSimDataset(Dataset):
             "cmd": int
         """
         normal_file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
-        seg_file_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index)
+        prev_file_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index - 1)
 
 
         img_name = os.path.join(self.root_dir, normal_file_name)
-        seg_name = os.path.join(self.root_dir, seg_file_name)
+        prev_name = os.path.join(self.root_dir, prev_file_name)
 
 
         sample = None
 
         if os.path.isfile(img_name):
             image = io.imread(img_name)
-            if os.path.isfile(seg_name):
-                seg_image = io.imread(seg_name)
+            if os.path.isfile(prev_name):
+                prev_image = io.imread(prev_name)
 
                 cur_row = self.drive_data[idx]
 
@@ -153,12 +153,12 @@ class DrivingSimDataset(Dataset):
                                                                        # steering
 
                 sample = {"image": image,
-                          "seg" : seg_image,
+                          "prev" : seg_image,
                           "vehicle_commands": vehicle_commands,
                           "cmd": cur_row[5]}
                 sample = self.to_tensor(sample)
             else:
-                print("image found, but segmented not found by data_loader.py: {}".format(actual_index))
+                print("image found, but previous not found by data_loader.py: {}".format(actual_index))
                 pass
 
         else:
