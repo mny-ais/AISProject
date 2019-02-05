@@ -149,6 +149,7 @@ class SegmentedDataset(Dataset):
         if with_aug:
             # apply image augmentation sequential
             image = seq.augment_images(image)
+            seg = seq.augment_images(seg)
 
         # swap color axis because
         # numpy image: H x W x C
