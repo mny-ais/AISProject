@@ -25,6 +25,7 @@ from utils.timer import Timer
 from os import path
 from plot import PlotIt
 from time import strftime, gmtime
+from torch import cat
 
 
 class Runner:
@@ -176,6 +177,12 @@ class Runner:
                 # data[0] is the iteration, data[1] is the data
                 #  print(images)
                 images = data[1]['image']
+                segmented = data[1]['seg']
+
+                # Put segmented and normal into one tensor
+                images = cat((images, segmented))
+
+
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
 
                 # Prep target by turning it into a CUDA compatible format
