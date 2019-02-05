@@ -180,7 +180,7 @@ class Runner:
                 segmented = data[1]['seg']
 
                 # Put segmented and normal into one tensor
-                images = cat((images, segmented))
+                images = cat((images, segmented), dim=3)
 
 
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
@@ -203,7 +203,7 @@ class Runner:
                 # calculate the loss
                 if self.out is None:
                     raise ValueError("forward() has not been run properly.")
-                loss = self.criterion(self.out, cat((car_data, car_data)))
+                loss = self.criterion(self.out, car_data)
 
                 # Zero grad
                 self.optimizer.zero_grad()
