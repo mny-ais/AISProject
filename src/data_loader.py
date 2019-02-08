@@ -125,7 +125,7 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
-        file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
+        file_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index)
 
         img_name = os.path.join(self.root_dir, file_name)
 
