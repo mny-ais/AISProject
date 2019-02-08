@@ -56,7 +56,7 @@ class Runner:
 
         # We use the SGD optimizer
         # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
-        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.01)
+        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
 
         # Weight file location and name
         self.save_dir = save_dir
