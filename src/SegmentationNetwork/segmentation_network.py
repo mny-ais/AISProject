@@ -97,16 +97,22 @@ class GoogLeNet(nn.Module):
 
         self.avgpool = nn.AvgPool2d(8, stride=1)
 
+        # Skips
+        self.skip1 = None
+        self.skip2 = None
+
     def forward(self, x):
         out = self.pre_layers(x)
         out = self.a3(out)
         out = self.b3(out)
+        self.skip1 = out.clone()
         out = self.maxpool(out)
         out = self.a4(out)
         out = self.b4(out)
         out = self.c4(out)
         out = self.d4(out)
         out = self.e4(out)
+        self.skip2 = out.clone()
         out = self.maxpool(out)
         out = self.a5(out)
         out = self.b5(out)
@@ -115,7 +121,7 @@ class GoogLeNet(nn.Module):
 
 
 class SegmentationNetwork(nn.Module):
-    def __init__(self, num_classes=6):
+    def __init__(self):
         """Neural network that can do road segmentation.
 
         Args:
@@ -124,13 +130,13 @@ class SegmentationNetwork(nn.Module):
         """
         super(SegmentationNetwork, self).__init__()
 
-        # Load VGG16
-        self.gnet = GoogLeNet()
+        # Load GoogLeNet
+        self.googlenet = GoogLeNet()
 
-        # Figure out proper num channel
-        classifier_conv = nn.Conv2d(4096, num_classes, 1)
+        classifier_conv = nn.Conv2d(1024, 3, 1)
         self._normal_initialization(classifier_conv)
         self.classifier_conv = classifier_conv
+        self.softmax = nn.Softmax(dim=1)
 
     def _normal_initialization(self, layer):
         """Initializes a layer with some weights.
@@ -152,9 +158,13 @@ class SegmentationNetwork(nn.Module):
         input_spatial_dim = x.size()[2:]
 
         # Run the network
-        x = self.gnet(x)
-        x = self.classifier_conv(x)
+        out = self.googlenet(x)
+        out = self.classifier_conv(out)
 
-        x = functional.upsample_bilinear(input=x, size=input_spatial_dim)
+        out = functional.interpolate(input=out, size=(32,160),
+                                mode="bilinear")
+        print("Out shape: {}, skip2 shape: {}".format(out.shape, self.googlenet.skip2.shape))
+        out = torch.cat((out, self.googlenet.skip2))
 
-        return x
+        out = self.softmax(out)
+        return out

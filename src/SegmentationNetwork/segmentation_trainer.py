@@ -17,14 +17,13 @@ Author:
 # optimize and repeat
 
 from SegmentationNetwork.segmentation_network import SegmentationNetwork
-import torch
-import torch.nn as nn
 import datetime
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import tkinter as tk
 import argparse
+import numpy as np
+from skimage import io
 
 from torch.utils.data.dataloader import DataLoader
 from SegmentationNetwork.segmented_dataset import SegmentedDataset
@@ -32,9 +31,11 @@ from utils.timer import Timer
 from os import path
 from plot import PlotIt
 from time import strftime, gmtime
+from PIL import ImageTk, Image
+
 
 class Trainer:
-    def _init__(self, save_dir):
+    def __init__(self, save_dir):
         """This class is used to train the segmentation network.
 
         Args:
@@ -53,12 +54,11 @@ class Trainer:
 
         torch.backends.cudnn.benchmark = True
 
-    def train_segmentation(self, csv_file, root_dir, num_epochs, batch_size):
+    def train_segmentation(self, image_dir, batch_size, num_epochs):
         """Trains the model.
 
         Args:
-            csv_file (string): File address of the csv_file for training.
-            root_dir (string): Root directory of the data for training.
+            image_dir (string): Root directory of the data for training.
             num_epochs (int): Number of epochs to train for.
             batch_size (int): Number of objects in each batch.
         """
@@ -73,12 +73,15 @@ class Trainer:
         counter = 0
 
         # Plot save location
-        plot_loc = path.join(path.split(self.save_dir)[0],
-                             strftime("%Y_%m_%d_%H-%M-%S", gmtime())
+        plot_loc = path.dirname(path.dirname(path.abspath(__file__)))
+        plot_loc = path.join(plot_loc, "plot_csv")
+        plot_loc = path.join(plot_loc, strftime("%Y_%m_%d_%H-%M-%S", gmtime())
                              + '-loss_data.csv')
 
         # Configure the grid and geometry
         # -----------------------
+        # | Target segmentation |
+        # | Output              |
         # | step     | rate     |
         # | epoch    | loss     |
         # | status message      |
@@ -97,12 +100,19 @@ class Trainer:
         time_var = tk.StringVar(master=root, value="Time left: 0:00")
         status = tk.StringVar(master=root, value="Preparing dataset")
 
-        # Prepare tk labels to be put on the grid
-        target_label = tk.Label(root, image=None)
-        target_label.grid(row=0, column=0, columnspan=2)
-        seg_label = tk.Label(root, image=None)
-        seg_label.grid(row=1, column=1, columnspan=2)
+        # Prepare image canvases
+        black_array = io.imread(path.join(image_dir, "seg_00001-cam_0.png"))
+        black_array.fill(0)
+        black_image = ImageTk.PhotoImage(image=Image.fromarray(black_array))
 
+        target_canvas = tk.Canvas(root, width=320, height=64)
+        target_canvas_img = target_canvas.create_image(0, 0, anchor="nw", image=black_image)
+        target_canvas.grid(row=0, column=0, columnspan=2)
+        seg_canvas = tk.Canvas(root, width=320, height=64)
+        seg_canvas_img = seg_canvas.create_image(0, 0, anchor="nw", image=black_image)
+        seg_canvas.grid(row=1, column=0, columnspan=2)
+
+        # Prepare tk labels to be put on the grid
         tk.Label(root, textvariable=step_var).grid(row=2, column=0, sticky="W",
                                                    padx=5, pady=5)
         tk.Label(root, textvariable=rate_var).grid(row=2, column=1,
@@ -126,7 +136,7 @@ class Trainer:
         loss_file = open(plot_loc, 'a')
 
         # Prepare the datasets and their corresponding dataloaders
-        data = SegmentedDataset(csv_file, root_dir)
+        data = SegmentedDataset(image_dir)
         train_loader = DataLoader(dataset=data,
                                   batch_size=batch_size,
                                   shuffle=True)
@@ -159,20 +169,15 @@ class Trainer:
                 seg = data[1]["seg"]
 
                 # Prep target by turning it into a CUDA compatible format
-                seg_cuda = seg.to(self.device, non_blocking=True)
+                seg_cuda = data[1]["seg"].to(device=self.device,
+                                             dtype=torch.long,
+                                             non_blocking=True)
+                seg = seg.numpy()
 
-                # self.optimizer.zero_grad()
-                image = torch.unsqueeze(image, 0)
-
-                out = self.network(image.to(self.device, non_blocking=True),
-                                   batch_size)
-
-                # Show the result
-
-
+                out = self.network(image.to(self.device, non_blocking=True))
 
                 # calculate the loss
-                if self.out is None:
+                if out is None:
                     raise ValueError("forward() has not been run properly.")
                 loss = self.criterion(out, seg_cuda)
 
@@ -191,10 +196,10 @@ class Trainer:
                 # Update data
                 step_var.set("Step: {0}/{1}".format(data[0] + 1, total_step))
                 epoch_var.set("Epoch: {0}/{1}".format(epoch + 1, num_epochs))
-                loss_var.set("Loss: {:.3f}".format(loss.item()))# }}}
+                loss_var.set("Loss: {:.3f}".format(loss.item()))
 
                 counter += 1
-                if timer.elapsed_seconds_since_lap() > 0.3:# {{{
+                if timer.elapsed_seconds_since_lap() > 0.3:
                     sps = float(counter) / timer.elapsed_seconds_since_lap()
                     rate_var.set("Rate: {:.2f} steps/s".format(sps))
                     timer.lap()
@@ -212,13 +217,18 @@ class Trainer:
 
                 # update image only once per step
                 if data[0] == 0:
-                    target = F.to_pil_image(seg)
-                    seg_img = F.to_pil_image(out.cpu().detach())
-                    target_label.configure(image=target)
-                    seg_label.configure(image=seg_img)
+                    target_array = self.class_to_image_array(seg)
+                    target = ImageTk.PhotoImage(image=Image
+                                                .fromarray(target_array))
+                    seg_array = self.class_prob_to_image_array(out.cpu()
+                                                               .detach()[0])
+                    seg_img = ImageTk.PhotoImage(image=Image
+                                                 .fromarray(seg_array))
+                    target_canvas.itemconfig(target_canvas_img, image=target)
+                    seg_canvas.itemconfig(seg_canvas_img, image=seg_img)
 
                 root.update()
-                root.update_idletasks()# }}}
+                root.update_idletasks()
 
                 loss_file.write("{}\n".format(loss.item()))
 
@@ -234,6 +244,55 @@ class Trainer:
         status.set("Done")
         PlotIt(plot_loc)
         root.mainloop()
+
+    @staticmethod
+    def class_to_image_array(input):
+        """Transforms classes into an image array.
+
+        Args:
+            input (np.array): numpy array of classes in each pixel in the shape
+                              [Batch, H, W]
+
+        Returns:
+            (np.array) in the form [H, W, Color]
+        """
+        input = input.transpose(1, 2, 0)
+        out = np.ndarray([64, 320, 3])
+        for i in range(64):
+            for j in range(320):
+                if input[i][j][0] == 0:
+                    out[i][j] = np.array([0, 0, 0])
+                elif input[i][j][0] == 1:
+                    out[i][j] = np.array([0, 0, 255])
+                else:
+                    out[i][j] = np.array([255, 0, 0])
+        return out.astype('uint8')
+
+    @staticmethod
+    def class_prob_to_image_array(input):
+        """Takes class probabilities and turns it into an image array.
+
+        Args:
+            input (torch.Tensor): Input with shape [2, 64, 320]
+
+        Returns:
+            (np.array) with shape [64, 320, 3]
+        """
+        input_array = input.numpy()
+        input_array = input_array.transpose(1, 2, 0)
+
+        output_array = np.ndarray([64, 320, 3])
+        for i in range(64):
+            for j in range(320):
+                index_max = np.argmax(input_array[i][j])
+                if index_max == 0:
+                    output_array[i][j].fill(0)
+                elif index_max == 1:
+                    output_array[i][j] = np.array([0, 0, 255])
+                else:
+                    output_array[i][j] = np.array([255, 0, 0])
+
+        return output_array.astype('uint8')
 
 
 def parse_args():
@@ -256,10 +315,22 @@ def parse_args():
 
     return parser.parse_args()
 
+
+def main(weights, data, batch_size, epochs):
+    """Main function to run everything.
+
+    Args:
+        weights: Path to the weights.
+        data: Path to the image data.
+        batch_size: Size of the batches to run.
+        epochs: Number of epochs to run
+    """
+    trainer = Trainer(weights)
+    trainer.train_segmentation(data, batch_size, epochs)
+
+
 if __name__ == "__main__":
     arguments = parse_args()
-    trainer = Trainer()
 
-    csv_loc = path.join(arguments.data, "control_input.csv")
-    trainer.train_segmentation(csv_loc, arguments.data, arguments.batch_size,
-                               arguments.epoch)
+    main(arguments.weights[0], arguments.data[0], arguments.batch_size,
+         arguments.epoch)
