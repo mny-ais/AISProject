@@ -56,7 +56,7 @@ class Runner:
 
         # We use the SGD optimizer
         # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
-        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.01)
+        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.002)
 
         # Weight file location and name
         self.save_dir = save_dir
@@ -93,8 +93,11 @@ class Runner:
 
         # Plot save location
         plot_loc = path.join(path.split(self.save_dir)[0],
+                             "plot_csv")
+        plot_loc = path.join(plot_loc,
                              strftime("%Y_%m_%d_%H-%M-%S", gmtime())
                              + '-loss_data.csv')
+
 
         # Configure the grid and geometry
         # -----------------------

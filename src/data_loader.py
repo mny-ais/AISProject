@@ -132,7 +132,10 @@ class DrivingSimDataset(Dataset):
         sample = None
 
         if os.path.isfile(img_name):
-            image = io.imread(img_name)
+            try:
+                image = io.imread(img_name)
+            except ValueError:
+                print("Could not find image {}".format(actual_index))
 
             cur_row = self.drive_data[idx]
 
