@@ -93,8 +93,11 @@ class Runner:
 
         # Plot save location
         plot_loc = path.join(path.split(self.save_dir)[0],
+                             "plot_csv")
+        plot_loc = path.join(plot_loc,
                              strftime("%Y_%m_%d_%H-%M-%S", gmtime())
                              + '-loss_data.csv')
+
 
         # Configure the grid and geometry
         # -----------------------
