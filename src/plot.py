@@ -27,8 +27,10 @@ class PlotIt:
     """Generates plot of loss function from .txt file."""
     def __init__(self, plot_location=None):
         if plot_location == None:
-            tk.Tk().withdraw()
+            root = tk.Tk()
+            root.withdraw()
             file_name = askopenfilename()
+            root.destroy()
         else:
             file_name = plot_location
         
