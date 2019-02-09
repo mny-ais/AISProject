@@ -138,7 +138,7 @@ class Controller:
 
         # Get an image from Unreal
         response = self.client.simGetImages([
-            airsim.ImageRequest("0", airsim.ImageType.Segmented, False, False)])
+            airsim.ImageRequest("0", airsim.ImageType.Segmentation, False, False)])
         rgb = None
         if response:
             rgb = self.__response_to_cv(response[0], 3)
