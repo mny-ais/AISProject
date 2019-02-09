@@ -135,16 +135,21 @@ class SegmentationNetwork(nn.Module):
         # Load various encoders
         if encoder == "googlenet":
             self.encoder = GoogLeNet()
+            class_conv_input = 1024
         elif encoder == "vgg11":
             self.encoder = vgg11(True).features
+            class_conv_input = 512
         elif encoder == "vgg16":
             self.encoder = vgg16(True).features
+            class_conv_input = 512
         elif encoder == "resnet18":
             self.encoder = resnet18(True)
+            class_conv_input = 1024
         elif encoder == "resnet50":
             self.encoder = resnet50(True)
+            class_conv_input = 1024
 
-        classifier_conv = nn.Conv2d(1024, 3, 1)
+        classifier_conv = nn.Conv2d(class_conv_input, 3, 1)
         self._normal_initialization(classifier_conv)
         self.classifier_conv = classifier_conv
         self.softmax = nn.Softmax(dim=1)
