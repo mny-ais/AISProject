@@ -33,6 +33,7 @@ from plot import PlotIt
 from time import strftime, gmtime
 from PIL import ImageTk, Image
 
+ENCODER = "googlenet"
 
 class Trainer:
     def __init__(self, save_dir):
@@ -41,7 +42,7 @@ class Trainer:
         Args:
             save_dir (string): The directory to save the model parameters to.
         """
-        self.network = SegmentationNetwork()
+        self.network = SegmentationNetwork(ENCODER)
         self.network.cuda()
         self.network.train()
 
