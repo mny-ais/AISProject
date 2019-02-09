@@ -177,7 +177,7 @@ class SegmentationNetwork(nn.Module):
         out = self.encoder(x)
         out = self.classifier_conv(out)
 
-        out = functional.interpolate(input=out, size=(64,320),
+        out = functional.interpolate(input=out, size=input_spatial_dim,
                                 mode="bilinear")
         out = self.softmax(out)
         return out
