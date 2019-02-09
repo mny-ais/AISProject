@@ -35,6 +35,9 @@ GRAB_IMAGE_DISTANCE = 0.1  # Meters
 
 MAX_THROTTLE_ONLY = True  # Run the car at max speed and ignore model throttle
 
+max_lanes = 6
+
+
 
 class Controller:
     def __init__(self, network):
