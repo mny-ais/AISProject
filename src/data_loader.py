@@ -126,7 +126,7 @@ class DrivingSimDataset(Dataset):
             "cmd": int
         """
         normal_file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
-        second_file_name = 'seg_{:0>5d}-cam_1.png'.format(actual_index)
+        second_file_name = 'image_{:0>5d}-cam_1.png'.format(actual_index)
 
 
         img_name = os.path.join(self.root_dir, normal_file_name)
