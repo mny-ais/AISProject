@@ -190,7 +190,7 @@ class Controller:
 
         # Get an image from Unreal
         response = self.client.simGetImages([
-            airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)])
+            airsim.ImageRequest("0", airsim.ImageType.Segmentation, False, False)])
         rgb = None
         if response:
             rgb = self.__response_to_cv(response[0], 3)
@@ -214,7 +214,7 @@ class Controller:
                                          1)
         # get its data, then to numpy, then to a tuple
         self.out = tuple(self.out.cpu().detach().numpy())
-        
+
         # Now send the command to airsim
         if MAX_THROTTLE_ONLY:
             self.throttle = self.max_throttle
