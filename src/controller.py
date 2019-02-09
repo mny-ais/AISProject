@@ -14,6 +14,7 @@ import airsim
 import cv2
 import pygame
 import torch
+from torch import cat
 import numpy as np
 from utils.timer import Timer
 from pygame.locals import K_KP4
@@ -138,11 +139,14 @@ class Controller:
 
         # Get an image from Unreal
         response = self.client.simGetImages([
-            airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)])
+            airsim.ImageRequest("0", airsim.ImageType.Scene, False, False),
+            airsim.ImageRequest("0", airsim.ImageType.Segmentation, False, False)])
         rgb = None
+        seg = None
         if response:
             rgb = self.__response_to_cv(response[0], 3)
             self._main_image = rgb
+            seg = self.__response_to_cv(response[1], 3)
 
         # Get key presses and parse them
         events = pygame.event.get()
@@ -155,14 +159,17 @@ class Controller:
 
         # run the network
         # First convert the images to tensors
-        rgb = self.__to_tensor(rgb).float().to(self.network.device)
+        rgb = self.__to_tensor(rgb).float()
+        seg = self.__to_tensor(seg).float()
+
+        rgb = cat((rgb, seg)).to(self.network.device)
 
         self.out = self.network.run_model([torch.unsqueeze(rgb, 0)],
                                          [0, [self._direction]],
                                          1)
         # get its data, then to numpy, then to a tuple
         self.out = tuple(self.out.cpu().detach().numpy())
-        
+
         # Now send the command to airsim
         if MAX_THROTTLE_ONLY:
             self.throttle = self.max_throttle
