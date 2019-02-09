@@ -74,6 +74,8 @@ class Controller:
         self.direction_text = "Direction: Forwards"
         self._text_font = None
 
+        self.set_segmentation_ids()
+
         # Directions:
         # -1 : Left
         # 0 : Forwards
@@ -108,6 +110,53 @@ class Controller:
             pygame.quit()
             self.client.enableApiControl(False)  # Give control back to user
             return
+
+    def set_segmentation_ids(self):
+
+        # rgb_file = open("seg_rgbs.txt", "r")
+        # lines = rgb_file.readlines()
+        # for l in lines:
+        #     s = l.split('[')
+        #     self.color_map[int(s[0].rstrip())] = eval('[' + s[1].rstrip())
+        #     self.val_map[tuple(eval('[' + s[1].rstrip()))] = int(s[0].
+        #                                                      rstrip())
+
+        found = self.client.simSetSegmentationObjectID("[\w]*", 0, True)
+        print("Reset all segmentations to zero: %r" % found)
+
+        self.client.simSetSegmentationObjectID("ParkingAnnotRoad[\w]*",
+                                               22,
+                                               True)
+        self.client.simSetSegmentationObjectID("CrosswalksRoad[\w]*",
+                                               23,
+                                               True)
+        self.client.simSetSegmentationObjectID("Car[\w]*",
+                                               24,
+                                               True)
+
+        self.client.simSetSegmentationObjectID("GroundRoad[\w]*",
+                                               25,
+                                               True)
+        self.client.simSetSegmentationObjectID("SolidMarkingRoad[\w]*",
+                                               26,
+                                               True)
+        self.client.simSetSegmentationObjectID("DashedMarkingRoad[\w]*",
+                                               27,
+                                               True)
+        self.client.simSetSegmentationObjectID("StopLinesRoad[\w]*",
+                                               28,
+                                               True)
+        self.client.simSetSegmentationObjectID("ParkingLinesRoad[\w]*",
+                                               29,
+                                               True)
+        self.client.simSetSegmentationObjectID("JunctionsAnnotRoad[\w]*",
+                                               30,
+                                               True)
+
+        for i in range(max_lanes):
+            self.client.simSetSegmentationObjectID("LaneRoadAnnot"
+                                                   + str(i) + "[\w]*", i + 31,
+                                                   True)
 
     def __init_game(self):
         """Initializes the PyGame window and creates a new episode.
