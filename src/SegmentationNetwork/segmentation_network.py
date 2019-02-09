@@ -107,14 +107,12 @@ class GoogLeNet(nn.Module):
         out = self.pre_layers(x)
         out = self.a3(out)
         out = self.b3(out)
-        self.skip1 = out.clone()
         out = self.maxpool(out)
         out = self.a4(out)
         out = self.b4(out)
         out = self.c4(out)
         out = self.d4(out)
         out = self.e4(out)
-        self.skip2 = out.clone()
         out = self.maxpool(out)
         out = self.a5(out)
         out = self.b5(out)
@@ -176,7 +174,5 @@ class SegmentationNetwork(nn.Module):
 
         out = functional.interpolate(input=out, size=(32,160),
                                 mode="bilinear")
-        print("Out shape: {}, skip2 shape: {}".format(out.shape, self.googlenet.skip2.shape))
-
         out = self.softmax(out)
         return out
