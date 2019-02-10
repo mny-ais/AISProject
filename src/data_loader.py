@@ -139,27 +139,27 @@ class DrivingSimDataset(Dataset):
             image = io.imread(img_name)
             if os.path.isfile(sec_name):
                 sec_image = io.imread(sec_name)
-
-                cur_row = self.drive_data[idx]
-
-                for i in range(len(cur_row)):
-                    cur_row[i] = float(cur_row[i])
-
-
-                # This is if we're training both the steering and the throttle
-                # vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
-
-                vehicle_commands = torch.tensor([cur_row[1]]).float()  # only
-                                                                       # steering
-
-                sample = {"image": image,
-                          "sec" : sec_image,
-                          "vehicle_commands": vehicle_commands,
-                          "cmd": cur_row[5]}
-                sample = self.to_tensor(sample)
             else:
                 print("image found, but previous not found by data_loader.py: {}".format(actual_index))
-                pass
+                sec_image = image
+
+            cur_row = self.drive_data[idx]
+
+            for i in range(len(cur_row)):
+                cur_row[i] = float(cur_row[i])
+
+
+            # This is if we're training both the steering and the throttle
+            # vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
+
+            vehicle_commands = torch.tensor([cur_row[1]]).float()  # only
+                                                                   # steering
+
+            sample = {"image": image,
+                      "sec" : sec_image,
+                      "vehicle_commands": vehicle_commands,
+                      "cmd": cur_row[5]}
+            sample = self.to_tensor(sample)
 
         else:
             print("image not found by data_loader.py: {}".format(actual_index))
