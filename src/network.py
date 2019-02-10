@@ -32,34 +32,32 @@ class DriveNet(nn.Module):
         super(DriveNet, self).__init__()  # First initialize the superclass
 
         # Input images are pushed through 8 convolutions to extract features
-        self.conv1 = NetworkUtils.make_conv(6, 32, 5, 2, pad=2, dropout=0)
-        self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1, dropout=0)
-        self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2, dropout=0)
-        self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1, dropout=0)
-        self.conv5 = NetworkUtils.make_conv(64, 128, 3, 2, dropout=0)
-        self.conv6 = NetworkUtils.make_conv(128, 128, 3, 1, dropout=0)
-        self.conv7 = NetworkUtils.make_conv(128, 256, 3, 1, dropout=0)
-        self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0)
+        self.conv1 = NetworkUtils.make_conv(6, 32, 5, 2, pad=2, dropout=0.2)
+        self.conv2 = NetworkUtils.make_conv(32, 32, 3, 1, dropout=0.2)
+        self.conv3 = NetworkUtils.make_conv(32, 64, 3, 2, dropout=0.2)
+        self.conv4 = NetworkUtils.make_conv(64, 64, 3, 1, dropout=0.2)
+        self.conv5 = NetworkUtils.make_conv(64, 128, 3, 2, dropout=0.2)
+        self.conv6 = NetworkUtils.make_conv(128, 128, 3, 1, dropout=0.2)
+        self.conv7 = NetworkUtils.make_conv(128, 256, 3, 1, dropout=0.2)
+        self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0.2)
 
         # 2 fully connected layers to extract the features in the images
         self.fc1 = NetworkUtils.make_fc(81920, dropout=0)  # This must be changed later
         self.fc2 = NetworkUtils.make_fc(512, dropout=0)
 
         # 2 fully connected layers for each high-level command branch
-        self.fc_left_1 = NetworkUtils.make_fc(512, dropout=0)
-        self.fc_left_2 = NetworkUtils.make_fc(512, dropout=0)
-        self.fc_forward_1 = NetworkUtils.make_fc(512, dropout=0)
-        self.fc_forward_2 = NetworkUtils.make_fc(512, dropout=0)
-        self.fc_right_1 = NetworkUtils.make_fc(512, dropout=0)
-        self.fc_right_2 = NetworkUtils.make_fc(512, dropout=0)
+        self.fc_left_1 = NetworkUtils.make_fc(512, dropout=0.5)
+        self.fc_left_2 = NetworkUtils.make_fc(512, dropout=0.5)
+        self.fc_forward_1 = NetworkUtils.make_fc(512, dropout=0.5)
+        self.fc_forward_2 = NetworkUtils.make_fc(512, dropout=0.5)
+        self.fc_right_1 = NetworkUtils.make_fc(512, dropout=0.5)
+        self.fc_right_2 = NetworkUtils.make_fc(512, dropout=0.5)
 
         # Output layer which turns the previous values into steering, throttle,
         # and brakes
         self.fc_out_left = nn.Linear(512, 1)
         self.fc_out_forward = nn.Linear(512,1)
         self.fc_out_right = nn.Linear(512, 1)
-
-        self.counter = 0
 
     def forward(self, img, car_data, batch_size):
         """Describes the connections within the neural network.
@@ -76,14 +74,10 @@ class DriveNet(nn.Module):
         # Split into single images and data/command
         cmd = car_data[1]
 
-        for i in range(len(img)):
-
-            # Counter used to get the right command from the cmd tensor
-            if self.counter >= batch_size:
-                self.counter = 0
+        for i in range(img.shape[1]):
 
             # Forward through Convolutions
-            x = self.conv1(img[i])
+            x = self.conv1(unsqueeze(img[0][i]))
             x = self.conv2(x)
             x = self.conv3(x)
             x = self.conv4(x)
@@ -125,8 +119,6 @@ class DriveNet(nn.Module):
                 out = x
             else:
                 out = cat((out, x))
-
-            self.counter += 1
 
         return out
 
