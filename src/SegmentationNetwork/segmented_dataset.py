@@ -98,7 +98,7 @@ class SegmentedDataset(Dataset):
         """Returns next transformed datapoint in correct format for the model.
 
         Returns:
-            (dict) in the form {"image": torch.Tensor,
+            (dict) in the form {"image": numpy.ndarray,
                                 "seg": torch.Tensor,
                                 "vehicle_commands": torch.Tensor,
                                 "cmd": int

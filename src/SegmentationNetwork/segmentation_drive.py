@@ -19,10 +19,20 @@ class SegmentationDrive(nn.Module):
         fully connected layers to determine steering output.
         """
         super(SegmentationDrive, self).__init__()
-        seg_net = SegmentationNetwork("googlenet")
-        fcd = FCD()
+        self.seg_net = SegmentationNetwork("googlenet")
+        self.fcd = FCD()
 
+    def forward(self, img, command):
+        # Segment
+        x = self.seg_net(img)
 
+        # Flatten
+        x = x.view(-1, self._num_flat_features(x))
+
+        # Analyze for steering
+        x = self.fcd(x, command)
+
+        return x
 
     @staticmethod
     def _num_flat_features(x):

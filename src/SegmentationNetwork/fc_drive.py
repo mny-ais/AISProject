@@ -29,45 +29,36 @@ class FCD(nn.Module):
         super(FCD, self).__init__()  # First initialize the superclass
 
         # 2 fully connected layers to extract the features in the images
-        self.fc1 = self.make_fc(81920, dropout=0)  # This must be changed later
+        self.fc1 = self.make_fc(61440, dropout=0)  # This must be changed later
         self.fc2 = self.make_fc(512, dropout=0)
 
         # 2 fully connected layers for each high-level command branch
-        self.fc_left_1 = self.make_fc(512, dropout=0)
-        self.fc_left_2 = self.make_fc(512, dropout=0)
-        self.fc_forward_1 = self.make_fc(512, dropout=0)
-        self.fc_forward_2 = self.make_fc(512, dropout=0)
-        self.fc_right_1 = self.make_fc(512, dropout=0)
-        self.fc_right_2 = self.make_fc(512, dropout=0)
+        self.fc_left_1 = self.make_fc(512, dropout=0.5)
+        self.fc_left_2 = self.make_fc(512, dropout=0.5)
+        self.fc_forward_1 = self.make_fc(512, dropout=0.5)
+        self.fc_forward_2 = self.make_fc(512, dropout=0.5)
+        self.fc_right_1 = self.make_fc(512, dropout=0.5)
+        self.fc_right_2 = self.make_fc(512, dropout=0.5)
 
-        # Output layer which turns the previous values into steering
+        # Output layer which turns the previous values into steering, throttle,
+        # and brakes
         self.fc_out_left = nn.Linear(512, 1)
-        self.fc_out_forward = nn.Linear(512,1)
+        self.fc_out_forward = nn.Linear(512, 1)
         self.fc_out_right = nn.Linear(512, 1)
 
-        self.counter = 0
-
-    def forward(self, img, car_data, batch_size):
+    def forward(self, img, cmd):
         """Describes the connections within the neural network.
 
         Args:
             img (torch.Tensor): The input image as a tensor.
-            cmd (int): The high level command being given to the model.
+            cmd (list(int)): The high level command being given to the model.
 
         Returns (torch.Tensor):
-            The commands to be given to the vehicle to drive in a 3 channel
-            tensor representing steering and throttle.
+            The steering commands to be given to the vehicle to drive in a 1x1
+            tensor.
         """
 
-        # Split into single images and data/command
-        cmd = car_data[1]
-
-        for i in range(len(img)):
-
-            # Counter used to get the right command from the cmd tensor
-            if self.counter >= batch_size:
-                self.counter = 0
-
+        for i in range(img.shape[0]):
             # Forward through fully connected layers
             x = self.fc1(img[i])
             x = self.fc2(x)
@@ -94,8 +85,6 @@ class FCD(nn.Module):
                 out = x
             else:
                 out = cat((out, x))
-
-            self.counter += 1
 
         return out
 
