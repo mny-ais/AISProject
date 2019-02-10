@@ -125,8 +125,12 @@ class DrivingSimDataset(Dataset):
             "vehicle_commands": torch.Tensor,
             "cmd": int
         """
+	
         normal_file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index)
-        prev_file_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index - 1)
+        prev_file_name = 'image_{:0>5d}-cam_0.png'.format(actual_index - 1)
+
+        # normal_file_name = 'image_{}-cam_0.png'.format(actual_index)
+        # prev_file_name = 'image_{}-cam_0.png'.format(actual_index - 1)
 
 
         img_name = os.path.join(self.root_dir, normal_file_name)
@@ -156,7 +160,7 @@ class DrivingSimDataset(Dataset):
                                                                    # steering
 
             sample = {"image": image,
-                      "prev" : seg_image,
+                      "prev" : prev_image,
                       "vehicle_commands": vehicle_commands,
                       "cmd": cur_row[5]}
             sample = self.to_tensor(sample)
@@ -172,21 +176,21 @@ class DrivingSimDataset(Dataset):
         """ converts images and data to tensor format
         """
         image = sample["image"]
-        seg = sample["seg"]
+        prev = sample["prev"]
         if with_aug:
             # apply image augmentation sequential
             image = seq.augment_images(image)
-            seg = seq.augment_images(seg)
+            prev = seq.augment_images(prev)
 
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
 
         image = image.transpose((2, 0, 1))
-        seg = seg.transpose((2, 0, 1))
+        prev = prev.transpose((2, 0, 1))
 
         return {"image": torch.from_numpy(image).to(dtype=torch.float),
-                "seg": torch.from_numpy(seg).to(dtype=torch.float),
+                "prev": torch.from_numpy(prev).to(dtype=torch.float),
                 "vehicle_commands": sample["vehicle_commands"],
                 "cmd": sample["cmd"]}
 
