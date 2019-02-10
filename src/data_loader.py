@@ -107,11 +107,12 @@ class DrivingSimDataset(Dataset):
         # print(int(self.drive_data.iloc[idx][0]))
         item = self.process_img(idx, actual_index)
 
-        # while item is None:
-        #     idx += 1
-        #     item = self.process_img(idx)
-        #     if idx >= len(self.drive_data):
-        #         idx = 0
+        while item is None:
+            idx += 1
+            actual_index = int(self.drive_data[idx][0])
+            item = self.process_img(idx, actual_index)
+            if idx >= len(self.drive_data):
+                idx = 0
 
         return item
 
