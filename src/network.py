@@ -77,7 +77,7 @@ class DriveNet(nn.Module):
         for i in range(img.shape[1]):
 
             # Forward through Convolutions
-            x = self.conv1(unsqueeze(img[0][i]))
+            x = self.conv1(unsqueeze(img[0][i], 0))
             x = self.conv2(x)
             x = self.conv3(x)
             x = self.conv4(x)
