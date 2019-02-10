@@ -83,21 +83,45 @@ class DriveNet(nn.Module):
                 self.counter = 0
 
             # Forward through Convolutions
+            print("input")
+            print(img[i].shape)
             x = self.conv1(img[i])
+            print("Conv1:")
+            print(x.shape)
             x = self.conv2(x)
+            print("Conv2:")
+            print(x.shape)
             x = self.conv3(x)
+            print("Conv3:")
+            print(x.shape)
             x = self.conv4(x)
+            print("Conv4:")
+            print(x.shape)
             x = self.conv5(x)
+            print("Conv5:")
+            print(x.shape)
             x = self.conv6(x)
+            print("Conv6:")
+            print(x.shape)
             x = self.conv7(x)
+            print("Conv7:")
+            print(x.shape)
             x = self.conv8(x)
+            print("Conv8:")
+            print(x.shape)
 
             # Flatten to prepare for fully connected layers
             x = x.view(-1, self.num_flat_features(x))
+            print("Flatten:")
+            print(x.shape)
 
             # Forward through fully connected layers
             x = self.fc1(x)
+            print("FC 1:")
+            print(x.shape)
             x = self.fc2(x)
+            print("FC 2:")
+            print(x.shape)
 
             # x = self.fc_forward_1(x)
             # x = self.fc_forward_2(x)
@@ -109,8 +133,14 @@ class DriveNet(nn.Module):
             # -1 left, 0 forward, 1 right
             if current_cmd == 0:
                 x = self.fc_forward_1(x)
+                print("fc_forward1:")
+                print(x.shape)
                 x = self.fc_forward_2(x)
+                print("fc_forward2:")
+                print(x.shape)
                 x = self.fc_out_forward(x)
+                print("final out:")
+                print(x.shape)
 
             elif current_cmd == -1:
                 x = self.fc_left_1(x)
