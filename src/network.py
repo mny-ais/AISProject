@@ -42,7 +42,7 @@ class DriveNet(nn.Module):
         self.conv8 = NetworkUtils.make_conv(256, 256, 3, 1, dropout=0.2)
 
         # 2 fully connected layers to extract the features in the images
-        self.fc1 = NetworkUtils.make_fc(327680, dropout=0)  # This must be changed later
+        self.fc1 = NetworkUtils.make_fc(81920, dropout=0)  # This must be changed later
         self.fc2 = NetworkUtils.make_fc(512, dropout=0)
 
         # 2 fully connected layers for each high-level command branch
