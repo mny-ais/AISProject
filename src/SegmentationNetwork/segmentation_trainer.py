@@ -217,7 +217,7 @@ class Trainer:
                     time_var.set("Time left: {}".format(time_left))
 
                 # update image only once per step
-                if data[0] == 0:
+                if data[0] % 2 == 0:
                     target_array = self.class_to_image_array(seg)
                     target = ImageTk.PhotoImage(image=Image
                                                 .fromarray(target_array))
