@@ -157,12 +157,12 @@ class Controller:
         # First convert the images to tensors
         rgb = self.__to_tensor(rgb).float().to(self.network.device)
 
-        self.out = self.network.run_model([torch.unsqueeze(rgb, 0)],
+        self.out = self.network.run_model(torch.unsqueeze(torch.unsqueeze(rgb, 0), 0),
                                          [0, [self._direction]],
                                          1)
         # get its data, then to numpy, then to a tuple
         self.out = tuple(self.out.cpu().detach().numpy())
-        
+
         # Now send the command to airsim
         if MAX_THROTTLE_ONLY:
             self.throttle = self.max_throttle
