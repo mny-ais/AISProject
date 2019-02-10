@@ -130,7 +130,7 @@ class DrivingSimDataset(Dataset):
 
 
         img_name = os.path.join(self.root_dir, normal_file_name)
-        sec_name = os.path.join(self.root_dir, sec_file_name)
+        sec_name = os.path.join(self.root_dir, second_file_name)
 
 
         sample = None
