@@ -172,21 +172,21 @@ class DrivingSimDataset(Dataset):
         """ converts images and data to tensor format
         """
         image = sample["image"]
-        seg = sample["seg"]
+        sec = sample["sec"]
         if with_aug:
             # apply image augmentation sequential
             image = seq.augment_images(image)
-            seg = seq.augment_images(seg)
+            sec = seq.augment_images(sec)
 
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
 
         image = image.transpose((2, 0, 1))
-        seg = seg.transpose((2, 0, 1))
+        sec = sec.transpose((2, 0, 1))
 
         return {"image": torch.from_numpy(image).to(dtype=torch.float),
-                "seg": torch.from_numpy(seg).to(dtype=torch.float),
+                "sec": torch.from_numpy(sec).to(dtype=torch.float),
                 "vehicle_commands": sample["vehicle_commands"],
                 "cmd": sample["cmd"]}
 
