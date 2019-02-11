@@ -8,7 +8,7 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import tkinter as tk
-from tkinter.filedialog import askopenfilename, askdirectory
+from tkinter.filedialog import asksaveasfilename, askdirectory
 import os
 import sys
 
@@ -50,7 +50,7 @@ def main():
 
     def weight_on_click(*args):
         """Chooses weights for weights_1"""
-        weight_path = askopenfilename()
+        weight_path = asksaveasfilename()
         if weight_path == "":
             weight_path_var.set("Choose File...")
         else:
@@ -58,7 +58,7 @@ def main():
 
     def weight_2_on_click(*args):
         """Chooses weights for weights_2."""
-        weight_2_path = askopenfilename()
+        weight_2_path = asksaveasfilename()
         if weight_2_path == "":
             weight_2_path_var.set("Choose File...")
         else:
