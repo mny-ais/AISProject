@@ -242,7 +242,8 @@ def grid_pad(widget, row=0, column=0, columnspan=1, rowspan=1, sticky="W",
 
 
 def run_network(mode, w1, w2, data, train, lr, batch_size, epochs, optimizer):
-    csv_dir = os.path.join(data, "control_input.csv")
+    if data is not None:
+        csv_dir = os.path.join(data, "control_input.csv")
 
     # Set optimizer
     if train:
