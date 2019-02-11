@@ -27,13 +27,16 @@ from time import strftime, gmtime
 
 
 class Runner:
-    def __init__(self, save_dir, eval_mode, cpu=True):
+    def __init__(self, save_dir, eval_mode, lr=0.01, optimizer="sgd", cpu=True):
         """This class is used to train and run a model.
 
         Args:
             save_dir (string): The directory to save the model parameters to.
             eval_mode (bool): Sets whether the model should be in evaluation
                               mode.
+            lr (float): The learning rate, defaults to 0.01
+            optimizer (str): The optimizer to be used. options are "adam" or
+            "sgd"
             cpu (bool): Use cpu or CUDA. True means use the CPU only
         """
         self.network = DriveNet()
@@ -53,9 +56,12 @@ class Runner:
 
         self.criterion = nn.MSELoss()  # So this is only initialized once
 
-        # We use the SGD optimizer
-        # self.optimizer = torch.optim.Adam(self.network.parameters(), lr=0.002)
-        self.optimizer = torch.optim.SGD(self.network.parameters(), lr=0.01)
+        if optimizer == "adam":
+            self.optimizer = torch.optim.Adam(self.network.parameters(),
+                                              lr=lr)
+        elif optimizer == "sgd":
+            self.optimizer = torch.optim.SGD(self.network.parameters(),
+                                             lr=lr)
 
         # Weight file location and name
         self.save_dir = save_dir
