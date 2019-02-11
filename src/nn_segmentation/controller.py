@@ -193,7 +193,8 @@ class Controller:
                                                 | pygame.DOUBLEBUF)
 
         self.seg_net.load_state_dict(torch.load(self.weight1))
-        self.fcd.load_state_dict(torch.load(self.weight2))
+        if not self.seg_only:
+            self.fcd.load_state_dict(torch.load(self.weight2))
 
         print("PyGame started")
 
