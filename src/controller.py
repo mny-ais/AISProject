@@ -152,7 +152,7 @@ class Controller:
                 self.first_image = False
             else:
                 # If it was not, set the current main image as prev image
-                self.prev_image = self._main_image
+                self.prev_image = self.__to_tensor(self._main_image).float().to(self.network.device)
                 rgb = self.__response_to_cv(response[0], 3)
                 self._main_image = rgb
 
@@ -169,6 +169,7 @@ class Controller:
         # First convert the images to tensors
         if rgb is not None:
             rgb = self.__to_tensor(rgb).float().to(self.network.device)
+
             network_input = torch.cat((rgb, self.prev_image))
 
             self.out = self.network.run_model(torch.unsqueeze(torch.unsqueeze(network_input, 0), 0),
