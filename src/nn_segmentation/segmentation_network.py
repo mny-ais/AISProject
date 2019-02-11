@@ -15,9 +15,6 @@ References:
 
     Going Deeper with Convolutions
     arXiv:1409.4842 [cs.CV] 17 Sep 2014
-
-    Image Segmentation and Object Detection in Pytorch
-    https://github.com/warmspringwinds/pytorch-segmentation-detection
 """
 import torch
 import torch.nn as nn
