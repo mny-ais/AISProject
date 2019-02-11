@@ -340,15 +340,15 @@ class Controller:
         """
         shape = image1.shape
         output = np.ndarray([shape[0], shape[1], shape[2]])
-        for i in range(len(shape[0])):
-            for j in range(len(shape[1])):
+        for i in range(shape[0]):
+            for j in range(shape[1]):
                 img2_color_array = [0, 0, 0]
                 index_max = np.argmax(image2[i][j])
                 if index_max == 1:
                     img2_color_array = np.array([0, 0, 255])
                 elif index_max == 2:
                     img2_color_array = np.array([255, 0, 0])
-                for k in range(len(shape[2])):
+                for k in range(shape[2]):
                     output = max(image1[i][j][k], img2_color_array[k])
 
         return output
