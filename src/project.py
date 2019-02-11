@@ -10,12 +10,25 @@ Authors:
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, askdirectory
 import os
-import last_image_too
-import nn_segmentation
-import seg_and_normal
-import segmented
-import standard
-import two_cams
+import sys
+
+from last_image_too.runner import Runner as litrun
+from last_image_too.controller import Controller as litcont
+
+from nn_segmentation.segmentation_trainer import Trainer as nntrain
+# TODO: Segmentation controller
+
+from seg_and_normal.runner import Runner as segnrun
+from seg_and_normal.controller import Controller as segncont
+
+from segmented.runner import Runner as segrun
+from segmented.controller import Controller as segcont
+
+from standard.runner import Runner as stdrun
+from standard.controller import Controller as stdcont
+
+from two_cams.runner import Runner as tcrun
+from two_cams.controller import Controller as tccont
 
 def main():
     """Provides the main function that starts everything else."""
@@ -59,7 +72,6 @@ def main():
         else:
             data_path_var.set(os.path.split(data_path)[1])
 
-
     def train_switch(*args):
         """Switches state of the right side of the screen."""
         if not train_bool.get():
@@ -84,12 +96,20 @@ def main():
     def run():
         """Runs the actual neural network stuff and destroys this screen."""
         mode = branch_var.get()
-        w1 = weight_path_var.get()
-        w2 = weight_2_path_var.get()
+        w1 = weight_path
+        w2 = weight_2_path
+        d = data_path
 
-        lr = lr_entry.get()
+        t = train_bool.get()
+
+        lr = int(lr_entry.get())
+        b = int(batch_entry.get())
+        e = int(epochs_entry.get())
+        o = optimizer_var.get()
+
         root.destroy()
 
+        run_network(mode, w1, w2, d, t, lr, b, e, o)
 
     # Create and configure root
     root = tk.Tk()
@@ -215,12 +235,82 @@ def main():
     root.mainloop()
 
 
-
 def grid_pad(widget, row=0, column=0, columnspan=1, rowspan=1, sticky="W",
              padx=3, pady=3):
     widget.grid(row=row, column=column, columnspan=columnspan, rowspan=rowspan,
                 sticky=sticky, padx=padx, pady=pady)
 
+
+def run_network(mode, w1, w2, data, train, lr, batch_size, epochs, optimizer):
+    csv_dir = os.path.join(data, "control_input.csv")
+
+    # Set optimizer
+    if train:
+        if optimizer == 0:
+            optimizer = "adam"
+        else:
+            optimizer = "sgd"
+
+    # Choose which branch to run
+    if mode == "standard":
+        if train:
+            runner = stdrun(w1, not train, lr, optimizer, False)
+            runner.train_model(csv_dir, data, epochs, batch_size)
+        else:
+            runner = stdrun(w1, not train, cpu=False)
+            controller = stdcont(runner)
+            controller.execute()
+
+
+    elif mode == "segmented":
+        if train:
+            runner = segrun(w1, not train, lr, optimizer, False)
+            runner.train_model(csv_dir, data, epochs, batch_size)
+        else:
+            runner = segrun(w1, not train, cpu=False)
+            controller = segcont(runner)
+            controller.execute()
+
+
+    elif mode == "seg and normal":
+        if train:
+            runner = segnrun(w1, not train, lr, optimizer, False)
+            runner.train_model(csv_dir, data, epochs, batch_size)
+        else:
+            runner = segnrun(w1, not train, cpu=False)
+            controller = segncont(runner)
+            controller.execute()
+
+
+    elif mode == "last image too":
+        if train:
+            runner = litrun(w1, not train, lr, optimizer, False)
+            runner.train_model(csv_dir, data, epochs, batch_size)
+        else:
+            runner = litrun(w1, not train, cpu=False)
+            controller = litcont(runner)
+            controller.execute()
+
+
+    elif mode == "two cams":
+        if train:
+            runner = tcrun(w1, not train, lr, optimizer, False)
+            runner.train_model(csv_dir, data, epochs, batch_size)
+        else:
+            runner = tcrun(w1, not train, cpu=False)
+            controller = tccont(runner)
+            controller.execute()
+
+
+    elif mode == "self segmenting":
+        if train:
+            runner = segrun(w1, not train, lr, optimizer, False)
+        else:
+            runner = segrun(w1, not train, cpu=False)
+            controller = segcont(runner)
+
+
+    sys.exit()
 
 if __name__ == "__main__":
 
