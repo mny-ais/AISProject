@@ -16,9 +16,9 @@ Author:
 # calculate loss based on ground truth data
 # optimize and repeat
 
-from SegmentationNetwork.segmentation_network import SegmentationNetwork
-from SegmentationNetwork.fc_drive import FCD
-from SegmentationNetwork.segmentation_drive import SegmentationDrive
+from nn_segmentation.segmentation_network import SegmentationNetwork
+from nn_segmentation.fc_drive import FCD
+from nn_segmentation.segmentation_drive import SegmentationDrive
 import datetime
 import torch
 import torch.nn as nn
@@ -28,7 +28,7 @@ import numpy as np
 from skimage import io
 
 from torch.utils.data.dataloader import DataLoader
-from SegmentationNetwork.segmented_dataset import SegmentedDataset
+from nn_segmentation.segmented_dataset import SegmentedDataset
 from utils.timer import Timer
 from os import path
 from plot import PlotIt

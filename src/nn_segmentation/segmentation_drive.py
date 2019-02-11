@@ -1,15 +1,15 @@
 """"Segmentation Drive.
 
 This class provides the combined network that drives the vehicle based on
-images from the camera by first segmenting it. It uses the SegmentationNetwork
+images from the camera by first segmenting it. It uses the nn_segmentation
 class as well as the FCD class
 
 Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import torch.nn as nn
-from SegmentationNetwork.segmentation_network import SegmentationNetwork
-from SegmentationNetwork.fc_drive import FCD
+from nn_segmentation.segmentation_network import SegmentationNetwork
+from nn_segmentation.fc_drive import FCD
 
 class SegmentationDrive(nn.Module):
     def __init__(self):
