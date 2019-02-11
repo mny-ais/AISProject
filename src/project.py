@@ -8,7 +8,7 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import tkinter as tk
-from tkinter.filedialog import asksaveasfilename, askdirectory
+from tkinter.filedialog import askopenfilename, asksaveasfilename, askdirectory
 import os
 import sys
 
@@ -30,8 +30,16 @@ from standard.controller import Controller as stdcont
 from two_cams.runner import Runner as tcrun
 from two_cams.controller import Controller as tccont
 
+weight_path = None
+weight_2_path_var = None
+data_path = None
+
 def main():
     """Provides the main function that starts everything else."""
+    global weight_path
+    global weight_2_path
+    global data_path
+
     # All the sub-functions first
     def weights_2_active_check(*args):
         """Does a check to see if weights_2 is active."""
@@ -50,9 +58,15 @@ def main():
 
     def weight_on_click(*args):
         """Chooses weights for weights_1"""
-        weight_path = asksaveasfilename(defaultextension=".pt",
-                                        filetypes=[("PT file", "*.pt"),
-                                                   ("All files", "*")])
+        global weight_path
+        if train_bool.get():
+            weight_path = asksaveasfilename(defaultextension=".pt",
+                                            filetypes=[("PT file", "*.pt"),
+                                                       ("All files", "*")])
+        else:
+            weight_path = askopenfilename(defaultextension=".pt",
+                                          filetypes=[("PT file", "*.pt"),
+                                                     ("All files", "*")])
         if weight_path == "":
             weight_path_var.set("Choose File...")
         else:
@@ -60,9 +74,15 @@ def main():
 
     def weight_2_on_click(*args):
         """Chooses weights for weights_2."""
-        weight_2_path = asksaveasfilename(defaultextension=".pt",
-                                        filetypes=[("PT file", "*.pt"),
-                                                   ("All files", "*")])
+        global weight_2_path
+        if train_bool.get():
+            weight_2_path = asksaveasfilename(defaultextension=".pt",
+                                              filetypes=[("PT file", "*.pt"),
+                                                         ("All files", "*")])
+        else:
+            weight_2_path = askopenfilename(defaultextension=".pt",
+                                            filetypes=[("PT file", "*.pt"),
+                                                       ("All files", "*")])
         if weight_2_path == "":
             weight_2_path_var.set("Choose File...")
         else:
@@ -70,6 +90,7 @@ def main():
 
     def data_on_click(*args):
         """Chooses data path."""
+        global data_path
         data_path = askdirectory()
         if data_path == "":
             data_path_var.set("Choose Folder...")
@@ -126,9 +147,6 @@ def main():
     root.columnconfigure(3, minsize=105)
 
     # Paths
-    weight_path = None
-    weight_2_path = None
-    data_path = None
     weight_path_var = tk.StringVar(root, value="Choose File...")
     weight_2_path_var = tk.StringVar(root, value="Choose File...")
     data_path_var = tk.StringVar(root, value="Choose Folder...")
