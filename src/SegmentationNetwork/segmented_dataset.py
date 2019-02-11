@@ -10,15 +10,11 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import os
-
 import torch
-
 import csv
-
+import numpy as np
 from skimage import io
-
 from torch.utils.data import Dataset
-
 try:
     import imgaug as ia
     from imgaug import augmenters as iaa
@@ -64,16 +60,16 @@ if with_aug:
 
 
 class SegmentedDataset(Dataset):
-    def __init__(self, csv_file, root_dir):
+    def __init__(self, root_dir):
         """Dataset object that turns the images and csv file into a dataset.
             Args:
-                csv_file (string): The CSV data file address
                 root_dir (string): The directory of both the images and csv file
         """
         super().__init__()
 
         self.dataset = []
         # self.drive_data = pd.read_csv(csv_file, sep=',')
+        csv_file = os.path.join(root_dir, "control_input.csv")
         self.drive_data = list(csv.reader(open(csv_file, mode='r')))
         del self.drive_data[0]
         self.root_dir = root_dir
@@ -87,21 +83,22 @@ class SegmentedDataset(Dataset):
         """
         actual_index = int(self.drive_data[idx][0])
         # print(int(self.drive_data.iloc[idx][0]))
-        item = self.process_img(idx, actual_index)
+        item = self.process_sample(idx, actual_index)
 
-        # while item is None:
-        #     idx += 1
-        #     item = self.process_img(idx)
-        #     if idx >= len(self.drive_data):
-        #         idx = 0
+        while item is None:
+            idx += 1
+            actual_index = int(self.drive_data[idx][0])
+            item = self.process_sample(idx, actual_index)
+            if idx >= len(self.drive_data):
+                idx = 0
 
         return item
 
-    def process_img(self, idx, actual_index):
+    def process_sample(self, idx, actual_index):
         """Returns next transformed datapoint in correct format for the model.
 
         Returns:
-            (dict) in the form {"image": torch.Tensor,
+            (dict) in the form {"image": numpy.ndarray,
                                 "seg": torch.Tensor,
                                 "vehicle_commands": torch.Tensor,
                                 "cmd": int
@@ -110,30 +107,29 @@ class SegmentedDataset(Dataset):
         seg_name = 'seg_{:0>5d}-cam_0.png'.format(actual_index)
 
         img_name = os.path.join(self.root_dir, file_name)
+        seg_name = os.path.join(self.root_dir, seg_name)
 
         sample = None
 
         if os.path.isfile(img_name):
             rgb = io.imread(img_name)
-            seg = io.imread(seg_name)
+            seg = self.process_seg(io.imread(seg_name))
 
             cur_row = self.drive_data[idx]
 
             for i in range(len(cur_row)):
                 cur_row[i] = float(cur_row[i])
 
-
             # This is if we're training both the steering and the throttle
             # vehicle_commands = torch.tensor([cur_row[1], cur_row[2]]).float()
 
             vehicle_commands = torch.tensor([cur_row[1]]).float()  # only
                                                                    # steering
-
-            sample = {"image": rgb,
+            sample = {"image": self.to_tensor(rgb),
                       "seg": seg,
                       "vehicle_commands": vehicle_commands,
                       "cmd": cur_row[5]}
-            sample = self.to_tensor(sample)
+
         else:
             print("image not found by data_loader.py: {}".format(actual_index))
             pass
@@ -141,22 +137,58 @@ class SegmentedDataset(Dataset):
         return sample
 
     @staticmethod
-    def to_tensor(sample):
-        """ converts images and data to tensor format
-        """
-        image = sample["image"]
-        seg = sample["seg"]
+    def to_tensor(image):
+        """Converts images and data to tensor format and augments it."""
+        # swap color axis because
+        # numpy image: H x W x C
+        # torch image: C X H X W
+        image = image.transpose((2, 0, 1))
         if with_aug:
             # apply image augmentation sequential
             image = seq.augment_images(image)
 
-        # swap color axis because
-        # numpy image: H x W x C
-        # torch image: C X H X W
 
-        image = image.transpose((2, 0, 1))
 
-        return {"image": torch.from_numpy(image).to(dtype=torch.float),
-                "seg": torch.from_numpy(seg).to(dtype=torch.float),
-                "vehicle_commands": sample["vehicle_commands"],
-                "cmd": sample["cmd"]}
+        return torch.from_numpy(image).to(dtype=torch.float)
+
+    @staticmethod
+    def process_seg(segmented_image):
+        """Processes the segmented image to be used for ground truth.
+
+        The idea is that the segmented image should be processed such that it
+        becomes only a 3 dimensional tensor, with the depth dimension holding
+        only information for drivable roads and road limits. 1 will be drivable
+        roads and 2 will be road edges. Also transposes it to H X W.
+        """
+        shape = segmented_image.shape
+        seg = np.ndarray([64, 320])
+        seg.fill(3)
+
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                # Here we modify each class to only show roads and road limits
+                color = segmented_image[i][j]
+                # Nothing
+                if 34 < color[0] < 120 and 165 < color[1]:
+                    seg[i][j] = 0
+                else:
+                    # road 1
+                    if color[0] < 31 and 119 < color[1]:
+                        seg[i][j] = 1
+                    # road 2
+                    elif 234 < color[1]:
+                        seg[i][j] = 1
+                    # Intersections
+                    elif 100 < color[0] < 140:
+                        seg[i][j] = 1
+                    # Lines (reds)
+                    elif 190 < color[0]:
+                        seg[i][j] = 2
+                    # Lines (blue)
+                    elif color[0] < 70 and 190 < color[2]:
+                        seg[i][j] = 2
+
+                    # Final pass
+                    if seg[i][j] == 3:
+                        seg[i][j] = 1
+        return seg
