@@ -15,8 +15,7 @@ import sys
 from last_image_too.runner import Runner as litrun
 from last_image_too.controller import Controller as litcont
 
-from nn_segmentation.segmentation_trainer import Trainer as nntrain
-# TODO: Segmentation controller
+from nn_segmentation.controller import Controller as nncont
 
 from seg_and_normal.runner import Runner as segnrun
 from seg_and_normal.controller import Controller as segncont
@@ -157,7 +156,7 @@ def main():
     # Modes:
     branch_var = tk.StringVar(root, value="standard")
     branch_var.trace_add("read", weights_2_active_check)
-    train_bool = tk.BooleanVar(root, value=True)
+    train_bool = tk.BooleanVar(root, value=False)
     train_bool.trace_add("read", train_switch)
 
     # Optimizer choice (0 = Adam, 1 = SGD)
@@ -330,10 +329,9 @@ def run_network(mode, w1, w2, data, train, lr, batch_size, epochs, optimizer):
 
     elif mode == "self segmenting":
         if train:
-            runner = segrun(w1, not train, lr, optimizer, False)
+            raise NotImplementedError("Can't train from here.")
         else:
-            runner = segrun(w1, not train, cpu=False)
-            controller = segcont(runner)
+            controller = nncont(w1, w2)
 
 
     sys.exit()
