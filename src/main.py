@@ -12,9 +12,9 @@ import argparse
 
 import sys
 
-from runner import Runner
+from standard.runner import Runner
 
-from controller import Controller
+from standard.controller import Controller
 
 from os import path
 

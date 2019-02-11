@@ -9,22 +9,22 @@ with information about the current progress of the training. When it is done,
 it outputs a plot of the loss over time.
 
 Authors:
-    Maximilian Roth <max@die-roths.de>
+    Maximilian Roth
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import datetime
-import random
 import torch
 import torch.nn as nn
 import tkinter as tk
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
-from data_loader import DrivingSimDataset
-from network import DriveNet
+from two_cams.data_loader import DrivingSimDataset
+from two_cams.network import DriveNet
 from utils.timer import Timer
 from os import path
-from plot import PlotIt
+from utils.plot import PlotIt
 from time import strftime, gmtime
+from torch import cat
 
 
 class Runner:
@@ -93,11 +93,8 @@ class Runner:
 
         # Plot save location
         plot_loc = path.join(path.split(self.save_dir)[0],
-                             "plot_csv")
-        plot_loc = path.join(plot_loc,
                              strftime("%Y_%m_%d_%H-%M-%S", gmtime())
                              + '-loss_data.csv')
-
 
         # Configure the grid and geometry
         # -----------------------
@@ -177,7 +174,14 @@ class Runner:
             for data in enumerate(train_loader):
                 # run the forward pass
                 # data[0] is the iteration, data[1] is the data
+                #  print(images)
                 images = data[1]['image']
+                sec = data[1]['sec']
+
+                # Put segmented and normal into one tensor
+                images = cat((images, sec), dim=1)
+
+
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])
 
                 # Prep target by turning it into a CUDA compatible format

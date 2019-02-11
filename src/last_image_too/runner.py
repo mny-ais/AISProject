@@ -18,11 +18,11 @@ import torch
 import torch.nn as nn
 import tkinter as tk
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
-from data_loader import DrivingSimDataset
-from network import DriveNet
+from last_image_too.data_loader import DrivingSimDataset
+from last_image_too.network import DriveNet
 from utils.timer import Timer
 from os import path
-from plot import PlotIt
+from utils.plot import PlotIt
 from time import strftime, gmtime
 from torch import cat
 
@@ -92,8 +92,8 @@ class Runner:
         counter = 0
 
         # Plot save location
-        plot_loc = path.join(path.split(self.save_dir)[0], "plot_csv")
-        plot_loc = path.join(plot_loc, strftime("%Y_%m_%d_%H-%M-%S", gmtime())
+        plot_loc = path.join(path.split(self.save_dir)[0],
+                             strftime("%Y_%m_%d_%H-%M-%S", gmtime())
                              + '-loss_data.csv')
 
         # Configure the grid and geometry
@@ -176,10 +176,10 @@ class Runner:
                 # data[0] is the iteration, data[1] is the data
                 #  print(images)
                 images = data[1]['image']
-                segmented = data[1]['seg']
+                prev = data[1]['prev']
 
                 # Put segmented and normal into one tensor
-                images = cat((images, segmented), dim=1)
+                images = cat((images, prev), dim=1)
 
 
                 vehicle_info = (data[1]["vehicle_commands"], data[1]["cmd"])

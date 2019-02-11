@@ -14,16 +14,15 @@ Authors:
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """
 import datetime
-import random
 import torch
 import torch.nn as nn
 import tkinter as tk
 from torch.utils.data.dataloader import DataLoader  # Using this to load data
-from data_loader import DrivingSimDataset
-from network import DriveNet
+from segmented.data_loader import DrivingSimDataset
+from segmented.network import DriveNet
 from utils.timer import Timer
 from os import path
-from plot import PlotIt
+from utils.plot import PlotIt
 from time import strftime, gmtime
 
 
