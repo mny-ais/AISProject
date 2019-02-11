@@ -85,6 +85,10 @@ class Controller:
 
         self.max_throttle = 0.35  # Throttle limit
 
+        # Vars for last image
+        self.first_image = True
+        self.prev_image = None
+
         # Quitting
         self._request_quit = False
 
@@ -141,8 +145,16 @@ class Controller:
             airsim.ImageRequest("0", airsim.ImageType.Scene, False, False)])
         rgb = None
         if response:
-            rgb = self.__response_to_cv(response[0], 3)
-            self._main_image = rgb
+            if self.first_image:
+                # If it was the first image, then just put it to prev image
+                self.prev_image = self.__response_to_cv(response[0], 3)
+                self._main_image = self.prev_image
+                self.first_image = False
+            else:
+                # If it was not, set the current main image as prev image
+                self.prev_image = self._main_image
+                rgb = self.__response_to_cv(response[0], 3)
+                self._main_image = rgb
 
         # Get key presses and parse them
         events = pygame.event.get()
@@ -155,32 +167,34 @@ class Controller:
 
         # run the network
         # First convert the images to tensors
-        rgb = self.__to_tensor(rgb).float().to(self.network.device)
+        if rgb is not None:
+            rgb = self.__to_tensor(rgb).float().to(self.network.device)
+            network_input = torch.cat(rgb, self.prev_image)
 
-        self.out = self.network.run_model(torch.unsqueeze(torch.unsqueeze(rgb, 0), 0),
-                                         [0, [self._direction]],
-                                         1)
-        # get its data, then to numpy, then to a tuple
-        self.out = tuple(self.out.cpu().detach().numpy())
+            self.out = self.network.run_model(torch.unsqueeze(torch.unsqueeze(network_input, 0), 0),
+                                             [0, [self._direction]],
+                                             1)
+            # get its data, then to numpy, then to a tuple
+            self.out = tuple(self.out.cpu().detach().numpy())
 
-        # Now send the command to airsim
-        if MAX_THROTTLE_ONLY:
-            self.throttle = self.max_throttle
-        else:
-            self.throttle = self.out[0][1]
-        self.__send_command((self.out[0][0], self.throttle))
+            # Now send the command to airsim
+            if MAX_THROTTLE_ONLY:
+                self.throttle = self.max_throttle
+            else:
+                self.throttle = self.out[0][1]
+            self.__send_command((self.out[0][0], self.throttle))
 
-        # Computation is now complete. Add to the counter.
-        self.counter += 1
+            # Computation is now complete. Add to the counter.
+            self.counter += 1
 
-        # Determine then update direction
-        if self._direction == 0:
-            direction = "Forward"
-        elif self._direction == -1:
-            direction = "Left"
-        else:
-            direction = "Right"
-        self.direction_text = "Direction: {0}".format(direction)
+            # Determine then update direction
+            if self._direction == 0:
+                direction = "Forward"
+            elif self._direction == -1:
+                direction = "Left"
+            else:
+                direction = "Right"
+            self.direction_text = "Direction: {0}".format(direction)
 
         # Update FPS
         if self._timer.elapsed_seconds_since_lap() > 0.3:
