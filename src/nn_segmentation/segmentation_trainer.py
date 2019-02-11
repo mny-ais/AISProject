@@ -31,7 +31,7 @@ from torch.utils.data.dataloader import DataLoader
 from nn_segmentation.segmented_dataset import SegmentedDataset
 from utils.timer import Timer
 from os import path
-from plot import PlotIt
+from utils.plot import PlotIt
 from time import strftime, gmtime
 from PIL import ImageTk, Image
 
