@@ -332,6 +332,7 @@ def run_network(mode, w1, w2, data, train, lr, batch_size, epochs, optimizer):
             raise NotImplementedError("Can't train from here.")
         else:
             controller = nncont(w1, w2)
+            controller.execute()
 
 
     sys.exit()
