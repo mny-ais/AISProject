@@ -50,7 +50,9 @@ def main():
 
     def weight_on_click(*args):
         """Chooses weights for weights_1"""
-        weight_path = asksaveasfilename()
+        weight_path = asksaveasfilename(defaultextension=".pt",
+                                        filetypes=[("PT file", "*.pt"),
+                                                   ("All files", "*")])
         if weight_path == "":
             weight_path_var.set("Choose File...")
         else:
@@ -58,7 +60,9 @@ def main():
 
     def weight_2_on_click(*args):
         """Chooses weights for weights_2."""
-        weight_2_path = asksaveasfilename()
+        weight_2_path = asksaveasfilename(defaultextension=".pt",
+                                        filetypes=[("PT file", "*.pt"),
+                                                   ("All files", "*")])
         if weight_2_path == "":
             weight_2_path_var.set("Choose File...")
         else:
