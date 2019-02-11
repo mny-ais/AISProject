@@ -232,7 +232,8 @@ class Controller:
         rgb = self.__to_tensor(rgb).float().to(self.device)
 
         self.seg_out = self.seg_net.forward(torch.unsqueeze(rgb, 0))
-        self._overlay_image = self.seg_out.cpu().detach()[0]
+        self._overlay_image = self.seg_out.cpu().detach()[0].numpy()
+        self._overlay_image = self._overlay_image.transpose(1, 2, 0)
 
         if not self.seg_only:
             # Flatten
