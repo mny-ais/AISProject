@@ -36,7 +36,7 @@ from torch.utils.data import Dataset
 try:
     import imgaug as ia
     from imgaug import augmenters as iaa
-    with_aug = True
+    with_aug = False
 except ImportError:
     print("imgaug not installed. Running without augmentation.")
     with_aug = False
