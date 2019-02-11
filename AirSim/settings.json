@@ -13,22 +13,22 @@
 		[
 	        {
 				"ImageType": 0,
-				"Width": 640,
-				"Height": 128,
+				"Width": 320,
+				"Height": 64,
 				"FOV_Degrees": 129,
 				"AutoExposureSpeed": 200,
 				"AutoExposureBias": 0.0,
 				"AutoExposureMaxBrightness": 0.64,
 				"AutoExposureMinBrightness": 0.03,
 				"MotionBlurAmount": 0,
-				"TargetGamma": 0.3,
+				"TargetGamma": 1.0,
 				"ProjectionMode": "",
 				"OrthoWidth": 5.12
             },
             {
                 "ImageType": 5,
-                "Width": 640,
-                "Height": 140,
+                "Width": 320,
+                "Height": 64,
                 "FOV_Degrees": 129,
                 "AutoExposureSpeed": 100,
                 "AutoExposureBias": 0,
