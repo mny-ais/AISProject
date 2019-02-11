@@ -169,7 +169,7 @@ class Controller:
         # First convert the images to tensors
         if rgb is not None:
             rgb = self.__to_tensor(rgb).float().to(self.network.device)
-            network_input = torch.cat(rgb, self.prev_image)
+            network_input = torch.cat((rgb, self.prev_image))
 
             self.out = self.network.run_model(torch.unsqueeze(torch.unsqueeze(network_input, 0), 0),
                                              [0, [self._direction]],
