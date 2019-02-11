@@ -351,7 +351,7 @@ class Controller:
                 elif index_max == 2:
                     img2_color_array = np.array([255, 0, 0])
                 for k in range(shape[2]):
-                    output = max(image1[i][j][k], img2_color_array[k])
+                    output[i][j][k] = max(image1[i][j][k], img2_color_array[k])
 
         return output
 
