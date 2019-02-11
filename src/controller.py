@@ -230,7 +230,7 @@ class Controller:
                                                    (0, 0, 0))
 
         if self.out is None:
-            self.out = (np.array(0, dtype="float32"),)
+            self.out = (np.array([0], dtype="float32"),)
         surface_steering = self._text_font.render("Steering: %.2f"
                                                   % self.out[0][0], True,
                                                   (0, 0, 0))
