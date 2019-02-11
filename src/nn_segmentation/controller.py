@@ -68,11 +68,13 @@ class Controller:
 
         # Set up the network
         self.seg_net = SegmentationNetwork("googlenet")
+        self.seg_net.eval()
         self.seg_net.cuda()
         if (weight2 is None) or (weight2 != ""):
             self.seg_only = True
         else:
             self.fcd = FCD()
+            self.fcd.eval()
             self.fcd.cuda()
             self.seg_only = False
             self.client.enableApiControl(True)
