@@ -69,7 +69,7 @@ class Controller:
         # Set up the network
         self.seg_net = SegmentationNetwork("googlenet")
         self.seg_net.cuda()
-        if weight2 != "":
+        if weight2 is not None:
             self.fcd = FCD()
             self.fcd.cuda()
             self.seg_only = False
