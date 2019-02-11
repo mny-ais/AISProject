@@ -74,7 +74,7 @@ def main():
 
     def train_switch(*args):
         """Switches state of the right side of the screen."""
-        if not train_bool.get():
+        if train_bool.get():
             for label in train_labels:
                 label.config(fg="black")
             try:
@@ -102,7 +102,7 @@ def main():
 
         t = train_bool.get()
 
-        lr = int(lr_entry.get())
+        lr = float(lr_entry.get())
         b = int(batch_entry.get())
         e = int(epochs_entry.get())
         o = optimizer_var.get()
