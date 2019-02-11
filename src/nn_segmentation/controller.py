@@ -272,9 +272,9 @@ class Controller:
         """Renders the pygame window itself."""
         if self._main_image is not None and self._overlay_image is not None:
             # If there is an image in the pipeline, render it.
-            print(type(self._main_image))
+            img = self.__overlay_images(self._main_image, self._overlay_image)
             surface_main = pygame.surfarray.make_surface(
-                self._main_image.swapaxes(0, 1))
+                img.swapaxes(0, 1))
             self._display.blit(surface_main, (0, 0))
 
         # Render white fill to "reset" the text
@@ -317,6 +317,27 @@ class Controller:
             image = image.reshape(r.height, r.width, channels + 1)
             image = image[:, :, 0:channels]
         return image
+
+    @staticmethod
+    def __overlay_images(image1, image2):
+        """Overlays using linear dodge.
+
+        Args:
+            image1 (np.ndarray): First image.
+            image2 (np.ndarray): Second image. The one that will become the
+            overlay.
+
+        Returns:
+            (np.ndarray) The overlayed image
+        """
+        shape = image1.shape
+        output = np.ndarray([shape[0], shape[1], shape[2]])
+        for i in range(len(shape[0])):
+            for j in range(len(shape[1])):
+                for k in range(len(shape[2])):
+                    output = max(image1[i][j][k], image2[i],[j],[k])
+
+        return output
 
     def __parse_event(self, event):
         """Parses PyGame events.
