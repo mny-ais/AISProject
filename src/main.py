@@ -4,7 +4,7 @@ This is the main module that runs the neural network according to arguments.
 This is also the module that connects to AirSim to actually drive the vehicle.
 
 Authors:
-    Maximilian Roth
+    Maximilian Roth <max@die-roths.de>
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """

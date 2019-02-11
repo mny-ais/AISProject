@@ -9,7 +9,7 @@ with information about the current progress of the training. When it is done,
 it outputs a plot of the loss over time.
 
 Authors:
-    Maximilian Roth
+    Maximilian Roth <max@die-roths.de>
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 """

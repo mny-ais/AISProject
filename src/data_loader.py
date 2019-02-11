@@ -8,7 +8,7 @@ The tuple contains steering and throttle, and the higher level command. This
 module also augments the training dataset.
 
 Authors:
-    Maximilian Roth
+    Maximilian Roth <max@die-roths.de>
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 

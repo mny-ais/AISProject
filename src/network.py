@@ -6,7 +6,7 @@ self-driving. Based on the paper "End-to-end Driving via Conditional Imitation
 Learning" by Codevilla et al.
 
 Authors:
-    Maximilian Roth
+    Maximilian Roth <max@die-roths.de>
     Nina Pant
     Yvan Satyawan <ys88@saturn.uni-freiburg.de>
 
