@@ -65,13 +65,17 @@ class Controller:
         # Initialize AirSim connection
         self.client = airsim.CarClient()
         self.client.confirmConnection()
-        self.client.enableApiControl(True)
 
         # Set up the network
         self.seg_net = SegmentationNetwork("googlenet")
         self.seg_net.cuda()
-        self.fcd = FCD()
-        self.fcd.cuda()
+        if weight2 != "":
+            self.fcd = FCD()
+            self.fcd.cuda()
+            self.seg_only = False
+            self.client.enableApiControl(True)
+        else:
+            self.seg_only = True
         self.seg_out = None
 
         self.weight1 = weight1
@@ -228,21 +232,22 @@ class Controller:
         self.seg_out = self.seg_net.forward(torch.unsqueeze(rgb, 0))
         self._overlay_image = self.seg_out.cpu().detach()[0]
 
-        # Flatten
-        x = self.seg_out.view(-1, self._num_flat_features(self.seg_out))
+        if not self.seg_only:
+            # Flatten
+            x = self.seg_out.view(-1, self._num_flat_features(self.seg_out))
 
-        # Analyze for steering
-        x = self.fcd(x, [0, [self._direction]])
+            # Analyze for steering
+            x = self.fcd(x, [0, [self._direction]])
 
-        # get its data, then to numpy, then to a tuple
-        self.out = tuple(x.cpu().detach().numpy())
-        
-        # Now send the command to airsim
-        if MAX_THROTTLE_ONLY:
-            self.throttle = self.max_throttle
-        else:
-            self.throttle = self.out[0][1]
-        self.__send_command((self.out[0][0], self.throttle))
+            # get its data, then to numpy, then to a tuple
+            self.out = tuple(x.cpu().detach().numpy())
+
+            # Now send the command to airsim
+            if MAX_THROTTLE_ONLY:
+                self.throttle = self.max_throttle
+            else:
+                self.throttle = self.out[0][1]
+            self.__send_command((self.out[0][0], self.throttle))
 
         # Computation is now complete. Add to the counter.
         self.counter += 1
