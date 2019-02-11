@@ -15,6 +15,10 @@ Our command line tool can unfortunately only run the standard network (i.e. with
 
 ### GUI
 We have also created a GUI for simpler usage.
+Open it with:
+```bash
+python src/project.py
+```
 It also allows the selection of different variations of the networks.
 The different network variations are:
 
