@@ -31,7 +31,7 @@ from two_cams.runner import Runner as tcrun
 from two_cams.controller import Controller as tccont
 
 weight_path = None
-weight_2_path_var = None
+weight_2_path= None
 data_path = None
 
 def main():
@@ -120,6 +120,9 @@ def main():
 
     def run():
         """Runs the actual neural network stuff and destroys this screen."""
+        global weight_path
+        global weight_2_path
+        global data_path
         mode = branch_var.get()
         w1 = weight_path
         w2 = weight_2_path
