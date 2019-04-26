@@ -3,6 +3,8 @@ This is our bachelor project at the Chair for Autonomous Intelligent Systems at 
 
 This architecture is designed to run a simulated vehicle within Unreal Engine with the AirSim plugin.
 
+[Check out our short demo here](https://drive.google.com/file/d/111I3EffTU_k3ina_KeWqAyrWH6vVl88L/view?usp=sharing)
+
 ## Network variations
 The different network variations are:
 
