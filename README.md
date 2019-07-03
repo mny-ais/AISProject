@@ -1,9 +1,12 @@
 # AISProject
-This is our bachelor project at the Chair for Autonomous Intelligent Systems at the University of Freiburg for a self-driving car based on the paper "End-to-End Driving via Conditional Imitation Learning" by Codevilla et al. Here we implement the architecture given in the paper and attempt to create variations and improvements, including a version which first attempts semantically segment the image first.
+This is our bachelor project at the Chair for Autonomous Intelligent Systems at the University of Freiburg for a self-driving car based on the paper "End-to-End Driving via Conditional Imitation Learning" by Codevilla et al.
+Here we implement the architecture given in the paper and attempt to create variations and improvements, including a version which first attempts to first perform semantic segmentation on the camera image first.
 
+![Simulation Environment Screenshot](https://github.com/yvan674/AISProject/blob/master/docs/images/simulation_2.png)
 This architecture is designed to run a simulated vehicle within Unreal Engine with the AirSim plugin.
 
-[Check out our short demo here](https://drive.google.com/file/d/111I3EffTU_k3ina_KeWqAyrWH6vVl88L/view?usp=sharing)
+## Demo
+[![AISProject Demo Video](docs/images/Video.jpg)](https://drive.google.com/file/d/111I3EffTU_k3ina_KeWqAyrWH6vVl88L/view)
 
 ## Network variations
 The different network variations are:
