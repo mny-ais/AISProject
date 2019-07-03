@@ -3,6 +3,7 @@ This is our bachelor project at the Chair for Autonomous Intelligent Systems at 
 Here we implement the architecture given in the paper and attempt to create variations and improvements, including a version which first attempts to first perform semantic segmentation on the camera image first.
 
 ![Simulation Environment Screenshot](https://github.com/yvan674/AISProject/blob/master/docs/images/simulation_2.png)
+
 This architecture is designed to run a simulated vehicle within Unreal Engine with the AirSim plugin.
 
 ## Demo
