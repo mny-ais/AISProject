@@ -25,7 +25,7 @@ Our architecture performs well and generalizes to new unseen environments quite 
 
 ## Usage
 ### Command-Line
-To use the our network, run the following command in command line:
+To use our network, run the following command in a command line interpreter:
 ```bash
 python src/main.py [weight_path] -e
 ```
@@ -41,4 +41,4 @@ Open it with:
 ```bash
 python src/project.py
 ```
-It also allows the selection of different variations of the networks.
+It also allows the selection of the different network variations.
