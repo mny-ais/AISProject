@@ -43,3 +43,6 @@ Open it with:
 python src/project.py
 ```
 It also allows the selection of the different network variations.
+
+## License
+This project is released under the GNU General Public License v3.0. Please review the [License file](https://github.com/yvan674/AISProject/blob/master/LICENSE) for more details.
