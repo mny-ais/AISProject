@@ -135,6 +135,7 @@ We later managed to expand this to two cameras by rewriting some of the code wri
   </tr>
 </table>
 
+### Results
 <!--Infos on the different variations-->
 <details> 
   <summary>Standard</summary>
