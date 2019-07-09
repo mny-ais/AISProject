@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/edge%20case/edge-case-nested-and-mixed-lists/</loc>
+<lastmod>2009-05-15T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/jekyll/update/test/</loc>
+<lastmod>2019-07-06T00:12:31+02:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/jekyll/update/welcome-to-jekyll/</loc>
+<lastmod>2019-07-07T00:12:31+02:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/self%20driving%20car/deep%20learning/neural%20network/maximilian%20christian%20roth/nina%20claire%20pant/yvan%20putra%20satyawan/first-post/</loc>
+<lastmod>2019-07-08T00:00:00+02:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/404/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/about/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/AISProject/jekyll/assets/AIS-Project.pdf</loc>
+<lastmod>2019-07-09T00:36:06+02:00</lastmod>
+</url>
+</urlset>

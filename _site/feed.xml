@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/AISProject/jekyll/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/AISProject/jekyll/" rel="alternate" type="text/html" /><updated>2019-07-09T09:02:42+02:00</updated><id>http://localhost:4000/AISProject/jekyll/feed.xml</id><title type="html">Deep Learning Self Driving Car - MNY Team</title><subtitle>A self driving car using deep learning. MNY created this self driving car in the Audi Cup environment.</subtitle><author><name>MNY Team</name></author><entry><title type="html">MNYs Deep Learning Self Driving Car</title><link href="http://localhost:4000/AISProject/jekyll/self%20driving%20car/deep%20learning/neural%20network/maximilian%20christian%20roth/nina%20claire%20pant/yvan%20putra%20satyawan/first-post/" rel="alternate" type="text/html" title="MNYs Deep Learning Self Driving Car" /><published>2019-07-08T00:00:00+02:00</published><updated>2019-07-08T00:00:00+02:00</updated><id>http://localhost:4000/AISProject/jekyll/self%20driving%20car/deep%20learning/neural%20network/maximilian%20christian%20roth/nina%20claire%20pant/yvan%20putra%20satyawan/first-post</id><content type="html" xml:base="http://localhost:4000/AISProject/jekyll/self%20driving%20car/deep%20learning/neural%20network/maximilian%20christian%20roth/nina%20claire%20pant/yvan%20putra%20satyawan/first-post/">&lt;p&gt;&lt;img src=&quot;/assets/simulator-1.png&quot; alt=&quot;Hero Image&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;some-context&quot;&gt;Some Context&lt;/h3&gt;
+&lt;p&gt;This is our bachelor project at the Chair for Autonomous Intelligent Systems (AIS) at the University of Freiburg.&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;It was on a self-driving car based on the paper “End-to-End Driving via Conditional Imitation Learning” by Codevilla et al.&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here we implement the architecture given in the paper and attempted to create variations and improvements,&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;including a version which first attempts to first perform semantic segmentation on the camera image first.&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;video-demo&quot;&gt;Video Demo&lt;/h3&gt;
+&lt;div class=&quot;embed-container&quot;&gt;
+  &lt;iframe src=&quot;https://player.vimeo.com/video/346883000&quot; width=&quot;640&quot; height=&quot;564&quot; frameborder=&quot;0&quot; webkitallowfullscreen=&quot;&quot; mozallowfullscreen=&quot;&quot; allowfullscreen=&quot;&quot;&gt;
+  &lt;/iframe&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;variations--improvements&quot;&gt;Variations &amp;amp; Improvements&lt;/h3&gt;
+&lt;p&gt;We made several different variations to the original paper.&lt;br /&gt;
+The first was to use only one camera instead of the proposed three.&lt;br /&gt;
+This was a necessity, due to hardware limitations of the tools provided.&lt;br /&gt;
+We later managed to expand this to two cameras by rewriting some of the code written by the supervisors.&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;!--
+   -  | Network           | Description
+   -  |-------------------|-------------
+   -  | standard          | Uses only one forward facing camera to drive
+   -  | segmented         | Uses only the ground truth segmentation of a forward facing camera
+   -  | seg and normal    | Uses both the image and ground truth segmentation of a forward facing camera
+   -  | last image too    | Uses both the current and previous image from a forward facing camera
+   -  | two cams          | Uses a forward facing and a camera angled towards the right
+   -  | self segmentation | Uses the forward facing camera and segments the image with a network first
+   -
+   -&lt;style type=&quot;text/css&quot;&gt;
+   -.tg  {border-collapse:collapse;border-spacing:0;border-color:#9ABAD9;}
+   -.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#9ABAD9;color:#444;background-color:#EBF5FF;}
+   -.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#9ABAD9;color:#fff;background-color:#409cff;}
+   -.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
+   -.tg .tg-hmp3{background-color:#D2E4FC;text-align:left;vertical-align:top}
+   -.tg .tg-sf3y{background-color:#D2E4FC;font-family:Arial, Helvetica, sans-serif !important;;text-align:left;vertical-align:top}
+   -.tg .tg-0lax{text-align:left;vertical-align:top}
+   -&lt;/style&gt;
+   -&lt;table class=&quot;tg&quot;&gt;
+   -  &lt;tr&gt;
+   -    &lt;th class=&quot;tg-1wig&quot;&gt;Network&lt;/th&gt;
+   -    &lt;th class=&quot;tg-1wig&quot;&gt;Description&lt;/th&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-hmp3&quot;&gt;standard&lt;/td&gt;
+   -    &lt;td class=&quot;tg-hmp3&quot;&gt;Uses only one forward facing camera to drive&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;segmented&lt;/td&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;Uses only the ground truth segmentation of a forward facing camera&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-hmp3&quot;&gt;seg and normal&lt;/td&gt;
+   -    &lt;td class=&quot;tg-sf3y&quot;&gt;Uses both the image and ground truth segmentation of a forward facing camera&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;last image too&lt;/td&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;Uses both the current and previous image from a forward facing camera&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-hmp3&quot;&gt;two cams&lt;/td&gt;
+   -    &lt;td class=&quot;tg-hmp3&quot;&gt;Uses a forward facing and a camera angled towards the right&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -  &lt;tr&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;self segmentation&lt;/td&gt;
+   -    &lt;td class=&quot;tg-0lax&quot;&gt;Uses the forward facing camera and segments the image with a network first&lt;/td&gt;
+   -  &lt;/tr&gt;
+   -&lt;/table&gt;
+   --&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+.tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 15px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+.tg .tg-tebh{background-color:#f9f9f9;font-family:Arial, Helvetica, sans-serif !important;;text-align:left;vertical-align:top}
+.tg .tg-buh4{background-color:#f9f9f9;text-align:left;vertical-align:top}
+.tg .tg-amwm{font-weight:bold;text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+&lt;/style&gt;
+
+&lt;table class=&quot;tg&quot;&gt;
+  &lt;tr&gt;
+    &lt;th class=&quot;tg-amwm&quot;&gt;Network&lt;/th&gt;
+    &lt;th class=&quot;tg-amwm&quot;&gt;Description&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-buh4&quot;&gt;standard&lt;/td&gt;
+    &lt;td class=&quot;tg-buh4&quot;&gt;Uses only one forward facing camera to drive&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;segmented&lt;/td&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;Uses only the ground truth segmentation of a forward facing camera&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-buh4&quot;&gt;seg and normal&lt;/td&gt;
+    &lt;td class=&quot;tg-tebh&quot;&gt;Uses both the image and ground truth segmentation of a forward facing camera&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;last image too&lt;/td&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;Uses both the current and previous image from a forward facing camera&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-buh4&quot;&gt;two cams&lt;/td&gt;
+    &lt;td class=&quot;tg-buh4&quot;&gt;Uses a forward facing and a camera angled towards the right&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;self segmentation&lt;/td&gt;
+    &lt;td class=&quot;tg-0lax&quot;&gt;Uses the forward facing camera and segments the image with a network first&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;results&quot;&gt;Results&lt;/h3&gt;
+&lt;!--Infos on the different variations--&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Standard&lt;/summary&gt;
+   &lt;p&gt;  Single camera and otherwise the implementation from the paper.&lt;br /&gt;
+        Works pretty well and is shown on the video.&lt;br /&gt;
+        This is on the testing dataset / unknown map and only with a small amount of data.&lt;/p&gt; 
+&lt;/details&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Segmented&lt;/summary&gt;
+   &lt;p&gt; Has the ground truth segmentation of a single camera output.&lt;br /&gt;
+        As expected the results of this artificial neural network are extremely
+        good and it handles even difficult problems with ease.&lt;br /&gt;
+        Obtaining such a perfect segmentation in reality is of course very hard if not impossible.&lt;/p&gt; 
+        Had some problems with lanes coming from the opposite direction, as they had the same coloring&lt;br /&gt;
+        (eg. left lane one color right lane another) and the left lanes from both sides had the same one.
+&lt;/details&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Seg And Normal&lt;/summary&gt;
+   &lt;p&gt; Had both the original image of a camera as well as its ground truth segmentation.&lt;br /&gt;
+        It did not perform better in most situations, as it carried with it some errors of the image only,&lt;br /&gt;
+        like thinking multiple parking spaces in a row are another lane.&lt;br /&gt;
+        It performed better than the segmentation only on streets with two lanes for each direction,&lt;br /&gt;
+        this was likely becuase it now saw the line separating the two directions.
+        In general it was perfoming on the same level as seg. only.&lt;/p&gt; 
+&lt;/details&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Last Image Too&lt;/summary&gt;
+   &lt;p&gt; This one was a bit tough and brought some problems,&lt;br /&gt;
+        as we doubled the input space it saved something similar to a state machine.&lt;br /&gt;
+        It tended to overcorrect, as it thought it was still very bad,&lt;br /&gt;
+        when it saw the last picture as the same as the new one before.&lt;br /&gt;
+        Though this was probably only because we trained it with the normal dataset.&lt;br /&gt;
+        In the end we were constrained by the end of the project.&lt;/p&gt; 
+&lt;/details&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Two Cams&lt;/summary&gt;
+   &lt;p&gt; A second image from the same position facing a bit to the left,&lt;br /&gt;
+        though in hindsight we should've done it to the right,&lt;br /&gt;
+        to get the outer side of the lanes in better view.&lt;br /&gt;
+        This overcorrected to the left, as it had the same problem as last img. too.&lt;br /&gt;
+        With a bigger dataset both would've probably just ignored the other image.&lt;/p&gt; 
+&lt;/details&gt;
+&lt;details&gt; 
+  &lt;summary&gt;Self Segmentation&lt;/summary&gt;
+   &lt;p&gt; Here we implemented our own segmentation network to segment street,&lt;br /&gt;
+        lines indicating lanes and unimportant stuff.&lt;br /&gt;
+        Sadly on the computers provided this could barely run in real time and&lt;br /&gt;
+        lagged terribly, even though it worked quite well, if slow on our GPU.&lt;/p&gt; 
+&lt;/details&gt;
+
+&lt;p&gt;For more info on the structure of the neural networks look into our &lt;a href=&quot;/assets/AIS-Project.pdf&quot;&gt;slides&lt;/a&gt;&lt;/p&gt;
+
+&lt;style&gt;
+.responsive-wrap iframe{ max-width: 100%;}
+&lt;/style&gt;
+
+&lt;div class=&quot;responsive-wrap&quot;&gt;
+&lt;!-- this is the embed code provided by Google --&gt;
+&lt;iframe src=&quot;https://docs.google.com/presentation/d/e/2PACX-1vTzGNXiUU3pggNZtoAv8Kh121AKM4Yoeise1na-jsMc2sZhS_MFcNcQCBsZy0yDV1Sl_UCXugQpBded/embed?start=false&amp;amp;loop=true&amp;amp;delayms=5000&quot; frameborder=&quot;0&quot; width=&quot;960&quot; height=&quot;569&quot; allowfullscreen=&quot;true&quot; mozallowfullscreen=&quot;true&quot; webkitallowfullscreen=&quot;true&quot;&gt;&lt;/iframe&gt;
+&lt;!-- Google embed ends --&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;environment&quot;&gt;Environment&lt;/h3&gt;
+&lt;p&gt;The whole simulation took place on a test map similar to the &lt;a href=&quot;&amp;quot;https://www.audicup.com/&amp;quot;&quot; title=&quot;Audi Cup&quot;&gt;&lt;strong&gt;Audi Cup&lt;/strong&gt;&lt;/a&gt; inside &lt;a href=&quot;&amp;quot;https://www.audicup.com/&amp;quot;&quot; title=&quot;Unreal Engine&quot;&gt;&lt;strong&gt;Unreal Engine&lt;/strong&gt;&lt;/a&gt;.&lt;br /&gt;&lt;/p&gt;</content><author><name>MNY Team</name></author><category term="content" /><category term="css" /><category term="markup" /><summary type="html"></summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/AISProject/jekyll/jekyll/update/welcome-to-jekyll/" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2019-07-07T00:12:31+02:00</published><updated>2019-07-07T00:12:31+02:00</updated><id>http://localhost:4000/AISProject/jekyll/jekyll/update/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/AISProject/jekyll/jekyll/update/welcome-to-jekyll/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name>MNY Team</name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Welcome to Jekylllllllll!</title><link href="http://localhost:4000/AISProject/jekyll/jekyll/update/test/" rel="alternate" type="text/html" title="Welcome to Jekylllllllll!" /><published>2019-07-06T00:12:31+02:00</published><updated>2019-07-06T00:12:31+02:00</updated><id>http://localhost:4000/AISProject/jekyll/jekyll/update/test</id><content type="html" xml:base="http://localhost:4000/AISProject/jekyll/jekyll/update/test/">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name>MNY Team</name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Edge Case: Nested and Mixed Lists</title><link href="http://localhost:4000/AISProject/jekyll/edge%20case/edge-case-nested-and-mixed-lists/" rel="alternate" type="text/html" title="Edge Case: Nested and Mixed Lists" /><published>2009-05-15T00:00:00+02:00</published><updated>2009-05-15T00:00:00+02:00</updated><id>http://localhost:4000/AISProject/jekyll/edge%20case/edge-case-nested-and-mixed-lists</id><content type="html" xml:base="http://localhost:4000/AISProject/jekyll/edge%20case/edge-case-nested-and-mixed-lists/">&lt;p&gt;Nested and mixed lists are an interesting beast. It’s a corner case to make sure that&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Lists within lists do not break the ordered list numbering order&lt;/li&gt;
+  &lt;li&gt;Your list styles go deep enough.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;ordered--unordered--ordered&quot;&gt;Ordered – Unordered – Ordered&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+  &lt;li&gt;ordered item
+    &lt;ul&gt;
+      &lt;li&gt;&lt;strong&gt;unordered&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;unordered&lt;/strong&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;ol&gt;
+      &lt;li&gt;ordered item&lt;/li&gt;
+      &lt;li&gt;ordered item&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;ordered--unordered--unordered&quot;&gt;Ordered – Unordered – Unordered&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+  &lt;li&gt;ordered item
+    &lt;ul&gt;
+      &lt;li&gt;&lt;strong&gt;unordered&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;unordered&lt;/strong&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;ul&gt;
+      &lt;li&gt;unordered item&lt;/li&gt;
+      &lt;li&gt;unordered item&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+  &lt;li&gt;ordered item&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;unordered--ordered--unordered&quot;&gt;Unordered – Ordered – Unordered&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+  &lt;li&gt;unordered item
+    &lt;ol&gt;
+      &lt;li&gt;ordered&lt;/li&gt;
+      &lt;li&gt;ordered
+        &lt;ul&gt;
+          &lt;li&gt;unordered item&lt;/li&gt;
+          &lt;li&gt;unordered item&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;unordered--unordered--ordered&quot;&gt;Unordered – Unordered – Ordered&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+  &lt;li&gt;unordered item
+    &lt;ul&gt;
+      &lt;li&gt;unordered&lt;/li&gt;
+      &lt;li&gt;unordered
+        &lt;ol&gt;
+          &lt;li&gt;&lt;strong&gt;ordered item&lt;/strong&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;strong&gt;ordered item&lt;/strong&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+  &lt;li&gt;unordered item&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;task-lists&quot;&gt;Task Lists&lt;/h3&gt;
+
+&lt;ul class=&quot;task-list&quot;&gt;
+  &lt;li class=&quot;task-list-item&quot;&gt;&lt;input type=&quot;checkbox&quot; class=&quot;task-list-item-checkbox&quot; disabled=&quot;disabled&quot; checked=&quot;checked&quot; /&gt;Finish my changes&lt;/li&gt;
+  &lt;li class=&quot;task-list-item&quot;&gt;&lt;input type=&quot;checkbox&quot; class=&quot;task-list-item-checkbox&quot; disabled=&quot;disabled&quot; /&gt;Push my commits to GitHub&lt;/li&gt;
+  &lt;li class=&quot;task-list-item&quot;&gt;&lt;input type=&quot;checkbox&quot; class=&quot;task-list-item-checkbox&quot; disabled=&quot;disabled&quot; /&gt;Open a pull request&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>MNY Team</name></author><category term="content" /><category term="css" /><category term="edge case" /><category term="lists" /><category term="markup" /><summary type="html">Nested and mixed lists are an interesting beast. It’s a corner case to make sure that</summary></entry></feed>
