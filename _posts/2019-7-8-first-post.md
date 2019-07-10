@@ -9,7 +9,7 @@ tags:
   - markup
 ---
 
-![Hero Image](./assets/simulator-1.png "Demo of standard net")
+![Hero Image](assets/simulator-1.png "Demo of standard net")
 
 ### Some Context
 This is our bachelor project at the Chair for Autonomous Intelligent Systems (AIS) at the University of Freiburg.<br>
