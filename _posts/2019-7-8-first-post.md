@@ -3,19 +3,13 @@ title: "MNYs Deep Learning Self Driving Car"
 header:
   teaser: /assets/images/AD.png
 categories:
-  - Self Driving Car
-  - Deep Learning
-  - Neural Network
-  - Maximilian Christian Roth
-  - Nina Claire Pant
-  - Yvan Putra Satyawan
 tags:
   - content
   - css
   - markup
 ---
 
-![Hero Image](/assets/simulator-1.png)
+![Hero Image](./assets/simulator-1.png "Demo of standard net")
 
 ### Some Context
 This is our bachelor project at the Chair for Autonomous Intelligent Systems (AIS) at the University of Freiburg.<br>
